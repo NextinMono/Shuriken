@@ -27,17 +27,24 @@
                 <MenuItem Header="Copy"/>
                 <MenuItem Header="Paste"/>
             </MenuItem>
+            <MenuItem Header="Utilities">
+                <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}"/>
+            </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Aspect Ratio">
                     <MenuItem Header="1280x720 (16:9)" Click="WidescreenSetClick"/>
                     <MenuItem Header="640x480 (4:3)" Click="FourThreeScreenSetClick"/>
+                </MenuItem>
+                <MenuItem Header="Scene Background Color">
+                    <MenuItem Header="Dark" Click="SetDarkBackground"/>
+                    <MenuItem Header="Light" Click="SetLightBackground"/>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Send help" Click="HelpClick"/>
             </MenuItem>
         </Menu>
-        <TabControl TabStripPlacement="Left" ItemsSource="{Binding Editors}" Grid.Row="2" Name="editorSelect">
+        <TabControl TabStripPlacement="Left" ItemsSource="{Binding Editors}" Grid.Row="2" Name="editorSelect" Background="White">
             <TabControl.ItemTemplate>
                 <DataTemplate>
                     <StackPanel HorizontalAlignment="Center">

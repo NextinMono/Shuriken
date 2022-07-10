@@ -88,8 +88,8 @@
                                     </TextBlock>
                                     <StackPanel.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="New Group"/>
-                                            <MenuItem Header="Remove"/>
+                                            <MenuItem Header="New Group" Command="{Binding CreateGroupCmd}"/>
+                                            <MenuItem Header="Remove" Command="{Binding RemoveSceneCmd}"/>
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>
                                 </StackPanel>
@@ -137,12 +137,12 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="+C" Command="{Binding CreateCastCmd}"/>
-                        <Button Grid.Column="1" Content="-C" Command="{Binding RemoveCastCmd}"/>
-                        <Button Grid.Column="2" Content="+G" Command="{Binding CreateGroupCmd}"/>
-                        <Button Grid.Column="3" Content="-G" Command="{Binding RemoveGroupCmd}"/>
-                        <Button Grid.Column="4" Content="+S" Command="{Binding CreateSceneCmd}"/>
-                        <Button Grid.Column="5" Content="-S" Command="{Binding RemoveSceneCmd}"/>
+                        <Button Grid.Column="0" Content="+&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateCastCmd}"/>
+                        <Button Grid.Column="1" Content="-&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveCastCmd}"/>
+                        <Button Grid.Column="2" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateGroupCmd}"/>
+                        <Button Grid.Column="3" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveGroupCmd}"/>
+                        <Button Grid.Column="4" Content="+&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateSceneCmd}"/>
+                        <Button Grid.Column="5" Content="-&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveSceneCmd}"/>
                     </Grid>
                 </Grid>
             </Grid>

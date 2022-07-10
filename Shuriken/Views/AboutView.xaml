@@ -14,16 +14,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Text="About Shuriken" FontSize="32" Padding="5 20"/>
-        <TextBlock Grid.Row="1" FontSize="16" Padding="5 20">
-            <Run Text="Version: "/>
-            <Run Text="{Binding AppVersion, Mode=OneWay}"/>
-            <LineBreak/>
-            <Run Text="Copyright"/>
-            <Run Text="&#xf1f9;" FontFamily="{StaticResource FontAwesome}"/>
-            <Run Text="2021"/>
-            <LineBreak/>
-            <Hyperlink NavigateUri="{Binding GithubLink}" RequestNavigate="HyperlinkRequestNavigate">Github</Hyperlink>
-        </TextBlock>
+        <TextBlock Grid.Row="0" Text="About Shuriken" FontSize="32" Padding="5 20" FontWeight="Bold"/>
+        <TextBlock Grid.Row="1" FontSize="16" Padding="5 20"><Run Text="Version: "/><Run Text=" "/><Run/><LineBreak/><Run Text="Copyright"/><Run Text=" "/><Run Text="&#xF1F9;"/><Run Text=" "/><Run Text="2022"/><LineBreak/><Run/><LineBreak/><Run Text="[This specific version is a fork of the original project, with Quality of Life changes by NextinHKRY]"/><LineBreak/><Hyperlink Foreground="#FF6D6D6D" TextDecorations="Underline"/></TextBlock>
     </Grid>
 </UserControl>

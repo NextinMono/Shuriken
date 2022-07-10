@@ -18,7 +18,6 @@ namespace Shuriken.Views
 {
     using Vec2 = Models.Vector2;
     using Vec3 = Models.Vector3;
-    
 
     /// <summary>
     /// Interaction logic for UIEditor.xaml
@@ -27,6 +26,7 @@ namespace Shuriken.Views
     {
         public static float ViewX = 1280;
         public static float ViewY = 720;
+        public static Vec3 ColorView = new Vec3(0.2f, 0.2f, 0.2f);
         Converters.ColorToBrushConverter colorConverter;
         Renderer renderer;
 
@@ -59,7 +59,7 @@ namespace Shuriken.Views
             if (sv == null) 
                 return;
             
-            GL.ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+            GL.ClearColor(ColorView.X, ColorView.Y, ColorView.Z, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             float deltaTime = obj.Milliseconds / 1000.0f * 60.0f;

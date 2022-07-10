@@ -81,6 +81,18 @@ namespace Shuriken
                 vm.Save(fileDialog.FileName);
             }
         }
+        private void Merge_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openDialog = new OpenFileDialog();
+            openDialog.Filter = filters;
+            if(openDialog.ShowDialog() == true)
+            {
+                if(MessageBox.Show("Are you sure you want to merge the two files? If you save, it will be irreversible (for now)!", "Shuriken", MessageBoxButton.OKCancel) == MessageBoxResult.OK)
+                {
+                    vm.Merge(@openDialog.FileName, @vm.WorkFilePath);
+                }
+            }
+        }
 
         private void HelpClick(object sender, RoutedEventArgs e)
         {
@@ -105,6 +117,15 @@ namespace Shuriken
         {
             // TODO: Check for differences in the loaded file and prompt the user to save
             Application.Current.Shutdown();
+        }
+
+        private void SetDarkBackground(object sender, RoutedEventArgs e)
+        {
+            Shuriken.Views.UIEditor.ColorView = new Models.Vector3(0.2f, 0.2f, 0.2f);
+        }
+        private void SetLightBackground(object sender, RoutedEventArgs e)
+        {
+            Shuriken.Views.UIEditor.ColorView = new Models.Vector3(0.8f, 0.8f, 0.8f);
         }
     }
 }

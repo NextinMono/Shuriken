@@ -47,22 +47,24 @@ namespace Shuriken.ViewModels
             ncpSubimages = new List<SubImage>();
         }
 
-        void GetSubImages(CSDNode node)
+        void GetSubImages(CSDNode node, int add = 0)
         {
             foreach (var scene in node.Scenes)
             {
-                if (ncpSubimages.Count > 0)
-                    return;
+                foreach (var subImage in scene.SubImages)
+                {
+                    subImage.TextureIndex += (uint)add;
+                }
 
-                ncpSubimages = scene.SubImages;
+                ncpSubimages.AddRange(scene.SubImages);
+                return;
             }
 
             foreach (var child in node.Children)
             {
-                if (ncpSubimages.Count > 0)
-                    return;
-
-                GetSubImages(child);
+                int count = ncpSubimages.Count;
+                GetSubImages(child, add);
+                if (ncpSubimages.Count > count) return;
             }
         }
 
@@ -554,6 +556,111 @@ namespace Shuriken.ViewModels
                 builder.AppendLine(texture);
 
             MessageBox.Show(builder.ToString(), "Missing Textures", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        public void Merge(string fileNameOne, string fileNameTwo)
+        {
+            Clear();
+            ncpSubimages.Clear();
+
+            WorkFile = new FAPCFile();
+            WorkFile.Load(fileNameOne);
+            var WorkFile2 = new FAPCFile();
+            WorkFile2.Load(fileNameTwo);
+
+            string root = Path.GetDirectoryName(Path.GetFullPath(fileNameOne));
+
+            List<XTexture> xTextures = WorkFile.Resources[1].Content.TextureList.Textures;
+            FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
+
+            List<XTexture> xTextures2 = WorkFile2.Resources[1].Content.TextureList.Textures;
+            FontList xFontList2 = WorkFile2.Resources[0].Content.CsdmProject.Fonts;
+
+            int texListCount = xTextures.Count;
+            xTextures.AddRange(xTextures2);
+
+            TextureList texList = new TextureList("textures");
+            foreach (XTexture texture in xTextures)
+            {
+                if (texture.Data != null)
+                    texList.Textures.Add(new Texture(texture.Name, texture.Data));
+
+                else
+                {
+                    string texPath = Path.Combine(root, texture.Name);
+                    if (File.Exists(texPath))
+                        texList.Textures.Add(new Texture(texPath));
+                    else
+                        MissingTextures.Add(texture.Name);
+                }
+            }
+
+            if (MissingTextures.Count > 0)
+                WarnMissingTextures();
+
+            GetSubImages(WorkFile.Resources[0].Content.CsdmProject.Root, 0);
+            int subImageCount = ncpSubimages.Count;
+            GetSubImages(WorkFile2.Resources[0].Content.CsdmProject.Root, texListCount);
+            LoadSubimages(texList, ncpSubimages);
+
+            foreach (var xFont in xFontList2.Fonts)
+            {
+                foreach (var characterMapping in xFont.CharacterMappings)
+                {
+                    characterMapping.SubImageIndex += (uint)subImageCount;
+                }
+            }
+            foreach (var xFontID in xFontList2.FontIDTable)
+            {
+                xFontID.Index += (uint)xFontList.FontIDTable.Count;
+            }
+            xFontList.Fonts.AddRange(xFontList2.Fonts);
+            xFontList.FontIDTable.AddRange(xFontList2.FontIDTable);
+
+            List<FontID> fontIDSorted = xFontList.FontIDTable.OrderBy(o => o.Index).ToList();
+            for (int i = 0; i < xFontList.FontIDTable.Count; i++)
+            {
+                int id = Project.CreateFont(fontIDSorted[i].Name);
+                UIFont font = Project.TryGetFont(id);
+                foreach (var mapping in xFontList.Fonts[i].CharacterMappings)
+                {
+                    var sprite = Utilities.FindSpriteIDFromNCPScene((int)mapping.SubImageIndex, ncpSubimages, texList.Textures);
+                    font.Mappings.Add(new Models.CharacterMapping(mapping.SourceCharacter, sprite));
+                }
+            }
+
+            var node = WorkFile.Resources[0].Content.CsdmProject.Root;
+            var node2 = WorkFile2.Resources[0].Content.CsdmProject.Root;
+            int sceneCount = node.Scenes.Count;
+
+            foreach (var scene in node2.Scenes)
+            {
+                foreach (var castGroup in scene.UICastGroups)
+                {
+                    foreach (var cast in castGroup.Casts)
+                    {
+                        for (int i = 0; i < 32; ++i)
+                        {
+                            if (cast.CastMaterialData.SubImageIndices[i] != -1)
+                                cast.CastMaterialData.SubImageIndices[i] += subImageCount;
+                        }
+                    }
+                }
+
+                scene.SubImages = ncpSubimages;
+            }
+            node.Scenes.AddRange(node2.Scenes);
+            foreach (var sceneID in node2.SceneIDTable)
+            {
+                sceneID.Index += (uint)sceneCount;
+            }
+            node.SceneIDTable.AddRange(node2.SceneIDTable);
+
+            ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+
+            Project.TextureLists.Add(texList);
+
+            WorkFilePath = fileNameOne;
+            IsLoaded = !MissingTextures.Any();
         }
     }
 }

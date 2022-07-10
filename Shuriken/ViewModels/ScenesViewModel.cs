@@ -98,6 +98,8 @@ namespace Shuriken.ViewModels
 
         public void CreateScene()
         {
+            //Should probably make it so that it just creates a new list, but I didn't want to mess with the thing too much.
+            if (Scenes != null)
             Scenes.Add(new UIScene("scene"));
         }
 
