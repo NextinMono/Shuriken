@@ -33,7 +33,7 @@
             <MenuItem Header="View">
                 <MenuItem Header="Aspect Ratio">
                     <MenuItem Header="1280x720 (16:9)" Click="WidescreenSetClick"/>
-                    <MenuItem Header="640x480 (4:3)" Click="FourThreeScreenSetClick"/>
+                    <MenuItem Header="640x480 (4:3)" Click="LetterboxSetClick"/>
                 </MenuItem>
                 <MenuItem Header="Scene Background Color">
                     <MenuItem Header="Dark" Click="SetDarkBackground"/>

@@ -31,5 +31,11 @@ namespace Shuriken.Views
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
             e.Handled = true;
         }
+
+        private void HyperlinkRequestNavigateOg(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo("https://github.com/crash5band/Shuriken") { UseShellExecute = true });
+            e.Handled = true;
+        }
     }
 }

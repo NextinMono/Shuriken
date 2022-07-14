@@ -24,11 +24,11 @@ namespace Shuriken.Views
     /// </summary>
     public partial class UIEditor : UserControl
     {
-        public static float ViewX = 1280;
-        public static float ViewY = 720;
+        public static Vec2 ViewResolution { get; set; } = new Vec2(1280, 720);
         public static Vec3 ColorView = new Vec3(0.2f, 0.2f, 0.2f);
         Converters.ColorToBrushConverter colorConverter;
         Renderer renderer;
+
 
         public UIEditor()
         {
@@ -50,7 +50,7 @@ namespace Shuriken.Views
             GL.Enable(EnableCap.FramebufferSrgb);
 
             colorConverter = new Converters.ColorToBrushConverter();
-            renderer = new Renderer(1280, 960);
+            renderer = new Renderer(1280, 720);
         }
 
         private void glControlRender(TimeSpan obj)
@@ -63,8 +63,8 @@ namespace Shuriken.Views
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             float deltaTime = obj.Milliseconds / 1000.0f * 60.0f;
-            sv.SizeX = ViewX;
-            sv.SizeY = ViewY;
+            sv.SizeX = ViewResolution.X;
+            sv.SizeY = ViewResolution.Y;
             sv.Tick(deltaTime);
             renderer.SetShader(renderer.shaderDictionary["basic"]);
 
@@ -100,7 +100,8 @@ namespace Shuriken.Views
                 {
                     if (!group.Visible)
                         continue;
-
+                    renderer.Width = (int)ViewResolution.X;
+                    renderer.Height = (int)ViewResolution.Y;
                     renderer.Start();
 
                     foreach (var lyr in group.Casts) 
@@ -334,6 +335,12 @@ namespace Shuriken.Views
             var item = e.OriginalSource as TreeViewItem;
             if (DataContext is ScenesViewModel vm)
                 vm.SelectedSceneGroup = item.DataContext as UISceneGroup;
+        }
+
+        public void SetRendererResolution(int width, int height)
+        {
+            renderer.Width = width;
+            renderer.Height = height;
         }
     }
 }

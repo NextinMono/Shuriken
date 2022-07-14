@@ -26,6 +26,7 @@ namespace Shuriken
     {   
         private static readonly string filters = "All files (*.xncp;*.yncp)|*.xncp;*.yncp|CSD Project (*.xncp)|*.xncp|CSD Project (*.yncp)|*.yncp";
 
+        
         private MainViewModel vm;
 
         public MainWindow()
@@ -103,19 +104,18 @@ namespace Shuriken
         }
         private void WidescreenSetClick(object sender, RoutedEventArgs e)
         {
-            Shuriken.Views.UIEditor.ViewX = 1280;
-            Shuriken.Views.UIEditor.ViewY = 720;
+            Shuriken.Views.UIEditor.ViewResolution = new Models.Vector2(1280, 720);
         }
-        private void FourThreeScreenSetClick(object sender, RoutedEventArgs e)
+        private void LetterboxSetClick(object sender, RoutedEventArgs e)
         {
-            Shuriken.Views.UIEditor.ViewX = 640;
-            Shuriken.Views.UIEditor.ViewY = 480;
+            Shuriken.Views.UIEditor.ViewResolution = new Models.Vector2(640, 480);
         }
-
 
         private void ExitMenu_Click(object sender, RoutedEventArgs e)
         {
             // TODO: Check for differences in the loaded file and prompt the user to save
+            if (MainViewModel.IsDirty)
+                MessageBox.Show("Do you want to save your progress?", "Shuriken", MessageBoxButton.YesNo);
             Application.Current.Shutdown();
         }
 

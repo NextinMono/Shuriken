@@ -31,6 +31,8 @@ namespace Shuriken.ViewModels
         public FAPCFile WorkFile { get; set; }
         public string WorkFilePath { get; set; }
         public bool IsLoaded { get; set; }
+        //Is unsaved
+        public static bool IsDirty = false;
         public MainViewModel()
         {
             MissingTextures = new List<string>();
