@@ -127,5 +127,10 @@ namespace Shuriken
         {
             Shuriken.Views.UIEditor.ColorView = new Models.Vector3(0.8f, 0.8f, 0.8f);
         }
+
+        private void Reload_Click(object sender, RoutedEventArgs e)
+        {
+            vm.Load(vm.WorkFilePath);
+        }
     }
 }

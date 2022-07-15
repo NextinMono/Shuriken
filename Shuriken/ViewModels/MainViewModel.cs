@@ -33,6 +33,24 @@ namespace Shuriken.ViewModels
         public bool IsLoaded { get; set; }
         //Is unsaved
         public static bool IsDirty = false;
+        public string TitleAdd 
+        { 
+            //Definitely is a better way to do this but whatever
+            get 
+            {
+                string add = "";
+                if (!string.IsNullOrEmpty(WorkFilePath))
+                {
+                    add += IsLoaded ? "" : "[Read-Only]";
+                    if (IsLoaded)
+                        add += IsDirty ? "[*]" : "";
+                    return $" - {WorkFilePath} {add}";
+                }
+                else
+                    return null;
+                
+            } 
+        }
         public MainViewModel()
         {
             MissingTextures = new List<string>();
@@ -547,6 +565,7 @@ namespace Shuriken.ViewModels
         public void Clear()
         {
             Project.Clear();
+            ncpSubimages.Clear();
             MissingTextures.Clear();
         }
 

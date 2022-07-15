@@ -10,7 +10,7 @@ namespace Shuriken.ViewModels
     internal class AboutViewModel : ViewModelBase
     {
         public static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
-        public static string GithubLink => "https://github.com/NextinMono/Shuriken";
+        public static string GithubLink => "https://github.com/NextinMono/Shuriken/tree/experimental";
 
         public AboutViewModel()
         {

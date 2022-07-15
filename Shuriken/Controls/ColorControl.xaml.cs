@@ -31,28 +31,33 @@ namespace Shuriken.Controls
             get => (Color)GetValue(ValueProperty);
             set => SetValue(ValueProperty, value);
         }
-
+        
         private void ColorBtnClick(object sender, RoutedEventArgs e)
         {
-            ColorPickerWindow window = new ColorPickerWindow();
-            System.Windows.Media.Color c = new System.Windows.Media.Color();
-            c.R = Value.R;
-            c.G = Value.G;
-            c.B = Value.B;
-            c.A = Value.A;
-            //window.ColorPicker.SelectedBrush = new System.Windows.Media.SolidColorBrush(c);
+            System.Windows.Forms.ColorDialog window = new System.Windows.Forms.ColorDialog();
 
-            window.ShowDialog();
-            if (window.DialogResult == true)
+            window.AnyColor = true;
+            window.AllowFullOpen = true;
+            window.SolidColorOnly = false;
+            window.Color = System.Drawing.Color.FromArgb(Value.A, Value.R, Value.G, Value.B);
+            if(window.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                Value = new Color(window.SelectedColor.R, window.SelectedColor.G, window.SelectedColor.B, window.SelectedColor.A);
-            }
+                Value.R = window.Color.R;
+                Value.G = window.Color.G;
+                Value.B = window.Color.B;
+                //We don't set A since it'll likely be 255 anyway.
+            }            
         }
 
         public ColorControl()
         {
             InitializeComponent();
             LayoutRoot.DataContext = this;
+        }
+
+        private void ClrPcker_Background_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+
         }
     }
 }

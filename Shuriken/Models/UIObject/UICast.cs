@@ -27,6 +27,7 @@ namespace Shuriken.Models
         }
 
         public uint Field00 { get; set; }
+        public uint CastNumber { get; set; }
         public DrawType Type { get; set; }
         public bool IsEnabled { get; set; }
         public Vector2 TopLeft { get; set; }
@@ -98,6 +99,7 @@ namespace Shuriken.Models
         public UICast(Cast cast, string name, int index)
         {
             Name = name;
+            CastNumber = cast.
             Field00 = cast.Field00;
             Type = (DrawType)cast.Field04;
             IsEnabled = cast.IsEnabled != 0;

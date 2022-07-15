@@ -77,7 +77,10 @@ namespace Shuriken.Models
             foreach (var texlist in TextureLists)
             {
                 foreach (var tex in texlist.Textures)
+                {
                     tex.GlTex.Dispose();
+                    tex.Sprites.Clear();
+                }
             }
 
             TextureLists.Clear();

@@ -9,7 +9,9 @@
         xmlns:vm ="clr-namespace:Shuriken.ViewModels"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}" 
         mc:Ignorable="d"
-    Title="{Binding WorkFilePath, StringFormat={}Shuriken - {0}, TargetNullValue=Shuriken}" d:DesignWidth="960" d:DesignHeight="450">
+    Title="{Binding TitleAdd, StringFormat={}Shuriken{0}, TargetNullValue=Shuriken}" d:DesignWidth="960" d:DesignHeight="450"
+    
+        >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -19,6 +21,7 @@
         <Menu Grid.Row="0">
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click="OpenMenu_Click"/>
+                <MenuItem Header="Reload" Click="Reload_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Save" Click="SaveMenu_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Save As" Click="SaveAsMenu_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Exit" Click="ExitMenu_Click"/>
@@ -27,7 +30,7 @@
                 <MenuItem Header="Copy"/>
                 <MenuItem Header="Paste"/>
             </MenuItem>
-            <MenuItem Header="Utilities">
+            <MenuItem Header="Tools">
                 <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}"/>
             </MenuItem>
             <MenuItem Header="View">
