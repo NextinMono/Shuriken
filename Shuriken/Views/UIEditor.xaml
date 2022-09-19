@@ -88,8 +88,8 @@
                                     </TextBlock>
                                     <StackPanel.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="New Group" Command="{Binding CreateGroupCmd}"/>
-                                            <MenuItem Header="Remove" Command="{Binding RemoveSceneCmd}"/>
+                                            <MenuItem Header="New Group" Command="{Binding CreateGroupCmd}" />
+                                            <MenuItem Header="Remove" Command="{Binding RemoveSceneCmd}" IsEnabled="False"/>
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>
                                 </StackPanel>
@@ -128,7 +128,7 @@
                     </TreeView>
 
                     <!-- creation / deletion buttons -->
-                    <Grid Grid.Row="2">
+                    <Grid Grid.Row="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
@@ -136,13 +136,17 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                             <ColumnDefinition/>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="+&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateCastCmd}"/>
-                        <Button Grid.Column="1" Content="-&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveCastCmd}"/>
-                        <Button Grid.Column="2" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateGroupCmd}"/>
-                        <Button Grid.Column="3" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveGroupCmd}"/>
-                        <Button Grid.Column="4" Content="+&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateSceneCmd}"/>
-                        <Button Grid.Column="5" Content="-&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveSceneCmd}"/>
+                        <Button Grid.Column="0" Content="+&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateCastCmd}" ToolTip="Adds a Cast to the selected scene."/>
+                        <Button Grid.Column="1" Content="*&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneCastCmd}" ToolTip="Clones the selected Cast."/>
+                        <Button Grid.Column="2" Content="-&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveCastCmd}" ToolTip="Removes the selected Cast."/>
+                        <Button Grid.Column="3" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateGroupCmd}" ToolTip="Adds a Group to the selected scene."/>
+                        <Button Grid.Column="4" Content="-&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveGroupCmd}" ToolTip="Removes the selected Group."/>
+                        <Button Grid.Column="5" Content="+&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateSceneCmd}" ToolTip="Creates a new Scene."/>
+                        <Button Grid.Column="6" Content="*&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneSceneCmd}" ToolTip="Clones a new Scene."/>
+                        <Button Grid.Column="7" Content="-&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveSceneCmd}" ToolTip="Removes the selected Scene."/>
                     </Grid>
                 </Grid>
             </Grid>

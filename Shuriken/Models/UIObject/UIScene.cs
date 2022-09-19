@@ -14,7 +14,7 @@ using System.Windows;
 
 namespace Shuriken.Models
 {
-    public class UIScene : INotifyPropertyChanged, IComparable<UIScene>
+    public class UIScene : INotifyPropertyChanged, IComparable<UIScene>, ICloneable
     {
         private string name;
         public string Name
@@ -256,6 +256,22 @@ namespace Shuriken.Models
         public int CompareTo(UIScene other)
         {
             return (int)(ZIndex - other.ZIndex);
+        }
+
+        public object Clone()
+        {
+            UIScene clone = new UIScene(Name + "_clone");
+            clone.Field00 = Field00;
+            clone.Field0C = Field0C;
+            clone.AnimationFramerate = AnimationFramerate;
+            clone.TextureSizes = TextureSizes;
+            clone.Groups = Groups;
+            clone.Animations = Animations;
+            clone.AspectRatio = AspectRatio;
+            clone.ZIndex = ZIndex;
+            clone.Field10 = Field10;
+            clone.Visible = true;
+            return clone;
         }
     }
 }

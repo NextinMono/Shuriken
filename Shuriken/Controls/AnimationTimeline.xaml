@@ -37,12 +37,12 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource TransparentButton}">
+                    <Button Style="{StaticResource TransparentButton}" Click="AddAnim">
                         <Button.Content>
                             <TextBlock Text="&#xf067;" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource TransparentButton}">
+                    <Button Style="{StaticResource TransparentButton}" Click="RemoveAnim">
                         <Button.Content>
                             <TextBlock Text="&#xf068;" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
@@ -108,32 +108,32 @@
                         <Separator HorizontalAlignment="Center" VerticalAlignment="Stretch" Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Margin="5"/>
                         
                         <!-- Timeline controls -->
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="PreviousKeyframe" ToolTip="Skips back to the previous keyframe.">
                             <Button.Content>
                                 <TextBlock Text="&#xf049;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
                         </Button>
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="PreviousFrame" ToolTip="Go back by 1 frame.">
                             <Button.Content>
                                 <TextBlock Text="&#xf04a;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
                         </Button>
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="NextFrame" ToolTip="Advances by 1 frame.">
                             <Button.Content>
                                 <TextBlock Text="&#xf04e;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
                         </Button>
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="NextKeyframe" ToolTip="Skips forward to the next keyframe.">
                             <Button.Content>
                                 <TextBlock Text="&#xf050;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
                         </Button>
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="AddKeyframe" ToolTip="Adds a new Keyframe at the current cursor position.">
                             <Button.Content>
                                 <TextBlock Text="&#xf055;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
                         </Button>
-                        <Button Style="{StaticResource TransparentButton}">
+                        <Button Style="{StaticResource TransparentButton}" Click="DeleteKeyframe" ToolTip="Removes selected Keyframe.">
                             <Button.Content>
                                 <TextBlock Text="&#xf056;" FontFamily="{StaticResource FontAwesome}"/>
                             </Button.Content>
@@ -154,7 +154,7 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label>Frame</Label>
-                        <TextBox Text="{Binding SelectedKey.Frame, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
+                        <TextBox Text="{Binding SelectedKey.Frame, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}" TextChanged="ChangedFrame" />
                         <Label>Value</Label>
                         <TextBox Name="FrameValueText" Text="{Binding SelectedKey.KValue, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}" />
                         <local:ColorControl x:Name="FrameValueColor" Value="{Binding SelectedKey.KValueColor, Mode=TwoWay}" IsEnabled="{Binding KeySelected}"/>

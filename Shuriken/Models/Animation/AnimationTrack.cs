@@ -119,6 +119,8 @@ namespace Shuriken.Models.Animation
             };
         }
 
+       
+
         public AnimationTrack(AnimationType type)
         {
             Type = type;

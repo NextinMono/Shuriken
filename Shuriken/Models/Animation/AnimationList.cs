@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Shuriken.Models.Animation
 {
-    public class AnimationList
+    public class AnimationList : ICloneable
     {
         public UICast Layer { get; set; }
         public ObservableCollection<AnimationTrack> Tracks { get; set; }
@@ -44,6 +44,11 @@ namespace Shuriken.Models.Animation
         {
             Layer = lyr;
             Tracks = new ObservableCollection<AnimationTrack>();
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

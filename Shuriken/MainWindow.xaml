@@ -9,7 +9,7 @@
         xmlns:vm ="clr-namespace:Shuriken.ViewModels"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}" 
         mc:Ignorable="d"
-    Title="{Binding TitleAdd, StringFormat={}Shuriken{0}, TargetNullValue=Shuriken}" d:DesignWidth="960" d:DesignHeight="450"
+    Title="{Binding TitleAdd, StringFormat={}Shuriken{0}, TargetNullValue=Shuriken}" d:DesignWidth="960" d:DesignHeight="500"
     
         >
     <Grid>
@@ -32,6 +32,9 @@
             </MenuItem>
             <MenuItem Header="Tools">
                 <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Clone Selected Element" Click="Clone_Click" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Change Color Order (RGBA to ABGR and reverse)" Click="ChangeColorOrder_Click" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Test Convert" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}"/>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Aspect Ratio">

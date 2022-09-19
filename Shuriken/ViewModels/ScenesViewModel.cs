@@ -37,8 +37,10 @@ namespace Shuriken.ViewModels
 
         public RelayCommand CreateSceneCmd { get; }
         public RelayCommand RemoveSceneCmd { get; }
+        public RelayCommand CloneSceneCmd { get; }
         public RelayCommand CreateGroupCmd { get; }
         public RelayCommand RemoveGroupCmd { get; }
+        public RelayCommand ChangeColorsTmp { get; }
         public RelayCommand<int> ChangeCastSpriteCmd { get; }
         public RelayCommand CreateCastCmd { get; }
         public RelayCommand RemoveCastCmd { get; }
@@ -52,7 +54,7 @@ namespace Shuriken.ViewModels
             {
                 if (dialog.SelectedSpriteID != -1)
                 {
-                    var sprIndex = (int)index;
+                    int sprIndex = (int)(SelectedUIObject as UICast).CastNumber;
                     ChangeCastSprite(sprIndex, dialog.SelectedSpriteID);
                 }
             }
@@ -60,10 +62,22 @@ namespace Shuriken.ViewModels
 
         public void ChangeCastSprite(int index, int sprID)
         {
-            if (SelectedUIObject is UICast)
+            try
             {
-                var cast = (UICast)SelectedUIObject;
-                cast.Sprites[index] = sprID;
+                if (SelectedUIObject is UICast)
+                {
+                    var cast = (UICast)SelectedUIObject;
+                    cast.Sprites[index] = sprID;
+                }
+
+            }
+            catch(ArgumentOutOfRangeException ex)
+            {
+#if DEBUG
+                System.Diagnostics.Debugger.Break();
+#else
+                System.Windows.MessageBox.Show(ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+#endif
             }
         }
 
@@ -123,6 +137,65 @@ namespace Shuriken.ViewModels
         {
             if (SelectedUIObject is ICastContainer container)
                 container.AddCast(new UICast());
+        } 
+        public void CloneCastToSelection()
+        {
+            if (SelectedUIObject is ICastContainer container)
+            {
+                UICast c = (UICast)SelectedUIObject;
+                for (int i = 0; i < SelectedScene.Groups.Count; i++)
+                {
+                    for (int x = 0; x < SelectedScene.Groups[i].Casts.Count; x++)
+                    {
+                        if (E(SelectedScene.Groups[i].Casts[x], SelectedScene.Groups[i].Casts[0], SelectedScene.Groups[i], SelectedScene))
+                            return;
+                    }
+                }
+                
+                
+
+                
+
+
+
+            }
+        }
+
+        bool E(UICast cast, UICast cast2, UICastGroup group, UIScene scene)
+        {
+            if (cast.Name == (SelectedUIObject as UICast).Name)
+            {
+                UICast newc = (UICast)(SelectedUIObject as UICast).Clone();
+
+                cast2.AddCast(newc);
+                group.CastsOrderedByIndex.Add(newc);
+
+                for (int i = 0; i < scene.Animations.Count; i++)
+                {
+                    for (int x = 0; x < scene.Animations[i].LayerAnimations.Count; x++)
+                    {
+                        if (scene.Animations[i].LayerAnimations[x].Layer == cast)
+                        {
+                            var g = (Models.Animation.AnimationList)scene.Animations[i].LayerAnimations[x].Clone();
+                            g.Layer = newc;
+                            scene.Animations[i].LayerAnimations.Add(g);
+                            break;
+                        }
+                    }
+                    
+                }
+
+                return true;
+            }
+            else
+            {
+                for (int i = 0; i < cast.Children.Count; i++)
+                {
+                   if( E(cast.Children[i], cast, group, scene))
+                        return true;
+                }
+                return false;
+            }
         }
 
         public void RemoveSelectedCast()
@@ -165,11 +238,31 @@ namespace Shuriken.ViewModels
 
             CreateSceneCmd      = new RelayCommand(CreateScene, null);
             RemoveSceneCmd      = new RelayCommand(RemoveSelectedScene, () => SelectedScene != null);
+            CloneSceneCmd      = new RelayCommand(CloneSelectedScene, () => SelectedScene != null);
             CreateGroupCmd      = new RelayCommand(AddGroupToSelection, () => SelectedScene != null);
             RemoveGroupCmd      = new RelayCommand(RemoveSelectedGroup, () => SelectedUIObject is UICastGroup);
-            CreateCastCmd       = new RelayCommand(AddCastToSelection, () => SelectedUIObject is ICastContainer);
+            CreateCastCmd       = new RelayCommand(CloneCastToSelection, () => SelectedUIObject is ICastContainer);
             RemoveCastCmd       = new RelayCommand(RemoveSelectedCast, () => SelectedUIObject is UICast);
-            ChangeCastSpriteCmd = new RelayCommand<int>(SelectCastSprite, null);
+            ChangeCastSpriteCmd = new RelayCommand<int>(SelectCastSprite, () => SelectedUIObject is UICast);
+        }
+
+      
+        private void CloneSelectedScene()
+        {
+
+            //snew.Groups = SelectedScene.Groups;
+            //snew.Field00 = SelectedScene.Field00;
+            //snew.Field0C = SelectedScene.Field0C;
+            //snew.Field10 = SelectedScene.Field10;
+            //snew.AnimationFramerate = SelectedScene.AnimationFramerate;
+            //snew.Animations = SelectedScene.Animations;
+            //snew.AspectRatio = SelectedScene.AspectRatio;
+            //snew.Name = SelectedScene.Name + "_Clone";
+            //snew.TextureSizes = SelectedScene.TextureSizes;
+            //snew.Visible = SelectedScene.Visible;
+            //snew.ZIndex = SelectedScene.ZIndex;
+            Scenes.Add((UIScene)SelectedScene.Clone());
+            //SelectedScene.
         }
     }
 }

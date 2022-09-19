@@ -9,7 +9,7 @@ using XNCPLib.XNCP.Animation;
 
 namespace Shuriken.Models.Animation
 {
-    public class Keyframe : INotifyPropertyChanged
+    public class Keyframe : INotifyPropertyChanged, ICloneable
     {
         private int frame;
         public int Frame
@@ -73,6 +73,10 @@ namespace Shuriken.Models.Animation
             OutTangent = k.OutTangent;
             Field14 = k.Field14;
             Data8Value = k.Data8Value;
+        }
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

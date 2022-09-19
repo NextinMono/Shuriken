@@ -14,26 +14,34 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Shuriken.Models;
 using System.ComponentModel;
-using System.Diagnostics;
 
 namespace Shuriken.Views
 {
     /// <summary>
-    /// Interaction logic for SpritePickerWindow.xaml
+    /// Interaction logic for AnimationPickerWindow.xaml
     /// </summary>
-    public partial class SpritePickerWindow : Window, INotifyPropertyChanged
+    public partial class AnimationPickerWindow : Window
     {
-        public SpritePickerWindow(IEnumerable<TextureList> texCollection)
+        public AnimationPickerWindow()
         {
             InitializeComponent();
-            LayoutRoot.DataContext = this;
 
-            TextureLists = new ObservableCollection<TextureList>(texCollection);
+            LayoutRoot.DataContext = this;
+            TextureLists.Add("Hide Flag");
+            TextureLists.Add("X Position");
+            TextureLists.Add("Y Position");
+            TextureLists.Add("Rotation");
+            TextureLists.Add("X Scale");
+            TextureLists.Add("Y Scale");
+            TextureLists.Add("SubImage");
+            TextureLists.Add("Color");
+            TextureLists.Add("Gradient Top Left");
+            TextureLists.Add("Gradient Bottom Left");
+            TextureLists.Add("Gradient Top Right");
+            TextureLists.Add("Gradient Bottom Right");
 
             if (TextureLists.Count > 0)
-                TextureListSelect.SelectedIndex = 0;
-
-            SelectedSpriteID = -1;
+                TextureListSelect = 0;
         }
 
         public bool SelectionValid { get; set; }
@@ -44,13 +52,14 @@ namespace Shuriken.Views
         }
         public int SelectedTexture { get; private set; }
         public int SelectedSpriteID { get; private set; }
-        public ObservableCollection<TextureList> TextureLists { get; }
+        public int TextureListSelect;
+        public ObservableCollection<string> TextureLists { get; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void SpriteListSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SelectedSpriteID = SpriteList.SelectedItem == null ? -1 : (int)SpriteList.SelectedItem;
+            SelectedSpriteID = TypeSelect.SelectedItem == null ? -1 : (int)TypeSelect.SelectedItem;
             SelectionValid = SelectedSpriteID != -1;
         }
 

@@ -26,6 +26,7 @@ namespace Shuriken.Views
     {
         public static Vec2 ViewResolution { get; set; } = new Vec2(1280, 720);
         public static Vec3 ColorView = new Vec3(0.2f, 0.2f, 0.2f);
+        public static object SelectedUIObject;
         Converters.ColorToBrushConverter colorConverter;
         Renderer renderer;
 
@@ -199,6 +200,9 @@ namespace Shuriken.Views
             position.X *= transform.Scale.X;
             position.Y *= transform.Scale.Y;
 
+            //position.X += lyr.Field68 / ViewResolution.X + lyr.Translation.X;
+            //position.X += lyr.Field6C / ViewResolution.Y + lyr.Translation.Y;
+
             // Rotate through parent transform
             float angle = Utilities.ToRadians(transform.Rotation);
             float rotatedX = position.X * MathF.Cos(angle) * scene.AspectRatio + position.Y * MathF.Sin(angle);
@@ -312,9 +316,10 @@ namespace Shuriken.Views
 
             if (DataContext is ScenesViewModel vm)
             {
+
                 vm.SelectedScene = item == null ? null : item.DataContext as UIScene;
                 vm.SelectedUIObject = source.DataContext;
-
+                if(vm.SelectedUIObject != null) SelectedUIObject = vm.SelectedUIObject;
                 TreeViewItem parent = Utilities.GetParentTreeViewItem(source);
                 vm.ParentNode = parent == null ? null : parent.DataContext;
             }

@@ -13,7 +13,7 @@ using System.Collections.ObjectModel;
 
 namespace Shuriken.Models
 {
-    public class UICast : INotifyPropertyChanged, ICastContainer
+    public class UICast : INotifyPropertyChanged, ICastContainer, ICloneable
     {
         private string name;
         public string Name
@@ -262,6 +262,11 @@ namespace Shuriken.Models
         private void NotifyPropertyChanged([CallerMemberName] string propertyName = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace Shuriken.Controls
         public double MaxZoom => 3.0;
 
         private AnimationTrack track;
-
+        private object SelectedUIObject;
         private Keyframe keyframe;
         public Keyframe SelectedKey
         {
@@ -357,6 +357,7 @@ namespace Shuriken.Controls
             {
                 track = null;
             }
+            SelectedUIObject = item.DataContext;
 
             ScanKeyframe();
             UpdateValueEditor();
@@ -403,6 +404,175 @@ namespace Shuriken.Controls
             var key = sender as Ellipse;
             key.ReleaseMouseCapture();
             holdingKey = false;
+        }
+
+        private void AddKeyframe(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < track.Keyframes.Count; i++)
+            {
+                if (track.Keyframes[i].Frame == CurrentFrame)
+                    return;
+            }
+            Keyframe newKey;
+            if (track.Keyframes.Count == 0)
+            {
+                newKey = new Keyframe();
+                newKey.Frame = currentFrame;
+            }
+            else
+                newKey = (Keyframe)track.Keyframes[track.Keyframes.Count - 1].Clone();
+            newKey.Frame = CurrentFrame;
+            track.Keyframes.Add(newKey);
+
+            ScanKeyframe();
+            UpdateValueEditor();
+            DrawTimeline();
+        }
+
+        private void DeleteKeyframe(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < track.Keyframes.Count; i++)
+            {
+                if (track.Keyframes[i].Frame == CurrentFrame)
+                {
+                    track.Keyframes.RemoveAt(i);
+                    break;
+                }
+            }           
+            ScanKeyframe();
+            UpdateValueEditor();
+            DrawTimeline();
+        }
+
+        private void ChangedFrame(object sender, TextChangedEventArgs e)
+        {
+            UpdateValueEditor();
+            DrawTimeline();
+        }
+
+        private void AddAnim(object sender, RoutedEventArgs e)
+        {
+            if(SelectedUIObject == null)
+            {
+                Animations.Add(new AnimationGroup("NewAnimation"));
+            }
+            if (SelectedUIObject is AnimationList)
+            {
+                AnimationList animationGroup = (AnimationList)SelectedUIObject;
+                AnimationType a = AnimationType.YPosition;
+
+                if (animationGroup.Tracks.Count == 0)
+                {
+                    MessageBox.Show("Sorry, but I haven't implemented actually *adding* casts to anims yet!");
+                    return;
+                }
+                for (int i = 0; i < animationGroup.Tracks.Count; i++)
+                {
+                    if (animationGroup.Tracks[i].Type == a)
+                        return;
+                }
+                AnimationTrack at = new AnimationTrack(a);
+                animationGroup.Tracks.Add(at);
+            }
+            if(SelectedUIObject is AnimationGroup)
+            {
+                if(Views.UIEditor.SelectedUIObject is Models.UICast)
+                {
+                    Models.UICast cast = Views.UIEditor.SelectedUIObject as Models.UICast;
+                    AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
+
+                    AnimationTrack at = new AnimationTrack(AnimationType.Color);
+                    //Check if cast already has anims
+                    for (int i = 0; i < animationGroup.LayerAnimations.Count; i++)
+                    {
+                        if (animationGroup.LayerAnimations[i].Layer == cast)
+                        {
+                            animationGroup.LayerAnimations[i].Tracks.Add(at);
+                            return;
+                        }
+                    }
+                    //Make new tracks if it just doesn't have any
+                    List<AnimationTrack> tracks = new List<AnimationTrack>();
+                    tracks.Add(at);
+                    animationGroup.LayerAnimations.Add(new AnimationList(cast, tracks));
+
+                }
+                else
+                {
+                    Animations.Add(new AnimationGroup("NewAnimation"));
+                }
+            }
+        }
+
+        private void NextKeyframe(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < track.Keyframes.Count; i++)
+            {
+                if (track.Keyframes[i].Frame > CurrentFrame)
+                {
+                    CurrentFrame = track.Keyframes[i].Frame;
+                    ScanKeyframe();
+                    UpdateValueEditor();
+                    DrawTimeline();
+                    return;
+                }
+            }
+        }
+
+        private void PreviousKeyframe(object sender, RoutedEventArgs e)
+        {
+            for (int i = track.Keyframes.Count - 1; i >= 0; i--)
+            {
+                if (track.Keyframes[i].Frame < CurrentFrame)
+                {
+                    CurrentFrame = track.Keyframes[i].Frame;
+                    ScanKeyframe();
+                    UpdateValueEditor();
+                    DrawTimeline();
+                    return;
+                }
+            }
+        }
+
+        private void PreviousFrame(object sender, RoutedEventArgs e)
+        {
+            currentFrame--;
+            currentFrame = Math.Clamp(currentFrame, 0, 400);
+            ScanKeyframe();
+            UpdateValueEditor();
+            DrawTimeline();
+        }
+
+        private void NextFrame(object sender, RoutedEventArgs e)
+        {
+            currentFrame++;
+            currentFrame = Math.Clamp(currentFrame, 0, 400);
+            ScanKeyframe();
+            UpdateValueEditor();
+            DrawTimeline();
+        }
+
+        private void RemoveAnim(object sender, RoutedEventArgs e)
+        {            
+            if (SelectedUIObject is AnimationList)
+            {
+                AnimationList animationGroup = (AnimationList)SelectedUIObject;
+
+                animationGroup.Tracks.Clear();
+            }
+            if (SelectedUIObject is AnimationGroup)
+            {
+               
+                   
+                    AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
+
+                Animations.Remove(animationGroup);
+
+            }
+            if(SelectedUIObject is AnimationTrack)
+            {
+                AnimationTrack h = (AnimationTrack)SelectedUIObject;
+            }
         }
     }
 }
