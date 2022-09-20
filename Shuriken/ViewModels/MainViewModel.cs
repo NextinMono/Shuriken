@@ -96,7 +96,7 @@ namespace Shuriken.ViewModels
             List<SceneID> xSceneIDs = xNode.SceneIDTable;
             List<SceneID> xSceneIDSorted = xSceneIDs.OrderBy(o => o.Index).ToList();
             for (int s = 0; s < xSceneIDSorted.Count; ++s)
-                uiSceneGroup.Scenes.Add(new UIScene(xNode.Scenes[s], xSceneIDSorted[s].Name, texlist));
+                uiSceneGroup.Scenes.Add(new UIScene(xNode.Scenes[s], xSceneIDSorted[s].Name, texlist, xSceneIDSorted[s].Index));
 
             if (parent != null)
                 parent.Children.Add(uiSceneGroup);
@@ -189,9 +189,10 @@ namespace Shuriken.ViewModels
             if (path == null) path = WorkFilePath;
             else WorkFilePath = path;
 
+            FAPCFile fapcFile = WorkFile.Copy();
             // TODO: We should create a FACPFile from scratch instead of overwritting the working one
-            List<XTexture> xTextures = WorkFile.Resources[1].Content.TextureList.Textures;
-            FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
+            List<XTexture> xTextures = fapcFile.Resources[1].Content.TextureList.Textures;
+            FontList xFontList = fapcFile.Resources[0].Content.CsdmProject.Fonts;
 
             List<SubImage> subImageList = new();
             List<Sprite> spriteList = new();
@@ -209,9 +210,9 @@ namespace Shuriken.ViewModels
 
             CSDNode rootNode = new();
             SaveNode(rootNode, Project.SceneGroups[0], subImageList, Data1, spriteList);
-            WorkFile.Resources[0].Content.CsdmProject.Root = rootNode;
+            fapcFile.Resources[0].Content.CsdmProject.Root = rootNode;
 
-            WorkFile.Save(path);
+            fapcFile.Save(path);
         }
 
         private void SaveNode(CSDNode xNode, UISceneGroup uiSceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Sprite> spriteList)

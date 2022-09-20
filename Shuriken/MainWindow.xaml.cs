@@ -100,9 +100,6 @@ namespace Shuriken
         {
         }
 
-        private void ViewClick(object sender, RoutedEventArgs e)
-        {
-        }
         private void WidescreenSetClick(object sender, RoutedEventArgs e)
         {
             Shuriken.Views.UIEditor.ViewResolution = new Models.Vector2(1280, 720);

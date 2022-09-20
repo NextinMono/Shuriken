@@ -28,6 +28,7 @@ namespace Shuriken.Models
         }
 
         public uint Field00 { get; set; }
+        public uint Index { get; set; }
         public float ZIndex { get; set; }
         public uint Field0C { get; set; }
         public float Field10 { get; set; }
@@ -38,10 +39,11 @@ namespace Shuriken.Models
         public ObservableCollection<Vector2> TextureSizes { get; set; }
         public ObservableCollection<UICastGroup> Groups { get; set; }
         public ObservableCollection<AnimationGroup> Animations { get; set; }
-        public UIScene(Scene scene, string sceneName, TextureList texList)
+        public UIScene(Scene scene, string sceneName, TextureList texList, uint index)
         {
             Name = sceneName;
             Field00 = scene.Version;
+            Index = index;
             ZIndex = scene.ZIndex;
             Field0C = scene.Field0C;
             Field10 = scene.Field10;

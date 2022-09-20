@@ -31,6 +31,8 @@
                         <Label>Name</Label>
                         <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
 
+                        <Label>Hierarchy Index</Label>
+                        <TextBox Text="{Binding Index, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label>Version</Label>
                         <TextBox Text="{Binding Field00, UpdateSourceTrigger=PropertyChanged}"/>
 
