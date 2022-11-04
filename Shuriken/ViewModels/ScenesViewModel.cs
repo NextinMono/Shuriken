@@ -54,7 +54,7 @@ namespace Shuriken.ViewModels
             {
                 if (dialog.SelectedSpriteID != -1)
                 {
-                    int sprIndex = (int)(SelectedUIObject as UICast).CastNumber;
+                    int sprIndex = (int)(SelectedUIObject as UICast).DefaultSprite;
                     ChangeCastSprite(sprIndex, dialog.SelectedSpriteID);
                 }
             }

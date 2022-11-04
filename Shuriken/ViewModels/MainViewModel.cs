@@ -21,7 +21,7 @@ namespace Shuriken.ViewModels
     public class MainViewModel : ViewModelBase
     {
         public static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
-
+        public IList<string> RecentFiles;
         public List<string> MissingTextures { get; set; }
         public ObservableCollection<ViewModelBase> Editors { get; set; }
 
@@ -54,7 +54,8 @@ namespace Shuriken.ViewModels
         public MainViewModel()
         {
             MissingTextures = new List<string>();
-
+            RecentFiles = new List<string>();
+            ConfigureRecentFilesList();
             Editors = new ObservableCollection<ViewModelBase>
             {
                 new ScenesViewModel(),
@@ -65,6 +66,11 @@ namespace Shuriken.ViewModels
 
             IsLoaded = false;
             ncpSubimages = new List<SubImage>();
+            
+        }
+        void ConfigureRecentFilesList()
+        {
+            
         }
 
         void GetSubImages(CSDNode node, int add = 0)
@@ -145,13 +151,13 @@ namespace Shuriken.ViewModels
             TextureList texList = new TextureList("textures");
             foreach (XTexture texture in xTextures)
             {
-                if (texture.Data != null)
+                if (texture.Data != null && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
                     texList.Textures.Add(new Texture(texture.Name, texture.Data));
 
                 else
                 {
                     string texPath = Path.Combine(root, texture.Name);
-                    if (File.Exists(texPath))
+                    if (File.Exists(texPath) && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
                         texList.Textures.Add(new Texture(texPath));
                     else
                         MissingTextures.Add(texture.Name);

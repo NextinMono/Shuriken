@@ -68,7 +68,7 @@ namespace XNCPLib.XNCP
             reader.Endianness = endianPrev;
 
             reader.Seek(reader.GetOffsetOrigin() + nextChunkOffset, SeekOrigin.Begin);
-            if (nextSignature != Utilities.Make4CCLE("NXTL"))
+            if (nextSignature != Utilities.Make4CCLE("NXTL") && nextSignature != Utilities.Make4CCLE("NGTL") && nextSignature != Utilities.Make4CCLE("NSTL"))
             {
                 CsdmProject = new NCPJChunk();
                 CsdmProject.Read(reader);
@@ -101,7 +101,9 @@ namespace XNCPLib.XNCP
                     Signature = Utilities.Make4CCLE("NYIF");
                 else
                     Signature = Utilities.Make4CCLE("NXIF");
-
+                //Override if file is GNCP
+                if (FAPCFile.IsGNCP)
+                    Signature = Utilities.Make4CCLE("NGIF");
                 writer.WriteUInt32(Signature);
 
                 // Skipped: header size

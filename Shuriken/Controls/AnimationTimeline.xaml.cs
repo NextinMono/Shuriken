@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Shuriken.Models.Animation;
+using Shuriken.Views;
 
 namespace Shuriken.Controls
 {
@@ -413,15 +414,9 @@ namespace Shuriken.Controls
                 if (track.Keyframes[i].Frame == CurrentFrame)
                     return;
             }
-            Keyframe newKey;
-            if (track.Keyframes.Count == 0)
-            {
-                newKey = new Keyframe();
-                newKey.Frame = currentFrame;
-            }
-            else
-                newKey = (Keyframe)track.Keyframes[track.Keyframes.Count - 1].Clone();
-            newKey.Frame = CurrentFrame;
+            Keyframe newKey; 
+            newKey = new Keyframe();
+            newKey.Frame = currentFrame;
             track.Keyframes.Add(newKey);
 
             ScanKeyframe();
@@ -480,8 +475,16 @@ namespace Shuriken.Controls
                 {
                     Models.UICast cast = Views.UIEditor.SelectedUIObject as Models.UICast;
                     AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
-
-                    AnimationTrack at = new AnimationTrack(AnimationType.Color);
+                    AnimationTypePicker selectedType = new AnimationTypePicker();
+                    AnimationTrack at = null;
+                    selectedType.ShowDialog();
+                    if (selectedType.DialogResult == true)
+                    {
+                        at = new AnimationTrack(selectedType.AnimType);
+                    }
+                    else
+                        return;
+                        
                     //Check if cast already has anims
                     for (int i = 0; i < animationGroup.LayerAnimations.Count; i++)
                     {
@@ -572,6 +575,20 @@ namespace Shuriken.Controls
             if(SelectedUIObject is AnimationTrack)
             {
                 AnimationTrack h = (AnimationTrack)SelectedUIObject;
+
+            }
+        }
+
+        private void CloneAnim(object sender, RoutedEventArgs e)
+        {
+            if (SelectedUIObject is AnimationGroup)
+            {
+                AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
+                var g = animationGroup;
+                g.LayerAnimations = animationGroup.LayerAnimations;
+                g.Name = "Intro_boss";
+                Animations.Add(g);
+                animationGroup.Name = "Intro_boss";
             }
         }
     }

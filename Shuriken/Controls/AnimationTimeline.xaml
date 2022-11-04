@@ -47,7 +47,7 @@
                             <TextBlock Text="&#xf068;" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
                     </Button>
-                    <Button Style="{StaticResource TransparentButton}">
+                    <Button Style="{StaticResource TransparentButton}" Click="CloneAnim">
                         <Button.Content>
                             <TextBlock Text="&#xf069;" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
@@ -58,7 +58,7 @@
                         <HierarchicalDataTemplate DataType="{x:Type animation:AnimationGroup}" ItemsSource="{Binding LayerAnimations}">
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox IsChecked="{Binding Enabled}" Margin="0 0 5 0"/>
-                                <TextBlock Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
                             </StackPanel>
                         </HierarchicalDataTemplate>
                         <HierarchicalDataTemplate DataType="{x:Type animation:AnimationList}" ItemsSource="{Binding Tracks}">

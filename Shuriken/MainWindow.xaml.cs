@@ -12,11 +12,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+//using System.Windows.Shapes;
 using Shuriken.ViewModels;
 using System.Collections.ObjectModel;
 using XNCPLib;
+using System.IO;
 using Shuriken.Models;
+using System.Diagnostics;
 
 namespace Shuriken
 {
@@ -25,7 +27,7 @@ namespace Shuriken
     /// </summary>
     public partial class MainWindow : Window
     {   
-        private static readonly string filters = "All files (*.xncp;*.yncp)|*.xncp;*.yncp|CSD Project (*.xncp)|*.xncp|CSD Project (*.yncp)|*.yncp|CSD Project (*.gncp)|*.gncp";
+        private static readonly string filters = "All files (*.xncp;*.yncp;*.gncp)|*.xncp;*.yncp;*.gncp|CSD Project (*.xncp)|*.xncp|CSD Project (*.yncp)|*.yncp|CSD Project (*.gncp)|*.gncp|CSD Project (*.sncp)|*.sncp";
 
         
         private MainViewModel vm;
@@ -150,26 +152,34 @@ namespace Shuriken
         }
         private void LetterboxToWidescreenTest(object sender, RoutedEventArgs e)
         {
-            //Could use linq? Yeah prob. I don't know how to use it tho so, figures.
-            for (int a = 0; a < Project.SceneGroups.Count; a++)
+            ////Could use linq? Yeah prob. I don't know how to use it tho so, figures.
+            //for (int a = 0; a < Project.SceneGroups.Count; a++)
+            //{
+            //    for (int b = 0; b < Project.SceneGroups[a].Scenes.Count; b++)
+            //    {
+            //        for (int c = 0; c < Project.SceneGroups[a].Scenes[b].Groups.Count; c++)
+            //        {
+            //            for (int d = 0; d < Project.SceneGroups[a].Scenes[b].Groups[c].Casts.Count; d++)
+            //            {
+            //                ConvertValues(Project.SceneGroups[a].Scenes[b], Project.SceneGroups[a].Scenes[b].Groups[c].Casts[d]);
+            //            }
+            //        }
+            //    }
+            //}
+
+            object uiobj = Views.UIEditor.SelectedUIObject;
+
+            if (uiobj is UIScene)
             {
-                for (int b = 0; b < Project.SceneGroups[a].Scenes.Count; b++)
-                {
-                    for (int c = 0; c < Project.SceneGroups[a].Scenes[b].Groups.Count; c++)
-                    {
-                        for (int d = 0; d < Project.SceneGroups[a].Scenes[b].Groups[c].Casts.Count; d++)
-                        {
-                            ConvertValues(Project.SceneGroups[a].Scenes[b], Project.SceneGroups[a].Scenes[b].Groups[c].Casts[d]);
-                        }
-                    }
-                }
+                UIScene scene = (UIScene)uiobj;               
+                ConvertValues(scene, scene.Groups[0].Casts[0]);
             }
         }
         void ConvertValues(UIScene scene, UICast cast)
         {
 
-            cast.Field00 = 1;
-            cast.Field5C = 0;
+            //cast.Field00 = 1;
+            //cast.Field5C = 0;
 
             for (int i = 0; i < scene.Groups.Count; i++)
             {
@@ -298,6 +308,37 @@ namespace Shuriken
             //((UICast)Shuriken.Views.UIEditor.SelectedUIObject).
 
 
+        }
+
+        private void TextureBoundaries(object sender, RoutedEventArgs e)
+        {
+            string output = "";
+            for (int i = 0; i < Project.TextureLists.Count; i++)
+            {
+
+                output += $"**{Project.TextureLists[i].Name}**";
+                for (int x = 0; x < Project.TextureLists[i].Textures.Count; x++)
+                {
+                    output += $"\n###{Project.TextureLists[i].Textures[x].Name}###";
+
+                    for (int g = 0; g < Project.TextureLists[i].Textures[x].Sprites.Count; g++)
+                    {
+                       var h =  Project.TryGetSprite(Project.TextureLists[i].Textures[x].Sprites[g]);
+                        output += $"\n{g}. TopLeft: {h.Start.X}x {h.Start.Y}y - BottomRight: {h.Width + h.Start.X}x {h.Height + h.Start.Y}y";
+
+                    }
+                }
+            }
+            var pathFile = vm.WorkFilePath;
+            var dir = Path.GetDirectoryName(pathFile);
+            dir = Path.Combine(dir, (System.IO.Path.GetFileName(vm.WorkFilePath) + ".txt"));
+            File.WriteAllText(dir, output);
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                Arguments = dir,
+                FileName = "explorer.exe"
+            };
+            Process.Start(startInfo);
         }
     }
 }

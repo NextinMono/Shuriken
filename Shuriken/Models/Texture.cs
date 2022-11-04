@@ -10,6 +10,7 @@ using Shuriken.Converters;
 using Shuriken.Rendering;
 using DirectXTexNet;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace Shuriken.Models
 {
@@ -17,6 +18,7 @@ namespace Shuriken.Models
     {
         public string Name { get; }
         public string FullName { get; }
+        public string FilePath { get; private set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
 
@@ -26,6 +28,7 @@ namespace Shuriken.Models
 
         private void CreateTexture(ScratchImage img)
         {
+
             if (TexHelper.Instance.IsCompressed(img.GetMetadata().Format))
                 img = img.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
 
@@ -41,6 +44,33 @@ namespace Shuriken.Models
 
             img.Dispose();
         }
+        private void CreateTextureNN()
+        {
+
+            PuyoTools.Core.Textures.Gvr.GvrTextureDecoder decoder = new PuyoTools.Core.Textures.Gvr.GvrTextureDecoder(FilePath);
+            Width = decoder.Width;
+            Width = decoder.Height;
+            GCHandle pinnedArray = GCHandle.Alloc(decoder.GetPixelData(), GCHandleType.Pinned);
+            IntPtr pointer = pinnedArray.AddrOfPinnedObject();
+            GlTex = new GLTexture(pointer, Width, Height);
+            pinnedArray.Free();
+
+
+            //if (TexHelper.Instance.IsCompressed(img.GetMetadata().Format))
+            //    img = img.Decompress(DXGI_FORMAT.B8G8R8A8_UNORM);
+
+            //else if (img.GetMetadata().Format != DXGI_FORMAT.B8G8R8A8_UNORM)
+            //    img = img.Convert(DXGI_FORMAT.B8G8R8A8_UNORM, TEX_FILTER_FLAGS.DEFAULT, 0.5f);
+
+            //Width = img.GetImage(0).Width;
+            //Height = img.GetImage(0).Height;
+
+            //GlTex = new GLTexture(img.FlipRotate(TEX_FR_FLAGS.FLIP_VERTICAL).GetImage(0).Pixels, Width, Height);
+
+            //CreateBitmap(decoder.GetPixelData());
+
+            //img.Dispose();
+        }
 
         private unsafe void CreateTexture(byte[] bytes)
         {
@@ -50,7 +80,11 @@ namespace Shuriken.Models
 
         private void CreateTexture(string filename)
         {
-            CreateTexture(TexHelper.Instance.LoadFromDDSFile(filename, DDS_FLAGS.NONE));
+            FilePath = filename;
+            if (Path.GetExtension(FilePath) == ".gvr")
+                CreateTextureNN();
+            else
+                CreateTexture(TexHelper.Instance.LoadFromDDSFile(filename, DDS_FLAGS.NONE));
         }
 
         private void CreateBitmap(ScratchImage img)
@@ -74,7 +108,7 @@ namespace Shuriken.Models
             FullName = name;
             Name = name;
             CreateTexture(bytes);
-        }            
+        }
 
         public Texture()
         {

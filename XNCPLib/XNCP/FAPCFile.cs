@@ -13,6 +13,8 @@ namespace XNCPLib.XNCP
     {
         public uint Signature { get; set; }
         public FAPCEmbeddedRes[] Resources { get; set; }
+
+        public static bool IsGNCP   {get;set;}
         public Encoding Encoding
         {
             get
@@ -50,7 +52,12 @@ namespace XNCPLib.XNCP
                 writer.Endianness = Endianness.Big;
             }
 
-            Signature = Utilities.Make4CCLE("FAPC");
+            Signature = Utilities.Make4CCLE("FAPC"); 
+            if (filename.EndsWith("gncp"))
+            {
+                Signature = Utilities.Make4CCLE("CPAF");
+                IsGNCP = true;
+            }
             writer.WriteUInt32(Signature);
 
             Resources[0].Write(writer);

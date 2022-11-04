@@ -42,12 +42,16 @@ namespace XNCPLib.XNCP
             uint textureCount = reader.ReadUInt32();
             uint texturesOffset = reader.ReadUInt32();
             uint dataOffset = texturesOffset > 24 ? reader.ReadUInt32() : 0;
-
+            
             reader.Seek(reader.GetOffsetOrigin() + texturesOffset, SeekOrigin.Begin);
+
             for (int i = 0; i < textureCount; ++i)
             {
                 XTexture texture = new XTexture();
-                texture.Read(reader);
+                if (Signature == Utilities.Make4CCLE("NGTL") || Signature == Utilities.Make4CCLE("NSTL"))
+                    texture.ReadNN(reader);
+                else
+                    texture.Read(reader);
 
                 if (string.IsNullOrEmpty(texture.Name))
                     texture.Name = $"Texture_{i}";
@@ -71,8 +75,48 @@ namespace XNCPLib.XNCP
             reader.PopOffsetOrigin();
         }
 
+        public void WriteNN(BinaryObjectWriter writer, OffsetChunk offsetChunk)
+        {
+            writer.WriteLittle(Signature);
+            writer.Write<int>(0);
+
+            var start = writer.At();
+            writer.Write(0x10); // List offset, untracked
+            writer.Write(Field0C);
+
+            uint textureDataStart = (uint)writer.Length;
+            Utilities.PadZeroBytes(writer, Textures.Count * 0x8);
+            for (int i = 0; i < Textures.Count; ++i)
+            {
+                writer.Seek(textureDataStart + (i * 0x8), SeekOrigin.Begin);
+
+                offsetChunk.Add(writer);
+                uint textureNameOffset = (uint)(writer.Length - writer.GetOffsetOrigin());                
+                Textures[i].WriteNN(writer, textureNameOffset);
+
+                // Align to 4 bytes if the texture name wasn't
+                writer.Seek(0, SeekOrigin.End);
+                writer.Align(4);
+            }
+
+            writer.Flush();
+            writer.Align(16);
+            var end = writer.At();
+
+            var size = (long)end - (long)start;
+            writer.At((long)start - sizeof(int), SeekOrigin.Begin);
+            writer.Write((int)size);
+
+            end.Dispose();
+        }
         public void Write(BinaryObjectWriter writer, OffsetChunk offsetChunk)
         {
+            bool isGNCP = Signature == Utilities.Make4CCLE("NGTL");
+            if (isGNCP)
+            {
+                WriteNN(writer, offsetChunk);
+                return;
+            }
             writer.PushOffsetOrigin();
             Endianness endianPrev = writer.Endianness;
 
@@ -105,7 +149,10 @@ namespace XNCPLib.XNCP
 
                 offsetChunk.Add(writer);
                 uint textureNameOffset = (uint)(writer.Length - writer.GetOffsetOrigin());
+                if(!isGNCP)
                 Textures[i].Write(writer, textureNameOffset);
+                else
+                    Textures[i].WriteNN(writer, textureNameOffset);
 
                 // Align to 4 bytes if the texture name wasn't
                 writer.Seek(0, SeekOrigin.End);

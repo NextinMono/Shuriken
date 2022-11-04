@@ -20,6 +20,7 @@ namespace XNCPLib.XNCP
 
         public void Read(BinaryObjectReader reader)
         {
+
             uint contentSize = reader.ReadUInt32();
             uint contentStart = (uint)reader.Position;
             {

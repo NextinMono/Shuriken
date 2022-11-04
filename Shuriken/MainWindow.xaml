@@ -22,6 +22,8 @@
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click="OpenMenu_Click"/>
                 <MenuItem Header="Reload" Click="Reload_Click" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Recent Files" ItemsSource="{Binding RecentFiles}"/>
+                <Separator/>
                 <MenuItem Header="Save" Click="SaveMenu_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Save As" Click="SaveAsMenu_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Exit" Click="ExitMenu_Click"/>
@@ -34,7 +36,8 @@
                 <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Clone Selected Element" Click="Clone_Click" IsEnabled="{Binding IsLoaded}"/>
                 <MenuItem Header="Change Color Order (RGBA to ABGR and reverse)" Click="ChangeColorOrder_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Test Convert" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Convert Selected Scene's Ratio" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Export Texture Boundaries" Click="TextureBoundaries" IsEnabled="{Binding IsLoaded}"/>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Aspect Ratio">
