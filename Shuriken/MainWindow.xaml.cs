@@ -63,7 +63,7 @@ namespace Shuriken
         }
         private void SaveMenu_Click(object sender, RoutedEventArgs e)
         {
-            try { vm.Save(null); }
+            try { vm.Save(null); System.Media.SystemSounds.Asterisk.Play(); }
             catch(System.IO.IOException error)
             {
 #if DEBUG
@@ -150,6 +150,35 @@ namespace Shuriken
                 }
             }
         }
+        private void MergeAllNodes(object sender, RoutedEventArgs e)
+        {
+            var list = Project.SceneGroups[0].Scenes.ToList();
+            for (int i = 0; i < Project.SceneGroups.Count; i++)
+            {
+                var h = Project.SceneGroups[i].Children;
+                foreach (var child in h)
+                {
+                    list.AddRange(GetScenesFromChildren(child));
+                }
+            }
+            for (int i = 0; i < Project.SceneGroups.Count; i++)
+            {
+                Project.SceneGroups[i].Children.Clear();
+            }
+            for (int i = 0; i < list.Count; i++)
+            {
+                Project.SceneGroups[0].Scenes.Add(list[i]);
+            }
+        }
+        ObservableCollection<UIScene> GetScenesFromChildren(UISceneGroup g)
+        {
+            var r = g.Scenes.ToList();
+            for (int i = 0; i < g.Children.Count; i++)
+            {
+                r.AddRange(GetScenesFromChildren(g.Children[i]));
+            }
+            return new ObservableCollection<UIScene>(r);
+        }
         private void LetterboxToWidescreenTest(object sender, RoutedEventArgs e)
         {
             ////Could use linq? Yeah prob. I don't know how to use it tho so, figures.
@@ -178,75 +207,15 @@ namespace Shuriken
         void ConvertValues(UIScene scene, UICast cast)
         {
 
-            //cast.Field00 = 1;
-            //cast.Field5C = 0;
+            cast.Field00 = 1;
+            cast.Field5C = 0;
 
-            for (int i = 0; i < scene.Groups.Count; i++)
-            {
-                var e = scene.Groups[i].Casts[0].Scale;
-                scene.Groups[i].Casts[0].Scale = new Vector3(e.X / (4.0f / 3.0f), e.Y);
-            }
-
-            //var translation = cast.Translation;
-            //Vector2 nTranslation = new Vector2(((640 * translation.X) / 1280) - (640 / 1280), translation.Y);
-            //cast.Translation = nTranslation;
-
-            //var offset = cast.Offset;
-            //Vector2 nOffset = new Vector2(offset.X * (640 / 1280), offset.Y);
-            //cast.Offset = nOffset;
-
-            //var e = new Vector2(cast.Translation.X + ((16 / 9) * (480 - 640)) / 2, cast.Translation.Y);
-            //if (cast.Translation.X >= 0.5f)
-            //cast.Translation = new Vector2((cast.Translation.X + ((16 / 9) * (480 - 640)) / 2) / 100, cast.Translation.Y);
-            //else
-            //    cast.Translation = new Vector2((cast.Translation.X - ((16 / 9) * (480 - 640)) / 2 )/ 100, cast.Translation.Y);
-            //if(cast.Type == DrawType.Font)
+            //for (int i = 0; i < scene.Groups.Count; i++)
             //{
-            //    var scale = cast.Scale;
-            //    Vector3 nScale = new Vector3(scale.X * (16/9) * 1.7f, scale.Y * (16 / 9) * 1.4f, 0);
-            //    cast.Scale = nScale;
-
-            //    cast.FontSpacingAdjustment = cast.FontSpacingAdjustment * ((16 / 9) * 3f);
-
-            //    var pos = cast.Translation;
-            //    cast.Translation = new Vector2(pos.X, pos.Y - 0.0018f);
-
-            //}
-            //else
-            //{
-            //    if (cast.Children.Count > 0)
-            //    {
-            //        var scale = cast.Scale;
-            //        Vector3 nScale = new Vector3(scale.X - (((640 * scale.X) / 1280) / 3), scale.Y, 0);
-            //        cast.Scale = nScale;
-
-            //    }
+            //    var e = scene.Groups[i].Casts[0].Scale;
+            //    scene.Groups[i].Casts[0].Scale = new Vector3(e.X / (4.0f / 3.0f), e.Y);
             //}
 
-
-            //var topleft = cast.TopLeft;
-            //Vector2 nTL = new Vector2((640 * topleft.X) / 1280, (480 * topleft.Y) / 720);
-            //cast.TopLeft = nTL;
-
-
-
-
-            //var bottomLeft = cast.BottomLeft;
-            //Vector2 nBL = new Vector2((640 * bottomLeft.X) / 1280, (480 * bottomLeft.Y) / 720);
-            //cast.BottomLeft = nBL;
-
-            //var topRight = cast.TopRight;
-            //Vector2 nTR = new Vector2(((640 * topRight.X) / 1280), (480 * topRight.Y) / 720);
-            //cast.TopRight = nTR;
-
-            //var bottomRight = cast.BottomRight;
-            //Vector2 nBR = new Vector2(((640 * bottomRight.X) / 1280), (480 * bottomRight.Y) / 720);
-            //cast.BottomRight = nBR;
-
-
-
-            //foreach (var f in cast.Children)
-            //    ConvertValues(scene, f);
         }
         void ChangeColors(UICast cast)
         {

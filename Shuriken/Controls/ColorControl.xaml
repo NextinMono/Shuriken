@@ -45,6 +45,6 @@
         <TextBox Grid.Column="5" Text="{Binding Value.B, UpdateSourceTrigger=PropertyChanged}"/>
         <TextBlock Grid.Column="6" Text="A"/>
         <TextBox Grid.Column="7" Text="{Binding Value.A, UpdateSourceTrigger=PropertyChanged}"/>
-        <Button Name="ColorBtn" Grid.Column="8" Width="20" Height="20" Background="{Binding Value, Converter={StaticResource ColorToBrushConverter}}" Click="ColorBtnClick"/>
+        <Button Name="ColorBtn" Grid.Column="8" Width="20" Height="20" Background="{Binding Value}" Click="ColorBtnClick"/>
     </Grid>
 </UserControl>

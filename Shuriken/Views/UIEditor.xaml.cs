@@ -214,25 +214,25 @@ namespace Shuriken.Views
             position += lyr.Offset;
 
             // Inherit position
-            if ((lyr.Field34 & 0x100) != 0)
+            if ((lyr.Inheritance & 0x100) != 0)
                 position.X += transform.Position.X;
             
-            if ((lyr.Field34 & 0x200) != 0)
+            if ((lyr.Inheritance & 0x200) != 0)
                 position.Y += transform.Position.Y;
 
             // Inherit rotation
-            if ((lyr.Field34 & 0x2) != 0)
+            if ((lyr.Inheritance & 0x2) != 0)
                 rotation += transform.Rotation;
 
             // Inherit scale
-            if ((lyr.Field34 & 0x400) != 0) 
+            if ((lyr.Inheritance & 0x400) != 0) 
                 scale.X *= transform.Scale.X;
 
-            if ((lyr.Field34 & 0x800) != 0) 
+            if ((lyr.Inheritance & 0x800) != 0) 
                 scale.Y *= transform.Scale.Y;
 
             // Inherit color
-            if ((lyr.Field34 & 0x8) != 0)
+            if ((lyr.Inheritance & 0x8) != 0)
             {
                 Vector4 cF = Vector4.Multiply(color.ToFloats(), transform.Color.ToFloats());
                 color = new Color(cF.X, cF.Y, cF.Z, cF.W);
@@ -257,7 +257,8 @@ namespace Shuriken.Views
                 else if (lyr.Type == DrawType.Font)
                 {
                     float xOffset = 0.0f;
-
+                    if(lyr.FontCharacters == null)
+                        return;
                     for (var i = 0; i < lyr.FontCharacters.Length; i++)
                     {
                         var font = Project.TryGetFont(lyr.FontID);
@@ -280,7 +281,8 @@ namespace Shuriken.Views
 
                         float width = spr.Dimensions.X / renderer.Width;
                         float height = spr.Dimensions.Y / renderer.Height;
-
+                        //float width = (spr.BottomRight.X - spr.TopLeft.X);
+                        //float height = (spr.BottomRight.Y - spr.TopLeft.Y);
                         var begin = (Vector2)lyr.TopLeft;
                         var end = begin + new Vector2(width, height);
 
@@ -346,6 +348,16 @@ namespace Shuriken.Views
         {
             renderer.Width = width;
             renderer.Height = height;
+        }
+
+        private void SceneTextMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if(e.ClickCount == 2)
+            {
+                TextBox t = ((TextBox)sender);
+                t.IsEnabled = true;
+                t.Focus();
+            }
         }
     }
 }

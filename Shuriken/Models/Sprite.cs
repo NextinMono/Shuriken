@@ -15,6 +15,8 @@ namespace Shuriken.Models
         public readonly int ID;
         public Vector2 Start { get; set; }
         public Vector2 Dimensions { get; set; }
+        public Vector2 TopLeft { get; set; }
+        public Vector2 BottomRight { get; set; }
         public Texture Texture { get; set; }
 
         // Used for saving to avoid corruption in un-edited values
@@ -83,7 +85,8 @@ namespace Shuriken.Models
             Start = new Vector2(MathF.Round(left * tex.Width), MathF.Round(top * tex.Height));
             Start.X = Math.Clamp(Start.X, 0, Texture.Width);
             Start.Y = Math.Clamp(Start.Y, 0, Texture.Height);
-
+            TopLeft = new Vector2(left, top);
+            BottomRight = new Vector2(right,bottom);
             Dimensions = new Vector2(MathF.Round((right - left) * tex.Width), MathF.Round((bottom - top) * tex.Height));
             CreateCrop();
 

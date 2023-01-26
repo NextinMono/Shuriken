@@ -33,23 +33,30 @@ namespace Shuriken.ViewModels
         public bool IsLoaded { get; set; }
         //Is unsaved
         public static bool IsDirty = false;
-        public string TitleAdd 
-        { 
+        public string TitleAdd
+        {
             //Definitely is a better way to do this but whatever
-            get 
+            get
             {
-                string add = "";
+                StringBuilder builder = new StringBuilder();
+                builder.AppendLine(WorkFilePath);
                 if (!string.IsNullOrEmpty(WorkFilePath))
                 {
-                    add += IsLoaded ? "" : "[Read-Only]";
                     if (IsLoaded)
-                        add += IsDirty ? "[*]" : "";
-                    return $" - {WorkFilePath} {add}";
+                    {
+                        if (IsDirty)
+                        {
+                            builder.AppendLine(" [*]");
+                        }
+                    }
+                    else
+                        builder.AppendLine(" [Read-Only]");
+                    return $" - {builder.ToString()}";
                 }
                 else
                     return null;
-                
-            } 
+
+            }
         }
         public MainViewModel()
         {
@@ -508,7 +515,7 @@ namespace Shuriken.ViewModels
                 xCast.BottomRight = new Vector2(uiCast.BottomRight);
 
                 xCast.Field2C = uiCast.Field2C;
-                xCast.Field34 = uiCast.Field34;
+                xCast.Field34 = uiCast.Inheritance;
                 xCast.Field38 = uiCast.Flags;
                 xCast.SubImageCount = uiCast.SubImageCount;
 
@@ -552,7 +559,7 @@ namespace Shuriken.ViewModels
 
                 // Cast Material Info
                 xCast.CastMaterialData = new();
-                Debug.Assert(uiCast.Sprites.Count == 32);
+                Debug.Assert(uiCast.Sprites.Count == uiCast.SubImageCount);
                 for (int index = 0; index < 32; index++)
                 {
                     if (uiCast.Sprites[index] == -1)
@@ -604,6 +611,13 @@ namespace Shuriken.ViewModels
             FontList xFontList2 = WorkFile2.Resources[0].Content.CsdmProject.Fonts;
 
             int texListCount = xTextures.Count;
+            for (int i = 0; i < xTextures2.Count; i++)
+            {
+                if (xTextures.FirstOrDefault(x => x.Name == xTextures2[i].Name) == default)
+                {
+                    xTextures.Add(xTextures2[i]);
+                }
+            }
             xTextures.AddRange(xTextures2);
 
             TextureList texList = new TextureList("textures");
@@ -675,6 +689,10 @@ namespace Shuriken.ViewModels
                 }
 
                 scene.SubImages = ncpSubimages;
+            }
+            foreach (var item in node2.Children)
+            {
+                node.Scenes.AddRange(item.Scenes);
             }
             node.Scenes.AddRange(node2.Scenes);
             foreach (var sceneID in node2.SceneIDTable)

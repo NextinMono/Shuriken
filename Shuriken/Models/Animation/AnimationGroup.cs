@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Shuriken.Models.Animation
 {
-    public class AnimationGroup : INotifyPropertyChanged
+    public class AnimationGroup : INotifyPropertyChanged, ICloneable
     {
         public float Time { get; set; }
         public bool Enabled { get; set; }
@@ -57,6 +57,11 @@ namespace Shuriken.Models.Animation
             }
 
             return null;
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

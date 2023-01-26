@@ -20,24 +20,77 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="File">
-                <MenuItem Header="Open" Click="OpenMenu_Click"/>
-                <MenuItem Header="Reload" Click="Reload_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Recent Files" ItemsSource="{Binding RecentFiles}"/>
+                <MenuItem Header="Open" Click="OpenMenu_Click">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf07b;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Reload" Click="Reload_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf0e2;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Recent Files" ItemsSource="{Binding RecentFiles}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf5fd;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <Separator/>
-                <MenuItem Header="Save" Click="SaveMenu_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Save As" Click="SaveAsMenu_Click" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Save" Click="SaveMenu_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf0c7;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Save As" Click="SaveAsMenu_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf0c7;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Exit" Click="ExitMenu_Click"/>
             </MenuItem>
             <MenuItem Header="Edit">
-                <MenuItem Header="Copy"/>
-                <MenuItem Header="Paste"/>
+                <MenuItem Header="Copy">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf0c5;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Paste">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf0ea;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="Tools">
-                <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Clone Selected Element" Click="Clone_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Change Color Order (RGBA to ABGR and reverse)" Click="ChangeColorOrder_Click" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Convert Selected Scene's Ratio" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}"/>
-                <MenuItem Header="Export Texture Boundaries" Click="TextureBoundaries" IsEnabled="{Binding IsLoaded}"/>
+                <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf5fd;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Merge all Nodes" Click="MergeAllNodes" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf5fd;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Clone Selected Element" Click="Clone_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Change Color Order (RGBA to ABGR and reverse)" Click="ChangeColorOrder_Click" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Convert Selected Scene's Ratio" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Export Texture Boundaries" Click="TextureBoundaries" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="View">
                 <MenuItem Header="Aspect Ratio">

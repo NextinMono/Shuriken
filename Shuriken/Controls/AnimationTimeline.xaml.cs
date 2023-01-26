@@ -409,6 +409,8 @@ namespace Shuriken.Controls
 
         private void AddKeyframe(object sender, RoutedEventArgs e)
         {
+            if (track.Keyframes == null)
+                track.Keyframes = new ObservableCollection<Keyframe>();
             for (int i = 0; i < track.Keyframes.Count; i++)
             {
                 if (track.Keyframes[i].Frame == CurrentFrame)
@@ -453,8 +455,17 @@ namespace Shuriken.Controls
             }
             if (SelectedUIObject is AnimationList)
             {
-                AnimationList animationGroup = (AnimationList)SelectedUIObject;
-                AnimationType a = AnimationType.YPosition;
+                AnimationList animationGroup = (AnimationList)SelectedUIObject; 
+                AnimationTypePicker selectedType = new AnimationTypePicker();
+                AnimationType a = AnimationType.None;
+                selectedType.ShowDialog();
+                if (selectedType.DialogResult == true)
+                {
+                    a = selectedType.AnimType;
+                }
+                else
+                    return;
+
 
                 if (animationGroup.Tracks.Count == 0)
                 {
@@ -475,8 +486,8 @@ namespace Shuriken.Controls
                 {
                     Models.UICast cast = Views.UIEditor.SelectedUIObject as Models.UICast;
                     AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
-                    AnimationTypePicker selectedType = new AnimationTypePicker();
                     AnimationTrack at = null;
+                    AnimationTypePicker selectedType = new AnimationTypePicker();
                     selectedType.ShowDialog();
                     if (selectedType.DialogResult == true)
                     {
@@ -574,7 +585,20 @@ namespace Shuriken.Controls
             }
             if(SelectedUIObject is AnimationTrack)
             {
-                AnimationTrack h = (AnimationTrack)SelectedUIObject;
+                AnimationTrack track = (AnimationTrack)SelectedUIObject;
+                for (int i = 0; i < Animations.Count; i++)
+                {
+                    for (int x = 0; x < Animations[i].LayerAnimations.Count; x++)
+                    {
+                        for (int h = 0; h < Animations[i].LayerAnimations[x].Tracks.Count; h++)
+                        {
+                            if(track == Animations[i].LayerAnimations[x].Tracks[h])
+                            {
+                                Animations[i].LayerAnimations[x].Tracks.Remove(track);
+                            }
+                        }
+                    }
+                }
 
             }
         }
@@ -583,12 +607,29 @@ namespace Shuriken.Controls
         {
             if (SelectedUIObject is AnimationGroup)
             {
-                AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
-                var g = animationGroup;
-                g.LayerAnimations = animationGroup.LayerAnimations;
-                g.Name = "Intro_boss";
-                Animations.Add(g);
-                animationGroup.Name = "Intro_boss";
+                AnimationGroup animationGroup = ((AnimationGroup)SelectedUIObject);
+                var newAnim = (AnimationGroup)animationGroup.Clone();
+                newAnim.LayerAnimations = animationGroup.LayerAnimations;
+
+                for (int i = 0; i < newAnim.LayerAnimations.Count; i++)
+                {
+                    for (int x = 0; x < newAnim.LayerAnimations[i].Tracks.Count; x++)
+                    {
+                        var list = newAnim.LayerAnimations[i].Tracks[x].Keyframes.ToList();
+
+                        list = Enumerable.Reverse(list).ToList();
+                        for (int y = 0; y < newAnim.LayerAnimations[i].Tracks[x].Keyframes.Count; y++)
+                        {
+                            newAnim.LayerAnimations[i].Tracks[x].Keyframes[y].Frame = list[y].Frame;
+                        }
+                            
+                        
+
+                    }
+                }
+
+                Animations.Add(newAnim);
+                newAnim.Name = $"{animationGroup.Name}_clone";
             }
         }
     }

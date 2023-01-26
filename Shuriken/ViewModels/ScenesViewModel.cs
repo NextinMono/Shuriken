@@ -36,6 +36,7 @@ namespace Shuriken.ViewModels
         public RelayCommand ZoomInCmd { get; }
 
         public RelayCommand CreateSceneCmd { get; }
+        public RelayCommand CloneCastCmd { get; }
         public RelayCommand RemoveSceneCmd { get; }
         public RelayCommand CloneSceneCmd { get; }
         public RelayCommand CreateGroupCmd { get; }
@@ -166,9 +167,12 @@ namespace Shuriken.ViewModels
             if (cast.Name == (SelectedUIObject as UICast).Name)
             {
                 UICast newc = (UICast)(SelectedUIObject as UICast).Clone();
-
-                cast2.AddCast(newc);
+                newc.CastNumber += 1;
+                //cast.AddCast(newc);
+                group.AddCast(newc);
                 group.CastsOrderedByIndex.Add(newc);
+
+                //cast.Children.Add(newc);
 
                 for (int i = 0; i < scene.Animations.Count; i++)
                 {
@@ -241,7 +245,8 @@ namespace Shuriken.ViewModels
             CloneSceneCmd      = new RelayCommand(CloneSelectedScene, () => SelectedScene != null);
             CreateGroupCmd      = new RelayCommand(AddGroupToSelection, () => SelectedScene != null);
             RemoveGroupCmd      = new RelayCommand(RemoveSelectedGroup, () => SelectedUIObject is UICastGroup);
-            CreateCastCmd       = new RelayCommand(CloneCastToSelection, () => SelectedUIObject is ICastContainer);
+            CreateCastCmd       = new RelayCommand(AddCastToSelection, () => SelectedUIObject is UICast);
+            CloneCastCmd       = new RelayCommand(CloneCastToSelection, () => SelectedUIObject is ICastContainer);
             RemoveCastCmd       = new RelayCommand(RemoveSelectedCast, () => SelectedUIObject is UICast);
             ChangeCastSpriteCmd = new RelayCommand<int>(SelectCastSprite, () => SelectedUIObject is UICast);
         }

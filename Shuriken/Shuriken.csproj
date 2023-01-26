@@ -9,6 +9,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	<UseWindowsForms>true</UseWindowsForms>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <ApplicationIcon>shuriken.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,7 +30,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="shuriken.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DirectXTexNet" Version="1.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="OpenTK" Version="4.7.2" />
     <PackageReference Include="OpenTK.GLWpfControl" Version="4.1.0" />
     <PackageReference Include="PropertyChanged.Fody" Version="3.4.0" />

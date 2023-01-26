@@ -69,7 +69,7 @@
                               SelectedItem="{Binding SelectedTexture}" DisplayMemberPath="Name"/>
                     <Button Grid.Column="1" Style="{StaticResource TransparentButton}" ToolTip="Open texture" Command="{Binding CreateTextureCmd}">
                         <Button.Content>
-                            <TextBlock Text="&#xf07c;" FontFamily="{StaticResource FontAwesome}"/>
+                            <TextBlock Text="&#xf055;" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
                     </Button>
                     <Button Grid.Column="2" Style="{StaticResource TransparentButton}" ToolTip="Remove texture" Command="{Binding RemoveTextureCmd}">

@@ -38,9 +38,8 @@
                         <Label>Name</Label>
                         <TextBox Text="{Binding Name}"/>
 
-                        <Label>Field00</Label>
-                        <TextBox Text="{Binding Field00}"/>
-
+                        <Label>Index</Label>
+                        <TextBox Text="{Binding CastNumber}" IsReadOnly="True"/>
                         <Label>Type</Label>
                         <ComboBox ItemsSource="{Binding Type, Converter={StaticResource EnumConverter}, Mode=OneTime}"
                               SelectedValue="{Binding Type}" SelectedValuePath="Value" DisplayMemberPath="Description"/>
@@ -53,6 +52,8 @@
             <Expander Header="Dimensions" IsExpanded="True">
                 <Border>
                     <StackPanel>
+                        <Label>Field00</Label>
+                        <TextBox Text="{Binding Field00}"/>
                         <Label>Width</Label>
                         <TextBox Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -135,10 +136,7 @@
                         <TextBox Text="{Binding Field34, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <Label>Flags</Label>
-                        <TextBox Text="{Binding Flags, UpdateSourceTrigger=PropertyChanged}"/>
-                        
-                        <Label>SubImageCount</Label>
-                        <TextBox Text="{Binding SubImageCount, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Text="{Binding Flags, UpdateSourceTrigger=PropertyChanged}"/>                        
 
                         <Label>Field4C</Label>
                         <TextBox Text="{Binding Field4C, UpdateSourceTrigger=PropertyChanged}"/>
@@ -174,6 +172,8 @@
             <Expander Header="Sprites" IsExpanded="True" Visibility="{Binding Type, Converter={StaticResource Eq2Visibility}, ConverterParameter={x:Static models:DrawType.Sprite}, Mode=OneWay}">
                 <Border>
                     <StackPanel>
+                        <Label>SubImage Count</Label>
+                        <TextBox Text="{Binding SubImageCount, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label>Default Sprite</Label>
                         <TextBox Text="{Binding DefaultSprite, UpdateSourceTrigger=PropertyChanged}"/>
 

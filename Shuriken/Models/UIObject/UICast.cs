@@ -10,6 +10,8 @@ using Shuriken.ViewModels;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Shuriken.Models
 {
@@ -27,6 +29,7 @@ namespace Shuriken.Models
         }
 
         public uint Field00 { get; set; }
+        public ScaleType Field00Type { get; set; }
         public uint CastNumber { get; set; }
         public DrawType Type { get; set; }
         public bool IsEnabled { get; set; }
@@ -45,7 +48,7 @@ namespace Shuriken.Models
         }
 
         public uint Field2C { get; set; }
-        public uint Field34 { get; set; }
+        public uint Inheritance { get; set; }
         public uint Flags { get; set; }
         public uint SubImageCount { get; set; }
 
@@ -99,7 +102,7 @@ namespace Shuriken.Models
         public UICast(Cast cast, string name, int index)
         {
             Name = name;
-            CastNumber = cast.
+            CastNumber = (uint)index;
             Field00 = cast.Field00;
             Type = (DrawType)cast.Field04;
             IsEnabled = cast.IsEnabled != 0;
@@ -113,7 +116,7 @@ namespace Shuriken.Models
             BottomRight = new Vector2(cast.BottomRight);
 
             Field2C = cast.Field2C;
-            Field34 = cast.Field34;
+            Inheritance = cast.Field34;
             Flags = cast.Field38;
             SubImageCount = cast.SubImageCount;
 
@@ -147,7 +150,7 @@ namespace Shuriken.Models
             InfoField34 = cast.CastInfoData.Field34;
             InfoField38 = cast.CastInfoData.Field38;
 
-            Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, 32).ToList());
+            Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, Convert.ToInt32(SubImageCount)).ToList());
         }
 
         public UICast()
@@ -161,7 +164,7 @@ namespace Shuriken.Models
             Children = new ObservableCollection<UICast>();
 
             Field2C = 0;
-            Field34 = 0;
+            Inheritance = 0;
             Flags = 0;
             SubImageCount = 0;
 
@@ -204,57 +207,7 @@ namespace Shuriken.Models
             DefaultSprite = 0;
         }
 
-        public UICast(UICast c)
-        {
-            Name = name;
-            Field00 = c.Field00;
-            Type = c.Type;
-            IsEnabled = c.IsEnabled;
-            Visible = true;
-            ZIndex = ZIndex;
-            Children = new ObservableCollection<UICast>(c.Children);
-
-            TopLeft = new Vector2(c.TopLeft);
-            TopRight = new Vector2(c.TopRight);
-            BottomLeft = new Vector2(c.BottomLeft);
-            BottomRight = new Vector2(c.BottomRight);
-
-            Field2C = c.Field2C;
-            Field34 = c.Field34;
-            Flags = c.Flags;
-            SubImageCount = c.SubImageCount;
-
-            FontID = -1;
-            FontCharacters = c.FontCharacters;
-
-            FontSpacingAdjustment = c.FontSpacingAdjustment;
-            Width = c.Width;
-            Height = c.Height;
-            Field58 = c.Field58;
-            Field5C = c.Field5C;
-
-            Offset = new Vector2(c.Offset);
-
-            Field68 = c.Field68;
-            Field6C = c.Field6C;
-            Field70 = c.Field70;
-
-            HideFlag = c.HideFlag;
-            Translation = new Vector2(c.Translation);
-            Rotation = c.Rotation;
-            Scale = new Vector3(c.Scale);
-            DefaultSprite = c.DefaultSprite;
-            Color = new Color(c.Color);
-            GradientTopLeft = new Color(c.GradientTopLeft);
-            GradientBottomLeft = new Color(c.GradientBottomLeft);
-            GradientTopRight = new Color(c.GradientTopRight);
-            GradientBottomRight = new Color(c.GradientBottomRight);
-            InfoField30 = c.InfoField30;
-            InfoField34 = c.InfoField34;
-            InfoField38 = c.InfoField38;
-
-            Sprites = new ObservableCollection<int>(c.Sprites);
-        }
+        
 
 
         public event PropertyChangedEventHandler PropertyChanged;

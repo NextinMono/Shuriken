@@ -127,7 +127,13 @@ namespace Shuriken.Models
                         int[] castSprites = scene.UICastGroups[g].Casts[c].CastMaterialData.SubImageIndices;
                         for (int index = 0; index < cast.Sprites.Count; ++index)
                         {
-                            cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], scene.SubImages, texList.Textures);
+                            try
+                            {
+
+
+                                cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], scene.SubImages, texList.Textures);
+                            }
+                            catch { }
                         }
                     }
                     else if (cast.Type == DrawType.Font)

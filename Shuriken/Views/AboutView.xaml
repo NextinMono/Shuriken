@@ -16,15 +16,37 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="About Shuriken" FontSize="32" Padding="5 20" FontWeight="Bold" TextDecorations="{x:Null}"/>
         <TextBlock Grid.Row="1" FontSize="16" Padding="5 20">
-            <Run Text="Version: "/>
+            <Run Text="Version: " FontWeight="Bold"/>
             <Run Text="{Binding AppVersion, Mode=OneWay}"/>
-            <Run Text="[This specific version is a fork of the original project, with Quality of Life changes by NextinHKRY]"/>
+            <Run Text="[This specific version is a fork of the original project, with Quality of Life changes by NextinHKRY]"  FontWeight="Light"/>
             <LineBreak/>
-            <Run Text="Copyright"/>
-            <Run Text="&#xf1f9;" FontFamily="{StaticResource FontAwesome}"/>
+            
+            <LineBreak/>
+            <Run Text="Developers" FontWeight="Bold"/>
+            <LineBreak/>
+            <Run Text="crash5band"/>
+            <LineBreak/>            
+            <Run Text="brianuuu"/>
+            <LineBreak/>
+            <Run Text="PTKickass"/>
+            <LineBreak/>
+            <Run Text="Skyth"/>
+            <LineBreak/>
+            <Run Text="HyperBE32"/>
+            <LineBreak/>
+            <Run Text="Sajid78"/>
+            <LineBreak/>
+            <Run Text="NextinHKRY (only for this fork)"/>
+            
+            <LineBreak/>
+            <LineBreak/>
+            <Run Text="Copyright &#xf1f9;" FontFamily="{StaticResource FontAwesome}"/>
             <Run Text="2022"/>
             <LineBreak/>
+            <Run Text="Links" FontSize="32" FontWeight="Bold"/>
+            <LineBreak/>
             <Hyperlink NavigateUri="{Binding GithubLink}" RequestNavigate="HyperlinkRequestNavigate">GitHub Fork</Hyperlink> 
+            <LineBreak/>
             <Hyperlink NavigateUri="{Binding GithubLink}" RequestNavigate="HyperlinkRequestNavigateOg">Original Repository</Hyperlink>
         </TextBlock>
     </Grid>
