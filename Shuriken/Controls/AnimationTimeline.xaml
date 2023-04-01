@@ -7,9 +7,14 @@
              xmlns:animation="clr-namespace:Shuriken.Models.Animation"
              xmlns:converters="clr-namespace:Shuriken.Converters"
              mc:Ignorable="d" 
+             
              d:DataContext="{d:DesignInstance local:AnimationTimeline}"
              d:DesignHeight="200" d:DesignWidth="800">
+    <UserControl.Resources>
+        <converters:EnumToCollectionConverter x:Key="EnumConverter"/>
+    </UserControl.Resources>
     <Grid Name="LayoutRoot">
+
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
@@ -50,6 +55,21 @@
                     <Button Style="{StaticResource TransparentButton}" Click="CloneAnim">
                         <Button.Content>
                             <TextBlock Text="&#xf069;" FontFamily="{StaticResource FontAwesome}"/>
+                        </Button.Content>
+                    </Button>
+                    <Button Style="{StaticResource TransparentButton}" Click="SetFirstMergeAnim">
+                        <Button.Content>
+                            <TextBlock Text="1" FontFamily="{StaticResource FontAwesome}"/>
+                        </Button.Content>
+                    </Button>
+                    <Button Style="{StaticResource TransparentButton}" Click="SetSecondMergeAnim">
+                        <Button.Content>
+                            <TextBlock Text="2" FontFamily="{StaticResource FontAwesome}"/>
+                        </Button.Content>
+                    </Button>
+                    <Button Style="{StaticResource TransparentButton}" Click="MergeAnim">
+                        <Button.Content>
+                            <TextBlock Text="M" FontFamily="{StaticResource FontAwesome}"/>
                         </Button.Content>
                     </Button>
                 </StackPanel>
@@ -160,6 +180,12 @@
                         <local:ColorControl x:Name="FrameValueColor" Value="{Binding SelectedKey.KValueColor, Mode=TwoWay}" IsEnabled="{Binding KeySelected}"/>
                         <Label>Data8</Label>
                         <local:Vector3Control x:Name="Data8Value" Value="{Binding SelectedKey.Data8Value, Mode=TwoWay}"/>
+                        <Label>InTangent</Label>
+                        <TextBox Text="{Binding SelectedKey.InTangent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
+                        <Label>OutTangent</Label>
+                        <TextBox Text="{Binding SelectedKey.OutTangent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
+                        <ComboBox Name="TypeBox" SelectedValue="{Binding SelectedKey.Type,Mode=TwoWay}" SelectedValuePath="Value"/>
+                        <TextBox Text="{Binding SelectedKey.Field14, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
                     </StackPanel>
                 </ScrollViewer>
             </GroupBox>

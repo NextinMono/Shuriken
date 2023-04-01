@@ -11,6 +11,8 @@ using Shuriken.Misc;
 using Shuriken.ViewModels;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using Microsoft.VisualBasic;
+using System.Collections.Specialized;
 
 namespace Shuriken.Models
 {
@@ -52,7 +54,11 @@ namespace Shuriken.Models
             TextureSizes = new ObservableCollection<Vector2>();
             Animations = new ObservableCollection<AnimationGroup>();
             Groups = new ObservableCollection<UICastGroup>();
-
+            for (int i = 0; i < texList.Textures.Count; i++)
+            {
+                texList.Textures[i].RelativeWidth = (int)(scene.Data1[i].X * 1280F);
+                texList.Textures[i].RelativeHeight = (int)(scene.Data1[i].Y * 720F);
+            }
             foreach (var texSize in scene.Data1)
             {
                 TextureSizes.Add(new Vector2(texSize.X, texSize.Y));
@@ -88,6 +94,12 @@ namespace Shuriken.Models
 
 
             Visible = false;
+        }
+        public void Merge(UIScene scene2)
+        {
+            foreach (var i in scene2.Groups) Groups.Add(i);
+            foreach (var i in scene2.Animations) Animations.Add(i);
+            foreach (var i in scene2.TextureSizes) TextureSizes.Add(i);
         }
 
         private void ProcessCasts(Scene scene, TextureList texList)

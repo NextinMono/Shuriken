@@ -33,6 +33,12 @@ namespace Shuriken.Models.Animation
 
         public Color KValueColor { get; set; }
 
+        public int TypeInt { 
+            get
+            {
+                return (int)Type;
+            } 
+        }
         public KeyframeType Type { get; set; }
         public float InTangent { get; set; }
         public float OutTangent { get; set; }

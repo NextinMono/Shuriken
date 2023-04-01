@@ -152,24 +152,11 @@ namespace Shuriken.ViewModels
 
             string root = Path.GetDirectoryName(Path.GetFullPath(filename));
 
+
             List<XTexture> xTextures = WorkFile.Resources[1].Content.TextureList.Textures;
             FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
+            TextureList texList = LoadTextures(root, xTextures, xFontList);
 
-            TextureList texList = new TextureList("textures");
-            foreach (XTexture texture in xTextures)
-            {
-                if (texture.Data != null && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
-                    texList.Textures.Add(new Texture(texture.Name, texture.Data));
-
-                else
-                {
-                    string texPath = Path.Combine(root, texture.Name);
-                    if (File.Exists(texPath) && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
-                        texList.Textures.Add(new Texture(texPath));
-                    else
-                        MissingTextures.Add(texture.Name);
-                }
-            }
 
             if (MissingTextures.Count > 0)
                 WarnMissingTextures();
@@ -196,13 +183,34 @@ namespace Shuriken.ViewModels
             WorkFilePath = filename;
             IsLoaded = !MissingTextures.Any();
         }
+        public TextureList LoadTextures(string root, List<XTexture> xTextures, FontList xFontList)
+        {
+            TextureList texList = new TextureList("textures");
+            foreach (XTexture texture in xTextures)
+            {
+                if (texture.Data != null && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
+                    texList.Textures.Add(new Texture(texture.Name, texture.Data));
+
+                else
+                {
+                    string texPath = Path.Combine(root, texture.Name);
+                    if (File.Exists(texPath) && WorkFile.Signature != XNCPLib.Misc.Utilities.Make4CCLE("NGTL"))
+                        texList.Textures.Add(new Texture(texPath));
+                    else
+                        MissingTextures.Add(texture.Name);
+                }
+            }
+            return texList;
+        }
 
         public void Save(string path)
         {
             if (path == null) path = WorkFilePath;
             else WorkFilePath = path;
+            bool saveOldSizes = false;
 
-            FAPCFile fapcFile = WorkFile.Copy();
+            
+                    FAPCFile fapcFile = WorkFile.Copy();
             // TODO: We should create a FACPFile from scratch instead of overwritting the working one
             List<XTexture> xTextures = fapcFile.Resources[1].Content.TextureList.Textures;
             FontList xFontList = fapcFile.Resources[0].Content.CsdmProject.Fonts;
@@ -216,9 +224,26 @@ namespace Shuriken.ViewModels
 
             List<System.Numerics.Vector2> Data1 = new();
             TextureList texList = Project.TextureLists[0];
+
+            //Check textures to see if they've changed in size, if so then show a prompt
+
             foreach (Texture tex in texList.Textures)
             {
-                Data1.Add(new System.Numerics.Vector2(tex.Width / 1280F, tex.Height / 720F));
+                if (tex.Width != tex.RelativeWidth || tex.Height != tex.RelativeHeight)
+                {
+                    if (MessageBox.Show("Do you want to save with the old texture sizes?", "Textures", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        saveOldSizes = true;
+                    break;
+                }
+            }
+
+            foreach (Texture tex in texList.Textures)
+            {
+                if(saveOldSizes)
+                Data1.Add(new System.Numerics.Vector2(tex.RelativeWidth / 1280F, tex.RelativeHeight / 720F));
+                
+                else
+                    Data1.Add(new System.Numerics.Vector2(tex.Width / 1280F, tex.Height / 720F));
             }
 
             CSDNode rootNode = new();

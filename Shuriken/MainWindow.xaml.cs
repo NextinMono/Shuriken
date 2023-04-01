@@ -170,6 +170,31 @@ namespace Shuriken
                 Project.SceneGroups[0].Scenes.Add(list[i]);
             }
         }
+        int FirstSceneSelected,SecondSceneSelected;
+        private void SelectFirstSceneMerge(object sender, RoutedEventArgs e)
+        {
+            object uiobj = Views.UIEditor.SelectedUIObject;
+
+            if (uiobj is UIScene)
+            {
+                UIScene scene = (UIScene)uiobj;
+                FirstSceneSelected = Project.SceneGroups[0].Scenes.IndexOf(scene);
+            }
+        }
+        private void SelectSecondSceneMerge(object sender, RoutedEventArgs e)
+        {
+            object uiobj = Views.UIEditor.SelectedUIObject;
+
+            if (uiobj is UIScene)
+            {
+                UIScene scene = (UIScene)uiobj;
+                SecondSceneSelected = Project.SceneGroups[0].Scenes.IndexOf(scene);
+            }
+        }
+        private void MergeScenes(object sender, RoutedEventArgs e)
+        {
+            Project.SceneGroups[0].Scenes[FirstSceneSelected].Merge(Project.SceneGroups[0].Scenes[SecondSceneSelected]);
+        }
         ObservableCollection<UIScene> GetScenesFromChildren(UISceneGroup g)
         {
             var r = g.Scenes.ToList();
@@ -207,8 +232,8 @@ namespace Shuriken
         void ConvertValues(UIScene scene, UICast cast)
         {
 
-            cast.Field00 = 1;
-            cast.Field5C = 0;
+            cast.Field00 = 3;
+            cast.Field5C = 3;
 
             //for (int i = 0; i < scene.Groups.Count; i++)
             //{

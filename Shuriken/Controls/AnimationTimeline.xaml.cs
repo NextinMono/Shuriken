@@ -111,7 +111,10 @@ namespace Shuriken.Controls
             cursor = GetFrameLine(CurrentFrame);
             cursor.Stroke = new SolidColorBrush(Color.FromRgb(221, 82, 70));
             cursor.StrokeThickness = 2;
-
+            //tried using an enumconverter but the names didnt show up
+            TypeBox.Items.Add("Constant");
+            TypeBox.Items.Add("Linear");
+            TypeBox.Items.Add("Hermite");
             MinValue = 0;
             MaxValue = 100;
             holdingKey = false;
@@ -631,6 +634,30 @@ namespace Shuriken.Controls
                 Animations.Add(newAnim);
                 newAnim.Name = $"{animationGroup.Name}_clone";
             }
+        }
+        int FirstAnimSelected, SecondAnimSelected;
+        private void SetFirstMergeAnim(object sender, RoutedEventArgs e)
+        {
+            FirstAnimSelected = Animations.IndexOf((AnimationGroup)SelectedUIObject);
+        }
+
+        private void SetSecondMergeAnim(object sender, RoutedEventArgs e)
+        {
+            SecondAnimSelected = Animations.IndexOf((AnimationGroup)SelectedUIObject);
+
+        }
+
+        private void MergeAnim(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                foreach (var i in Animations[SecondAnimSelected].LayerAnimations) Animations[FirstAnimSelected].LayerAnimations.Add(i);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
         }
     }
 }

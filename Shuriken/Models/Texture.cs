@@ -22,6 +22,9 @@ namespace Shuriken.Models
         public int Width { get; private set; }
         public int Height { get; private set; }
 
+        public int RelativeWidth { get;  set; }
+        public int RelativeHeight { get;  set; }
+
         public BitmapSource ImageSource { get; private set; }
         internal GLTexture GlTex { get; private set; }
         public ObservableCollection<int> Sprites { get; set; }
@@ -37,6 +40,7 @@ namespace Shuriken.Models
 
             Width = img.GetImage(0).Width;
             Height = img.GetImage(0).Height;
+
 
             GlTex = new GLTexture(img.FlipRotate(TEX_FR_FLAGS.FLIP_VERTICAL).GetImage(0).Pixels, Width, Height);
 
@@ -96,7 +100,7 @@ namespace Shuriken.Models
             bmp.Dispose();
         }
 
-        public Texture(string filename) : this()
+        public Texture(string filename, int relativeWidth = 0, int relativeHeight = 0) : this()
         {
             FullName = filename;
             Name = Path.GetFileNameWithoutExtension(filename);

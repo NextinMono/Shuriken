@@ -66,6 +66,7 @@ namespace XNCPLib.XNCP
             AnimationData2List = new List<AnimationData2>();
         }
 
+       
         public void Read(BinaryObjectReader reader)
         {
             Version = reader.ReadUInt32();
