@@ -94,5 +94,16 @@ namespace Shuriken.Models
         {
             return v.ToFloats();
         }
+        public void InvertOrder()
+        {
+            byte Alpha = A;
+            byte Red = R;
+            byte Green = G;
+            byte Blue = B;
+            A = Red;
+            R = Alpha;
+            G = Blue;
+            B = Green;
+        }
     }
 }

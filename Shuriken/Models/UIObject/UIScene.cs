@@ -54,8 +54,12 @@ namespace Shuriken.Models
             TextureSizes = new ObservableCollection<Vector2>();
             Animations = new ObservableCollection<AnimationGroup>();
             Groups = new ObservableCollection<UICastGroup>();
-            for (int i = 0; i < texList.Textures.Count; i++)
+            for (int i = 0; i < scene.Data1.Count; i++)
             {
+                if(i > texList.Textures.Count -1)
+                {
+                    break;
+                }
                 texList.Textures[i].RelativeWidth = (int)(scene.Data1[i].X * 1280F);
                 texList.Textures[i].RelativeHeight = (int)(scene.Data1[i].Y * 720F);
             }
@@ -179,7 +183,6 @@ namespace Shuriken.Models
                                 {
                                     Field00 = castAnimData.SubDataList[castAnimDataIndex].Field00,
                                 };
-
                                 int keyIndex = 0;
                                 foreach (var key in castAnimData.SubDataList[castAnimDataIndex].Keyframes)
                                 {

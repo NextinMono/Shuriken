@@ -54,7 +54,7 @@ namespace XNCPLib.XNCP
         public void WriteNN(BinaryObjectWriter writer, uint nameOffset)
         {
             writer.Write(Field00);
-            writer.WriteStringOffset(StringBinaryFormat.NullTerminated, Name);
+            writer.WriteStringOffset(nameOffset-1, Name);
             writer.Write(Field08);
             writer.Write(Field0A);
             writer.Write(Field0C);

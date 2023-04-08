@@ -78,7 +78,13 @@
                         <HierarchicalDataTemplate DataType="{x:Type animation:AnimationGroup}" ItemsSource="{Binding LayerAnimations}">
                             <StackPanel Orientation="Horizontal">
                                 <CheckBox IsChecked="{Binding Enabled}" Margin="0 0 5 0"/>
+                                <TextBlock Text="&#xf017;" FontFamily="{StaticResource FontAwesome}" VerticalAlignment="Center"/>
                                 <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+                                <Button Click="AddAnimTrack">
+                                    <Button.Content>
+                                        <TextBlock Text="&#xf067;" FontFamily="{StaticResource FontAwesome}"/>
+                                    </Button.Content>
+                                </Button>
                             </StackPanel>
                         </HierarchicalDataTemplate>
                         <HierarchicalDataTemplate DataType="{x:Type animation:AnimationList}" ItemsSource="{Binding Tracks}">
@@ -162,7 +168,7 @@
                 </ScrollViewer>
                 
                 <!-- Timeline canvas -->
-                <ScrollViewer Grid.Row="1" Name="TimelineContainer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer Grid.Row="1" Name="TimelineContainer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsTrackSelected, UpdateSourceTrigger=PropertyChanged}">
                     <Canvas Name="Timeline" Background="LightGray" VerticalAlignment="Top" HorizontalAlignment="Left" MouseLeftButtonDown="TimelineMouseLeftButtonDown"/>
                 </ScrollViewer>
             </Grid>
@@ -170,7 +176,7 @@
             <GridSplitter Grid.Row="1" Grid.Column="3" Width="5" ResizeBehavior="PreviousAndNext" Margin="2.5 0"/>
             
             <!-- Keyframe properties -->
-            <GroupBox Grid.Row="1" Grid.Column="4" Header="Keyframe properties">
+            <GroupBox Grid.Row="1" Grid.Column="4" Header="Keyframe properties" IsEnabled="{Binding IsTrackSelected,UpdateSourceTrigger=PropertyChanged}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <Label>Frame</Label>
@@ -178,14 +184,18 @@
                         <Label>Value</Label>
                         <TextBox Name="FrameValueText" Text="{Binding SelectedKey.KValue, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}" />
                         <local:ColorControl x:Name="FrameValueColor" Value="{Binding SelectedKey.KValueColor, Mode=TwoWay}" IsEnabled="{Binding KeySelected}"/>
+                        <Label>Smoothing</Label>
+                        <ComboBox Name="TypeBox" SelectedValue="{Binding SelectedKey.Type,Mode=TwoWay}" SelectedValuePath="Value" DropDownClosed="TypeBox_DropDownClosed"/>
                         <Label>Data8</Label>
                         <local:Vector3Control x:Name="Data8Value" Value="{Binding SelectedKey.Data8Value, Mode=TwoWay}"/>
                         <Label>InTangent</Label>
                         <TextBox Text="{Binding SelectedKey.InTangent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
                         <Label>OutTangent</Label>
                         <TextBox Text="{Binding SelectedKey.OutTangent, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
-                        <ComboBox Name="TypeBox" SelectedValue="{Binding SelectedKey.Type,Mode=TwoWay}" SelectedValuePath="Value"/>
+                        <Label>Field14</Label>
+
                         <TextBox Text="{Binding SelectedKey.Field14, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding KeySelected}"/>
+                        
                     </StackPanel>
                 </ScrollViewer>
             </GroupBox>

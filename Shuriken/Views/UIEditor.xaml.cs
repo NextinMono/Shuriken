@@ -318,7 +318,6 @@ namespace Shuriken.Views
 
             if (DataContext is ScenesViewModel vm)
             {
-
                 vm.SelectedScene = item == null ? null : item.DataContext as UIScene;
                 vm.SelectedUIObject = source.DataContext;
                 if(vm.SelectedUIObject != null) SelectedUIObject = vm.SelectedUIObject;

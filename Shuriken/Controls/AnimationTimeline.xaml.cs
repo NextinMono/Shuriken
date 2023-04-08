@@ -13,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -46,20 +47,22 @@ namespace Shuriken.Controls
         public double Zoom
         {
             get { return zoom; }
-            set { zoom = value;DrawTimeline(); }
+            set { zoom = value; DrawTimeline(); }
         }
         public double MinZoom => 0.5;
         public double MaxZoom => 3.0;
 
         private AnimationTrack track;
         private object SelectedUIObject;
+        private AnimationGroup activeGroup;
+        private AnimationList activeList;
         private Keyframe keyframe;
         public Keyframe SelectedKey
         {
             get { return keyframe; }
-            set 
+            set
             {
-                keyframe = value; 
+                keyframe = value;
                 NotifyPropertyChanged("KeySelected");
                 if (value != null)
                 {
@@ -73,19 +76,21 @@ namespace Shuriken.Controls
         {
             get { return keyframe != null; }
         }
+        public bool IsTrackSelected;
+       
 
         private double minValue;
         public double MinValue
         {
             get { return minValue; }
-            set { minValue = value;DrawTimeline(); }
+            set { minValue = value; DrawTimeline(); }
         }
 
         private double maxValue;
         public double MaxValue
         {
             get { return maxValue; }
-            set { maxValue = value;DrawTimeline(); }
+            set { maxValue = value; DrawTimeline(); }
         }
 
         private bool holdingKey;
@@ -125,6 +130,10 @@ namespace Shuriken.Controls
 
         private void UpdateValueEditor()
         {
+            if(track != null && SelectedKey != null)
+            {
+                TypeBox.SelectedIndex = (int)SelectedKey.Type;
+            }
             if (track != null && track.Type.IsColor())
             {
                 FrameValueColor.Visibility = Visibility.Visible;
@@ -181,7 +190,7 @@ namespace Shuriken.Controls
         {
             TextBlock lbl = new TextBlock();
             lbl.FontSize = 10;
-            lbl.Text = (max -  (1 - fraction) * (max - min)).ToString();
+            lbl.Text = (max - (1 - fraction) * (max - min)).ToString();
             lbl.VerticalAlignment = VerticalAlignment.Center;
             return lbl;
         }
@@ -224,20 +233,21 @@ namespace Shuriken.Controls
             double y2 = ValueToHeight(k2.KValue, minValue, maxValue);
 
             Line line = new Line();
-            //line.X1 = x1;
-            //line.X2 = x2;
-            //line.Y1 = y1;
-            //line.Y2 = y2;
-            //line.Stroke = curveBrush;
-            //line.StrokeThickness = 2.0;
+            line.X1 = x1;
+            line.X2 = x2;
+            line.Y1 = y1;
+            line.Y2 = y2;
+            line.Stroke = curveBrush;
+            line.StrokeThickness = 2.0;
 
             return line;
         }
-
+        List<Ellipse> keyframeListUI = new List<Ellipse>();
         private void DrawKeyframes()
         {
             if (track != null)
             {
+                keyframeListUI.Clear();
                 for (int k = 0; k < track.Keyframes.Count; ++k)
                 {
                     Ellipse c = new Ellipse();
@@ -251,15 +261,22 @@ namespace Shuriken.Controls
 
                     Canvas.SetLeft(c, GetFrameXPos(track.Keyframes[k].Frame) - (c.Width / 2));
                     Canvas.SetTop(c, ValueToHeight(track.Keyframes[k].KValue, minValue, maxValue));
-
-                    if (k < track.Keyframes.Count - 1)
+                    keyframeListUI.Add(c);
+                    if (k < keyframeListUI.Count - 1)
                     {
-                        //Line line = GetCurve(track.Keyframes[k], track.Keyframes[k + 1]);
-                        //line.X1 -= c.Width / 2;
-                        //line.X2 -= c.Width / 2;
-                        //line.Y1 += c.Height / 2;
-                        //line.Y2 += c.Height / 2;
-                        //Timeline.Children.Add(line);
+                        Ellipse ell1 = keyframeListUI[k];
+                        Ellipse ell2 = keyframeListUI[k+1];
+                        Point btn1Point = ell1.TransformToAncestor(this).Transform(new Point(0, 0));
+                        Point btn2Point = ell2.TransformToAncestor(this).Transform(new Point(0, 0));
+
+                        Line line = new Line();
+                        line.Stroke = new SolidColorBrush(Colors.Black);
+                        line.StrokeThickness = 2.0;
+                        line.X1 = btn1Point.X + ell1.ActualWidth;
+                        line.X2 = btn2Point.X;
+                        line.Y1 = btn1Point.Y + ell1.ActualHeight / 2;
+                        line.Y2 = btn2Point.Y + ell2.ActualHeight / 2;
+                        Timeline.Children.Add(line);
                     }
 
                     Timeline.Children.Add(c);
@@ -271,6 +288,7 @@ namespace Shuriken.Controls
         {
             Timeline.Children.Clear();
             int maxFrame = 400;
+           
             Timeline.Width = (maxFrame * frameMargin * zoom) + xOffset;
             Timeline.Height = TimelineContainer.ActualHeight;
             if (Timeline.Height > 0)
@@ -352,6 +370,7 @@ namespace Shuriken.Controls
 
         private void AnimationTreeViewSelected(object sender, RoutedEventArgs e)
         {
+            
             TreeViewItem item = e.OriginalSource as TreeViewItem;
             if (item.DataContext is AnimationTrack)
             {
@@ -362,6 +381,9 @@ namespace Shuriken.Controls
                 track = null;
             }
             SelectedUIObject = item.DataContext;
+            if (SelectedUIObject is AnimationGroup) activeGroup = (AnimationGroup)SelectedUIObject;
+            if (SelectedUIObject is AnimationList) activeList = (AnimationList)SelectedUIObject;
+            IsTrackSelected = SelectedUIObject is AnimationTrack;
 
             ScanKeyframe();
             UpdateValueEditor();
@@ -419,7 +441,7 @@ namespace Shuriken.Controls
                 if (track.Keyframes[i].Frame == CurrentFrame)
                     return;
             }
-            Keyframe newKey; 
+            Keyframe newKey;
             newKey = new Keyframe();
             newKey.Frame = currentFrame;
             track.Keyframes.Add(newKey);
@@ -438,7 +460,7 @@ namespace Shuriken.Controls
                     track.Keyframes.RemoveAt(i);
                     break;
                 }
-            }           
+            }
             ScanKeyframe();
             UpdateValueEditor();
             DrawTimeline();
@@ -452,77 +474,13 @@ namespace Shuriken.Controls
 
         private void AddAnim(object sender, RoutedEventArgs e)
         {
-            if(SelectedUIObject == null)
-            {
-                Animations.Add(new AnimationGroup("NewAnimation"));
-            }
-            if (SelectedUIObject is AnimationList)
-            {
-                AnimationList animationGroup = (AnimationList)SelectedUIObject; 
-                AnimationTypePicker selectedType = new AnimationTypePicker();
-                AnimationType a = AnimationType.None;
-                selectedType.ShowDialog();
-                if (selectedType.DialogResult == true)
-                {
-                    a = selectedType.AnimType;
-                }
-                else
-                    return;
-
-
-                if (animationGroup.Tracks.Count == 0)
-                {
-                    MessageBox.Show("Sorry, but I haven't implemented actually *adding* casts to anims yet!");
-                    return;
-                }
-                for (int i = 0; i < animationGroup.Tracks.Count; i++)
-                {
-                    if (animationGroup.Tracks[i].Type == a)
-                        return;
-                }
-                AnimationTrack at = new AnimationTrack(a);
-                animationGroup.Tracks.Add(at);
-            }
-            if(SelectedUIObject is AnimationGroup)
-            {
-                if(Views.UIEditor.SelectedUIObject is Models.UICast)
-                {
-                    Models.UICast cast = Views.UIEditor.SelectedUIObject as Models.UICast;
-                    AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
-                    AnimationTrack at = null;
-                    AnimationTypePicker selectedType = new AnimationTypePicker();
-                    selectedType.ShowDialog();
-                    if (selectedType.DialogResult == true)
-                    {
-                        at = new AnimationTrack(selectedType.AnimType);
-                    }
-                    else
-                        return;
-                        
-                    //Check if cast already has anims
-                    for (int i = 0; i < animationGroup.LayerAnimations.Count; i++)
-                    {
-                        if (animationGroup.LayerAnimations[i].Layer == cast)
-                        {
-                            animationGroup.LayerAnimations[i].Tracks.Add(at);
-                            return;
-                        }
-                    }
-                    //Make new tracks if it just doesn't have any
-                    List<AnimationTrack> tracks = new List<AnimationTrack>();
-                    tracks.Add(at);
-                    animationGroup.LayerAnimations.Add(new AnimationList(cast, tracks));
-
-                }
-                else
-                {
-                    Animations.Add(new AnimationGroup("NewAnimation"));
-                }
-            }
+            Animations.Add(new AnimationGroup("NewAnimation"));
         }
 
         private void NextKeyframe(object sender, RoutedEventArgs e)
         {
+            if(track == null)
+                return;
             for (int i = 0; i < track.Keyframes.Count; i++)
             {
                 if (track.Keyframes[i].Frame > CurrentFrame)
@@ -570,7 +528,7 @@ namespace Shuriken.Controls
         }
 
         private void RemoveAnim(object sender, RoutedEventArgs e)
-        {            
+        {
             if (SelectedUIObject is AnimationList)
             {
                 AnimationList animationGroup = (AnimationList)SelectedUIObject;
@@ -579,14 +537,10 @@ namespace Shuriken.Controls
             }
             if (SelectedUIObject is AnimationGroup)
             {
-               
-                   
-                    AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
-
+                AnimationGroup animationGroup = (AnimationGroup)SelectedUIObject;
                 Animations.Remove(animationGroup);
-
             }
-            if(SelectedUIObject is AnimationTrack)
+            if (SelectedUIObject is AnimationTrack)
             {
                 AnimationTrack track = (AnimationTrack)SelectedUIObject;
                 for (int i = 0; i < Animations.Count; i++)
@@ -595,7 +549,7 @@ namespace Shuriken.Controls
                     {
                         for (int h = 0; h < Animations[i].LayerAnimations[x].Tracks.Count; h++)
                         {
-                            if(track == Animations[i].LayerAnimations[x].Tracks[h])
+                            if (track == Animations[i].LayerAnimations[x].Tracks[h])
                             {
                                 Animations[i].LayerAnimations[x].Tracks.Remove(track);
                             }
@@ -625,9 +579,6 @@ namespace Shuriken.Controls
                         {
                             newAnim.LayerAnimations[i].Tracks[x].Keyframes[y].Frame = list[y].Frame;
                         }
-                            
-                        
-
                     }
                 }
 
@@ -647,17 +598,60 @@ namespace Shuriken.Controls
 
         }
 
+        private void TypeBox_DropDownClosed(object sender, EventArgs e)
+        {
+            if(SelectedKey != null)
+            SelectedKey.Type = (XNCPLib.XNCP.Animation.KeyframeType)TypeBox.SelectedIndex;
+        }
+
+        private void AddAnimTrack(object sender, RoutedEventArgs e)
+        {
+            activeGroup = (sender as FrameworkElement).DataContext as AnimationGroup;
+            if (activeGroup != null)
+            {
+                if (Views.UIEditor.SelectedUIObject is Models.UICast)
+                {
+                    Models.UICast cast = Views.UIEditor.SelectedUIObject as Models.UICast;
+                    AnimationGroup animationGroup = SelectedUIObject is AnimationGroup ? (AnimationGroup)SelectedUIObject : activeGroup;
+                    AnimationTrack newAnimTrack = null;
+                    AnimationTypePicker selectedType = new AnimationTypePicker();
+                    selectedType.ShowDialog();
+                    if (selectedType.DialogResult == true)
+                    {
+                        newAnimTrack = new AnimationTrack(selectedType.AnimType);
+                    }
+                    else
+                        return;
+
+                    //Check if cast already has anims
+                    for (int i = 0; i < animationGroup.LayerAnimations.Count; i++)
+                    {
+                        if (animationGroup.LayerAnimations[i].Layer == cast)
+                        {
+                            animationGroup.LayerAnimations[i].Tracks.Add(newAnimTrack);
+                            return;
+                        }
+                    }
+                    //Make new tracks if it just doesn't have any
+                    List<AnimationTrack> tracks = new List<AnimationTrack>();
+                    tracks.Add(newAnimTrack);
+                    animationGroup.LayerAnimations.Add(new AnimationList(cast, tracks));
+
+                }
+            }
+        }
+
         private void MergeAnim(object sender, RoutedEventArgs e)
         {
             try
             {
                 foreach (var i in Animations[SecondAnimSelected].LayerAnimations) Animations[FirstAnimSelected].LayerAnimations.Add(i);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            
+
         }
     }
 }

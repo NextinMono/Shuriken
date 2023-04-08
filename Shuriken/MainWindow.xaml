@@ -19,17 +19,23 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
+            <Menu.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <DockPanel HorizontalAlignment="Stretch"/>
+                </ItemsPanelTemplate>
+            </Menu.ItemsPanel>
             <MenuItem Header="File">
                 <MenuItem Header="Open" Click="OpenMenu_Click">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf07b;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Reload" Click="Reload_Click" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="Reload" Click="Reload_Click">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf0e2;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
+
                 <MenuItem Header="Recent Files" ItemsSource="{Binding RecentFiles}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf5fd;" FontFamily="{StaticResource FontAwesome}"/>
@@ -71,47 +77,39 @@
                         <TextBlock Text="&#xf5fd;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Clone Selected Element" Click="Clone_Click" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="Clone Selected Element" Click="Tools_Clone" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Change Color Order (RGBA to ABGR and reverse)" Click="ChangeColorOrder_Click" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="Change Color Order" Click="Tools_ChangeColorOrder" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Convert Selected Scene's Ratio" Click="LetterboxToWidescreenTest" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="Convert Selected Scene's Ratio" Click="Tools_LetterboxToWidescreen" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf24d;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Export Texture Boundaries" Click="TextureBoundaries" IsEnabled="{Binding IsLoaded}">
+
+                <MenuItem Header="SelectFirstSceneMerge" Click="Tools_SelectFirstSceneMerge" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="SelectFirstSceneMerge" Click="SelectFirstSceneMerge" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="SelectSecondSceneMerge" Click="Tools_SelectSecondSceneMerge" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="SelectSecondSceneMerge" Click="SelectSecondSceneMerge" IsEnabled="{Binding IsLoaded}">
-                    <MenuItem.Icon>
-                        <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Header="SceneMerge" Click="MergeScenes" IsEnabled="{Binding IsLoaded}">
+                <MenuItem Header="SceneMerge" Click="Tools_MergeScenes" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="View">
-                <MenuItem Header="Aspect Ratio">
-                    <MenuItem Header="1280x720 (16:9)" Click="WidescreenSetClick"/>
-                    <MenuItem Header="640x480 (4:3)" Click="LetterboxSetClick"/>
-                </MenuItem>
+            <MenuItem Header="View">                
                 <MenuItem Header="Scene Background Color">
                     <MenuItem Header="Dark" Click="SetDarkBackground"/>
                     <MenuItem Header="Light" Click="SetLightBackground"/>
@@ -119,6 +117,10 @@
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Send help" Click="HelpClick"/>
+            </MenuItem>
+            <MenuItem Name="ResolutionHeader" Header="{Binding Resolution}"  HorizontalAlignment="Right" SubmenuClosed="UpdateResolutionText">
+                <MenuItem Header="1280x720 (16:9)" Click="WidescreenSetClick"/>
+                <MenuItem Header="640x480 (4:3)" Click="LetterboxSetClick"/>
             </MenuItem>
         </Menu>
         <TabControl TabStripPlacement="Left" ItemsSource="{Binding Editors}" Grid.Row="2" Name="editorSelect" Background="White">

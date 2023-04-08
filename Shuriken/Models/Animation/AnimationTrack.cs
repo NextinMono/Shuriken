@@ -15,6 +15,7 @@ namespace Shuriken.Models.Animation
     {
         public bool Enabled { get; set; } = true;
         public uint Field00 { get; set; }
+        public float FrameCount { get; set; }
         public AnimationType Type { get; }
         public string TypeString => Type.ToString();
         public ObservableCollection<Keyframe> Keyframes { get; set; }

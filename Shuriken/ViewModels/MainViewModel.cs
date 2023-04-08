@@ -33,6 +33,13 @@ namespace Shuriken.ViewModels
         public bool IsLoaded { get; set; }
         //Is unsaved
         public static bool IsDirty = false;
+        public string Resolution
+        {
+            get
+            {
+                return $"Viewport Resolution: {Shuriken.Views.UIEditor.ViewResolution.X}x{Shuriken.Views.UIEditor.ViewResolution.Y}";
+            }
+        }
         public string TitleAdd
         {
             //Definitely is a better way to do this but whatever
@@ -152,13 +159,12 @@ namespace Shuriken.ViewModels
 
             string root = Path.GetDirectoryName(Path.GetFullPath(filename));
 
-
+            
             List<XTexture> xTextures = WorkFile.Resources[1].Content.TextureList.Textures;
             FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
             TextureList texList = LoadTextures(root, xTextures, xFontList);
 
-
-            if (MissingTextures.Count > 0)
+            if (MissingTextures.Count > 0 )
                 WarnMissingTextures();
 
             GetSubImages(WorkFile.Resources[0].Content.CsdmProject.Root);
@@ -181,7 +187,10 @@ namespace Shuriken.ViewModels
             Project.TextureLists.Add(texList);
 
             WorkFilePath = filename;
+
             IsLoaded = !MissingTextures.Any();
+            if (filename.EndsWith(".gncp", StringComparison.OrdinalIgnoreCase))
+                IsLoaded = false;
         }
         public TextureList LoadTextures(string root, List<XTexture> xTextures, FontList xFontList)
         {
@@ -381,8 +390,22 @@ namespace Shuriken.ViewModels
                     // AnimationFrameDataList
                     AnimationFrameData animationFrameData = new();
                     animationFrameData.Field00 = animGroup.Field00;
-                    animationFrameData.FrameCount = animGroup.Duration;
+
+                    int longestTrackFrameCount = 0;
+                    foreach (AnimationList list in animGroup.LayerAnimations)
+                    {
+
+                        foreach (AnimationTrack track in list.Tracks)
+                        {
+                            List<Models.Animation.Keyframe> orderedList = track.Keyframes.OrderBy(o => o.Frame).ToList();
+                            if (orderedList[orderedList.Count-1].Frame > longestTrackFrameCount)
+                                longestTrackFrameCount = orderedList[orderedList.Count - 1].Frame;
+                        }
+                    }
+
+                    animationFrameData.FrameCount = longestTrackFrameCount;
                     xScene.AnimationFrameDataList.Add(animationFrameData);
+                    
                 }
 
                 // Sort animation names
@@ -419,6 +442,8 @@ namespace Shuriken.ViewModels
                     for (int a = 0; a < xScene.AnimationKeyframeDataList.Count; a++)
                     {
                         AnimationKeyframeData animationKeyframeData = xScene.AnimationKeyframeDataList[a];
+                        AnimationFrameData animationFrameData = xScene.AnimationFrameDataList[a];
+
                         AnimationGroup animation = uiScene.Animations[a];
 
                         GroupAnimationData2 groupAnimationData2 = new();
@@ -467,7 +492,6 @@ namespace Shuriken.ViewModels
                                     data8.Value = new System.Numerics.Vector3(keyframe.Data8Value.X, keyframe.Data8Value.Y, keyframe.Data8Value.Z);
                                     data6.Data.Data.Add(data8);
                                 }
-
                                 castAnimationData2.Data.SubData.Add(data6);
                                 castAnimationData.SubDataList.Add(castAnimationSubData);
                             }
