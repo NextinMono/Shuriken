@@ -59,12 +59,14 @@ namespace Shuriken.Models
         }
         private unsafe void CreateTextureNN()
         {
+            ///Someone should definitely remake this, and also someone should probably make a custom GVR decoder -Nextin
+            
             //Decode GVR to byte array
             PuyoTools.Core.Textures.Gvr.GvrTextureDecoder decoder = new PuyoTools.Core.Textures.Gvr.GvrTextureDecoder(FilePath);
             Width = decoder.Width;
             Height = decoder.Height;
-
             byte[] bytes = decoder.GetPixelData();
+
             //Create bitmap from byte array
             Bitmap bitmap = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
             BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, Width, Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
@@ -74,7 +76,7 @@ namespace Shuriken.Models
             byte[] pngBytes;
             using (var memoryStream = new MemoryStream())
             {
-                // Save the bitmap to a memory stream in PNG format
+                // Save the bitmap to the memory stream in PNG format
                 bitmap.Save(memoryStream, ImageFormat.Png);
                 pngBytes = memoryStream.ToArray();
                 memoryStream.Dispose();

@@ -169,7 +169,7 @@
                 
                 <!-- Timeline canvas -->
                 <ScrollViewer Grid.Row="1" Name="TimelineContainer" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsEnabled="{Binding IsTrackSelected, UpdateSourceTrigger=PropertyChanged}">
-                    <Canvas Name="Timeline" Background="LightGray" VerticalAlignment="Top" HorizontalAlignment="Left" MouseLeftButtonDown="TimelineMouseLeftButtonDown"/>
+                    <Canvas Name="Timeline" Style="{StaticResource Timeline}" VerticalAlignment="Top" HorizontalAlignment="Left" MouseLeftButtonDown="TimelineMouseLeftButtonDown"/>
                 </ScrollViewer>
             </Grid>
             

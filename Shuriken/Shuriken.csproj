@@ -17,6 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="App.xaml~RFc92a0.TMP" />
     <None Remove="Fonts\fa-solid-900.ttf" />
   </ItemGroup>
 

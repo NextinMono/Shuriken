@@ -56,8 +56,7 @@ namespace XNCPLib.XNCP
             if (filename.EndsWith("gncp"))
             {
                 Signature = Utilities.Make4CCLE("CPAF");
-                IsGNCP = true;
-                
+                IsGNCP = true;                
             }
             writer.WriteUInt32(Signature);
 

@@ -10,7 +10,7 @@
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}" 
         mc:Ignorable="d"
     Title="{Binding TitleAdd, StringFormat={}Shuriken (Nextins Fork){0}, TargetNullValue=Shuriken (Nextins Fork)}" d:DesignWidth="960" d:DesignHeight="500"
-    
+    Style="{DynamicResource CustomWindowStyle}"
         >
     <Grid>
         <Grid.RowDefinitions>
@@ -111,8 +111,28 @@
             </MenuItem>
             <MenuItem Header="View">                
                 <MenuItem Header="Scene Background Color">
-                    <MenuItem Header="Dark" Click="SetDarkBackground"/>
-                    <MenuItem Header="Light" Click="SetLightBackground"/>
+                    <MenuItem Header="Dark" Click="SetDarkBackground">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xf186;" FontFamily="{StaticResource FontAwesome}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Light" Click="SetLightBackground">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xf185;" FontFamily="{StaticResource FontAwesome}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem Header="Application Theme">
+                    <MenuItem Header="Light" Click="SetLightTheme">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xf185;" FontFamily="{StaticResource FontAwesome}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem Header="Dark" Click="SetDarkTheme">
+                        <MenuItem.Icon>
+                            <TextBlock Text="&#xf186;" FontFamily="{StaticResource FontAwesome}"/>
+                        </MenuItem.Icon>
+                    </MenuItem>                    
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Help">

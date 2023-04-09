@@ -190,7 +190,11 @@ namespace Shuriken.ViewModels
 
             IsLoaded = !MissingTextures.Any();
             if (filename.EndsWith(".gncp", StringComparison.OrdinalIgnoreCase))
+            {
                 IsLoaded = false;
+                MessageBox.Show("Saving with GNCP files does not work yet, saving has been disabled.", "Saving Disabled", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            }
         }
         public TextureList LoadTextures(string root, List<XTexture> xTextures, FontList xFontList)
         {

@@ -228,6 +228,19 @@ namespace Shuriken
             if (Shuriken.Views.UIEditor.SelectedUIObject is UIScene)
                 Project.SceneGroups[0].Scenes.Add((UIScene)((UIScene)Shuriken.Views.UIEditor.SelectedUIObject).Clone());
         }
+
+        private void SetDarkTheme(object sender, RoutedEventArgs e)
+        {
+            var app = (App)Application.Current;
+            app.SwitchTheme(true);
+        }
+
+        private void SetLightTheme(object sender, RoutedEventArgs e)
+        {
+            var app = (App)Application.Current;
+            app.SwitchTheme(false);
+        }
+
         private void UpdateResolutionText(object sender, RoutedEventArgs e)
         {
             ResolutionHeader.Header = vm.Resolution;
