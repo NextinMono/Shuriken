@@ -4,11 +4,21 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Shuriken.Views"
+             xmlns:vm="clr-namespace:Shuriken.ViewModels"
              mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type={x:Type vm:SettingsViewModel}}"
              d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Background="Transparent">
-        <StackPanel>
-            <TextBlock Text="IDK" Padding="10 0 0 0"/>
-        </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="Settings" FontSize="32" Padding="5 20" FontWeight="Bold" TextDecorations="{x:Null}"/>
+        <TextBlock Grid.Row="1" Text="Appearance" FontSize="16" Padding="5" FontWeight="Bold" TextDecorations="{x:Null}"/>
+        <TextBlock Grid.Row="2" FontSize="16">
+            <Label>Application Theme</Label>
+            <ComboBox Name="ThemeBox" SelectedValue="{Binding Theme}"/>
+        </TextBlock>
     </Grid>
 </UserControl>

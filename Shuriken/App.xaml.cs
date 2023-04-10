@@ -21,6 +21,7 @@ namespace Shuriken
         }
         public bool darkMode = false;
         ResourceDictionary darkThemeDict;
+      
         public void SwitchTheme(bool dark)
         {
             darkMode = dark;

@@ -20,9 +20,12 @@ namespace Shuriken.Views
     /// </summary>
     public partial class SettingsView : UserControl
     {
+       
         public SettingsView()
         {
             InitializeComponent();
+            ThemeBox.Items.Add("Light");
+            ThemeBox.Items.Add("Dark");
         }
     }
 }

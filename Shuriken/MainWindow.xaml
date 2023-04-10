@@ -122,18 +122,7 @@
                         </MenuItem.Icon>
                     </MenuItem>
                 </MenuItem>
-                <MenuItem Header="Application Theme">
-                    <MenuItem Header="Light" Click="SetLightTheme">
-                        <MenuItem.Icon>
-                            <TextBlock Text="&#xf185;" FontFamily="{StaticResource FontAwesome}"/>
-                        </MenuItem.Icon>
-                    </MenuItem>
-                    <MenuItem Header="Dark" Click="SetDarkTheme">
-                        <MenuItem.Icon>
-                            <TextBlock Text="&#xf186;" FontFamily="{StaticResource FontAwesome}"/>
-                        </MenuItem.Icon>
-                    </MenuItem>                    
-                </MenuItem>
+                
             </MenuItem>
             <MenuItem Header="Help">
                 <MenuItem Header="Send help" Click="HelpClick"/>

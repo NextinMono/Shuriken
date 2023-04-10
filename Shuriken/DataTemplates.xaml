@@ -23,6 +23,9 @@
     <DataTemplate DataType="{x:Type viewmodels:FontsViewModel}">
         <views:FontEditor Padding="10 0 0 0"/>
     </DataTemplate>
+    <DataTemplate DataType="{x:Type viewmodels:SettingsViewModel}">
+        <views:SettingsView Padding="10 0 0 0"/>
+    </DataTemplate>
     <DataTemplate DataType="{x:Type viewmodels:AboutViewModel}">
         <views:AboutView Padding="10 0 0 0"/>
     </DataTemplate>

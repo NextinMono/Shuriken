@@ -18,7 +18,7 @@
         <TextBlock Grid.Row="1" FontSize="16" Padding="5 20">
             <Run Text="Version: " FontWeight="Bold"/>
             <Run Text="{Binding AppVersion, Mode=OneWay}"/>
-            <Run Text="[This specific version is a fork of the original project, with Quality of Life changes by NextinHKRY]"  FontWeight="Light"/>
+            <Run Text="[This specific version is a fork of the original project, with Quality of Life changes and GNCP support by NextinHKRY]"  FontWeight="Light"/>
             <LineBreak/>
             
             <LineBreak/>

@@ -42,7 +42,7 @@ namespace Shuriken.ViewModels
         }
         public string TitleAdd
         {
-            //Definitely is a better way to do this but whatever
+            //Definitely is a better way to do this
             get
             {
                 StringBuilder builder = new StringBuilder();
@@ -75,6 +75,7 @@ namespace Shuriken.ViewModels
                 new ScenesViewModel(),
                 new SpritesViewModel(),
                 new FontsViewModel(),
+                new SettingsViewModel(),
                 new AboutViewModel()
             };
 
@@ -743,10 +744,17 @@ namespace Shuriken.ViewModels
 
                 scene.SubImages = ncpSubimages;
             }
+            foreach (var item in node2.NodeDictionaries)
+            {
+                var itemMod = item;
+                itemMod.Index += (uint)node.Children.Count;
+                node.NodeDictionaries.Add(itemMod);
+            }
             foreach (var item in node2.Children)
             {
-                node.Scenes.AddRange(item.Scenes);
+                node.Children.Add(item);
             }
+            
             node.Scenes.AddRange(node2.Scenes);
             foreach (var sceneID in node2.SceneIDTable)
             {
