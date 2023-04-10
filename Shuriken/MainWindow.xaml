@@ -66,6 +66,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
+           
             <MenuItem Header="Tools">
                 <MenuItem Header="Merge Files" Click="Merge_Click" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
@@ -104,6 +105,21 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="SceneMerge" Click="Tools_MergeScenes" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="SelectFirstFolderMerge" Click="Tools_SelectFirstFolderMerge" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="SelectSecondFolderMerge" Click="Tools_SelectSecondFolderMerge" IsEnabled="{Binding IsLoaded}">
+                    <MenuItem.Icon>
+                        <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="FolderMerge" Click="Tools_MergeFolders" IsEnabled="{Binding IsLoaded}">
                     <MenuItem.Icon>
                         <TextBlock Text="&#xf56e;" FontFamily="{StaticResource FontAwesome}"/>
                     </MenuItem.Icon>

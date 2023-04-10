@@ -45,6 +45,8 @@ namespace Shuriken.ViewModels
         public RelayCommand<int> ChangeCastSpriteCmd { get; }
         public RelayCommand CreateCastCmd { get; }
         public RelayCommand RemoveCastCmd { get; }
+        public RelayCommand CreateNodeCmd { get; }
+        public RelayCommand RemoveNodeCmd { get; }
 
         public void SelectCastSprite(object index)
         {
@@ -148,21 +150,14 @@ namespace Shuriken.ViewModels
                 {
                     for (int x = 0; x < SelectedScene.Groups[i].Casts.Count; x++)
                     {
-                        if (E(SelectedScene.Groups[i].Casts[x], SelectedScene.Groups[i].Casts[0], SelectedScene.Groups[i], SelectedScene))
+                        if (CloneCastReallyBad(SelectedScene.Groups[i].Casts[x], SelectedScene.Groups[i].Casts[0], SelectedScene.Groups[i], SelectedScene))
                             return;
                     }
                 }
-                
-                
-
-                
-
-
-
             }
         }
 
-        bool E(UICast cast, UICast cast2, UICastGroup group, UIScene scene)
+        bool CloneCastReallyBad(UICast cast, UICast cast2, UICastGroup group, UIScene scene)
         {
             if (cast.Name == (SelectedUIObject as UICast).Name)
             {
@@ -195,7 +190,7 @@ namespace Shuriken.ViewModels
             {
                 for (int i = 0; i < cast.Children.Count; i++)
                 {
-                   if( E(cast.Children[i], cast, group, scene))
+                   if(CloneCastReallyBad(cast.Children[i], cast, group, scene))
                         return true;
                 }
                 return false;
@@ -210,12 +205,30 @@ namespace Shuriken.ViewModels
 
         public void CreateSceneGroup()
         {
-            throw new NotImplementedException();
+            if (SelectedSceneGroup == null)
+                SceneGroups.Add(new UISceneGroup("New_Folder"));
+            else
+            {
+                SelectedSceneGroup.Children.Add(new UISceneGroup("New_Folder"));
+            }
         }
 
-        public void RemoveSelecteSceneGroup()
+        public void RemoveSceneGroup()
         {
-            throw new NotImplementedException();
+            if(!SceneGroups.Contains(SelectedSceneGroup))
+            {
+                //TODO: make it recursive for every child of child, i've only done 2 layers because most XNCPs only ever have 2 layers of folders
+                for (int x = 0; x < SceneGroups.Count; x++)
+                {
+                    for (int y = 0; y < SceneGroups[x].Children.Count; y++)
+                    {
+                        if (SceneGroups[x].Children[y] == SelectedSceneGroup)
+                            SceneGroups[x].Children.Remove(SelectedSceneGroup);
+                    }
+                }
+            }
+            else
+                SceneGroups.Remove(SelectedSceneGroup);
         }
 
         public UISceneGroup SelectedSceneGroup { get; set; }
@@ -249,8 +262,11 @@ namespace Shuriken.ViewModels
             CloneCastCmd       = new RelayCommand(CloneCastToSelection, () => SelectedUIObject is ICastContainer);
             RemoveCastCmd       = new RelayCommand(RemoveSelectedCast, () => SelectedUIObject is UICast);
             ChangeCastSpriteCmd = new RelayCommand<int>(SelectCastSprite, () => SelectedUIObject is UICast);
+            CreateNodeCmd = new RelayCommand(CreateSceneGroup, null);
+            RemoveNodeCmd = new RelayCommand(RemoveSceneGroup, () => SelectedSceneGroup != null);
+            if(SceneGroups.Count != 0)
+                SelectedSceneGroup = SceneGroups[0];
         }
-
       
         private void CloneSelectedScene()
         {

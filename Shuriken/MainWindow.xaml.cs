@@ -32,7 +32,7 @@ namespace Shuriken
 
         private MainViewModel vm;
 
-        int MergeFirstSel, MergeSecondSel;
+        int MergeFirstSel, MergeSecondSel, MergeFolderParent1, MergeFolderParent2;
 
         public MainWindow()
         {
@@ -46,6 +46,11 @@ namespace Shuriken
             DataContext = vm;
 
             editorSelect.SelectedIndex = 0;
+            if(Environment.GetCommandLineArgs().Length > 1)
+            {
+                if (File.Exists(Environment.GetCommandLineArgs()[1]))
+                    vm.Load(Environment.GetCommandLineArgs()[1]);
+            }
         }
 
         private void NewClick(object sender, RoutedEventArgs e)
@@ -231,6 +236,83 @@ namespace Shuriken
             if (Shuriken.Views.UIEditor.SelectedUIObject is UIScene)
                 Project.SceneGroups[0].Scenes.Add((UIScene)((UIScene)Shuriken.Views.UIEditor.SelectedUIObject).Clone());
         }
+
+        private void Tools_MergeFolders(object sender, RoutedEventArgs e)
+        {
+            UISceneGroup first, second;
+            if (MergeFolderParent1 != -1)
+                first = Project.SceneGroups[MergeFolderParent1].Children[MergeFirstSel];
+            else
+                first = Project.SceneGroups[MergeFirstSel];
+            if (MergeFolderParent2 != -1)
+                second = Project.SceneGroups[MergeFolderParent2].Children[MergeSecondSel];
+            else
+                second = Project.SceneGroups[MergeSecondSel];
+
+            var scenes = second.Scenes;
+            foreach (UIScene item in scenes)
+            {
+                first.Scenes.Add(item);
+            }
+            if(MergeFolderParent2 != -1)
+                Project.SceneGroups[MergeFolderParent2].Children.Remove(second);
+            else
+
+                Project.SceneGroups.Remove(second);
+        }
+
+        private void Tools_SelectSecondFolderMerge(object sender, RoutedEventArgs e)
+        {
+            var efg = (ScenesViewModel)MainViewModel.Editors[0];
+            UISceneGroup uiobj = efg.SelectedSceneGroup;
+
+            MergeFolderParent2 = -1;
+            UISceneGroup folder = (UISceneGroup)uiobj;
+            if (!Project.SceneGroups.Contains(folder))
+            {
+                for (int i = 0; i < Project.SceneGroups.Count; i++)
+                {
+                    for (int y = 0; y < Project.SceneGroups[i].Children.Count; y++)
+                    {
+                        if (Project.SceneGroups[i].Children[y] == folder)
+                        {
+                            MergeFolderParent2 = i;
+                            MergeSecondSel = Project.SceneGroups[MergeFolderParent2].Children.IndexOf(folder);
+
+                            return;
+                        }
+                    }
+                }
+            }
+            MergeSecondSel = Project.SceneGroups.IndexOf(folder);
+        }
+
+        private void Tools_SelectFirstFolderMerge(object sender, RoutedEventArgs e)
+        {
+            var efg = (ScenesViewModel)MainViewModel.Editors[0];
+            UISceneGroup uiobj = efg.SelectedSceneGroup;
+
+            MergeFolderParent1 = -1;
+            UISceneGroup folder = (UISceneGroup)uiobj;
+            if (!Project.SceneGroups.Contains(folder))
+            {
+                for (int i = 0; i < Project.SceneGroups.Count; i++)
+                {
+                    for (int y = 0; y < Project.SceneGroups[i].Children.Count; y++)
+                    {
+                        if (Project.SceneGroups[i].Children[y] == folder)
+                        {
+                            MergeFolderParent1 = i;
+                            MergeFirstSel = Project.SceneGroups[MergeFolderParent1].Children.IndexOf(folder);
+
+                            return;
+                        }
+                    }
+                }
+            }
+            MergeFirstSel = Project.SceneGroups.IndexOf(folder);
+        }
+
         private void UpdateResolutionText(object sender, RoutedEventArgs e)
         {
             ResolutionHeader.Header = vm.Resolution;

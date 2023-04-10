@@ -43,11 +43,13 @@
                     <RowDefinition Height="auto"/>
                     <RowDefinition Height="3*"/>
                 </Grid.RowDefinitions>
+                
 
                 <Grid Grid.Row="0">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <TextBlock Grid.Row="0">
                     <Run Text="&#xf542;" FontFamily="{StaticResource FontAwesome}"/>
@@ -58,11 +60,26 @@
                             <HierarchicalDataTemplate DataType="{x:Type models:UISceneGroup}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
-                                    <TextBlock Text="{Binding Name}"/>
+                                    <TextBlock>
+                                <Run Text="&#xf07b; " FontFamily="{StaticResource FontAwesome}"/>
+                                <Run Text="{Binding Name}"/>
+                                    </TextBlock>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                         </TreeView.Resources>
                     </TreeView>
+                    <!-- creation / deletion buttons -->
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="+&#xf07b; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateNodeCmd}" ToolTip="Adds a Scene Group to the selected scene."/>
+                        <Button Grid.Column="2" Content="-&#xf07b; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveNodeCmd}" ToolTip="Removes the selected Cast."/>
+                    </Grid>
+                    
+                    
+                    
                 </Grid>
 
                 <GridSplitter Grid.Row="1" Height="5" ResizeDirection="Rows" ResizeBehavior="PreviousAndNext" HorizontalAlignment="Stretch" Margin="0 2.5"/>
@@ -139,14 +156,14 @@
                             <ColumnDefinition/>
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="+&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateCastCmd}" ToolTip="Adds a Cast to the selected scene."/>
-                        <Button Grid.Column="1" Content="*&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneCastCmd}" ToolTip="Clones the selected Cast."/>
-                        <Button Grid.Column="2" Content="-&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveCastCmd}" ToolTip="Removes the selected Cast."/>
-                        <Button Grid.Column="3" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateGroupCmd}" ToolTip="Adds a Group to the selected scene."/>
-                        <Button Grid.Column="4" Content="-&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveGroupCmd}" ToolTip="Removes the selected Group."/>
-                        <Button Grid.Column="5" Content="+&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateSceneCmd}" ToolTip="Creates a new Scene."/>
-                        <Button Grid.Column="6" Content="*&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneSceneCmd}" ToolTip="Clones a new Scene."/>
-                        <Button Grid.Column="7" Content="-&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveSceneCmd}" ToolTip="Removes the selected Scene."/>
+                        <Button Grid.Column="0" Content="+&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateSceneCmd}" ToolTip="Creates a new Scene."/>
+                        <Button Grid.Column="1" Content="*&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneSceneCmd}" ToolTip="Clones a new Scene."/>
+                        <Button Grid.Column="2" Content="-&#xf61f; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveSceneCmd}" ToolTip="Removes the selected Scene."/>
+                        <Button Grid.Column="3" Content="+&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateCastCmd}" ToolTip="Adds a Cast to the selected scene."/>
+                        <Button Grid.Column="4" Content="*&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CloneCastCmd}" ToolTip="Clones the selected Cast."/>
+                        <Button Grid.Column="5" Content="-&#xf111; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveCastCmd}" ToolTip="Removes the selected Cast."/>
+                        <Button Grid.Column="6" Content="+&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding CreateGroupCmd}" ToolTip="Adds a Group to the selected scene."/>
+                        <Button Grid.Column="7" Content="-&#xf5fd; " FontFamily="{StaticResource FontAwesome}" Command="{Binding RemoveGroupCmd}" ToolTip="Removes the selected Group."/>
                     </Grid>
                 </Grid>
             </Grid>
