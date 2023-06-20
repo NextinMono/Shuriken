@@ -23,7 +23,7 @@ namespace Shuriken.ViewModels
         public static string AppVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
         public IList<string> RecentFiles;
         public List<string> MissingTextures { get; set; }
-        public ObservableCollection<ViewModelBase> Editors { get; set; }
+        public static ObservableCollection<ViewModelBase> Editors { get; set; }
 
         private List<SubImage> ncpSubimages;
 
@@ -399,7 +399,6 @@ namespace Shuriken.ViewModels
                     int longestTrackFrameCount = 0;
                     foreach (AnimationList list in animGroup.LayerAnimations)
                     {
-
                         foreach (AnimationTrack track in list.Tracks)
                         {
                             List<Models.Animation.Keyframe> orderedList = track.Keyframes.OrderBy(o => o.Frame).ToList();

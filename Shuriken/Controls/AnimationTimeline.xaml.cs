@@ -434,6 +434,8 @@ namespace Shuriken.Controls
 
         private void AddKeyframe(object sender, RoutedEventArgs e)
         {
+            if (track == null)
+                return;
             if (track.Keyframes == null)
                 track.Keyframes = new ObservableCollection<Keyframe>();
             for (int i = 0; i < track.Keyframes.Count; i++)
@@ -445,7 +447,7 @@ namespace Shuriken.Controls
             newKey = new Keyframe();
             newKey.Frame = currentFrame;
             track.Keyframes.Add(newKey);
-
+            track.Keyframes = new ObservableCollection<Keyframe>(track.Keyframes.OrderBy(o => o.Frame).ToList());
             ScanKeyframe();
             UpdateValueEditor();
             DrawTimeline();
@@ -573,8 +575,6 @@ namespace Shuriken.Controls
                     for (int x = 0; x < newAnim.LayerAnimations[i].Tracks.Count; x++)
                     {
                         var list = newAnim.LayerAnimations[i].Tracks[x].Keyframes.ToList();
-
-                        list = Enumerable.Reverse(list).ToList();
                         for (int y = 0; y < newAnim.LayerAnimations[i].Tracks[x].Keyframes.Count; y++)
                         {
                             newAnim.LayerAnimations[i].Tracks[x].Keyframes[y].Frame = list[y].Frame;

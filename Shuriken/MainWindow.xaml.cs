@@ -205,6 +205,9 @@ namespace Shuriken
         }
         private void Tools_MergeScenes(object sender, RoutedEventArgs e)
         {
+            var efg = (ScenesViewModel)MainViewModel.Editors[0];
+            int one = Project.SceneGroups[0].Children.IndexOf(efg.SelectedSceneGroup);
+
             Project.SceneGroups[0].Scenes[MergeFirstSel].Merge(Project.SceneGroups[0].Scenes[MergeSecondSel]);
         }
         ObservableCollection<UIScene> GetScenesFromChildren(UISceneGroup g)
@@ -228,8 +231,10 @@ namespace Shuriken
         }
         void Tools_ScalingConvertValues(UIScene scene, UICast cast)
         {
-            cast.Field00 = 0;
-            cast.Field5C = 0;
+            //cast.Field00 = 3;
+            //cast.Field5C = 0;
+            cast.Field68 = 0;
+            cast.Field6C = 0;
         }
         private void Tools_Clone(object sender, RoutedEventArgs e)
         {

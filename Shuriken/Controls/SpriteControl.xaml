@@ -33,17 +33,23 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="1*"/>
                         <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
+                        <RowDefinition Height="1*"/>
                     </Grid.RowDefinitions>
 
                     <TextBlock Text="X" Grid.Row="0" Grid.Column="0"/>
                     <TextBlock Text="Y" Grid.Row="0" Grid.Column="2"/>
                     <TextBlock Text="Width" Grid.Row="2" Grid.Column="0"/>
                     <TextBlock Text="Height" Grid.Row="2" Grid.Column="2"/>
+                    <TextBlock Text="Tex.Width" Grid.Row="3" Grid.Column="0"/>
+                    <TextBlock Text="Tex.Height" Grid.Row="3" Grid.Column="2"/>
 
                     <TextBox Text="{Binding Sprite.X, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="1"/>
                     <TextBox Text="{Binding Sprite.Y, UpdateSourceTrigger=PropertyChanged}" Grid.Row="0" Grid.Column="3"/>
                     <TextBox Text="{Binding Sprite.Width, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1"/>
                     <TextBox Text="{Binding Sprite.Height, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="3"/>
+                    <TextBox Text="{Binding Sprite.Texture.RelativeWidth, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1"/>
+                    <TextBox Text="{Binding Sprite.Texture.RelativeHeight, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="3"/>
                 </Grid>
 
                 <Separator Grid.Row="1"/>
