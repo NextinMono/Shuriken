@@ -21,7 +21,11 @@ namespace XNCPLib.XNCP
         {
 
         }
-
+        public FontID(string in_Name, uint in_Index)
+        {
+            Name = in_Name;
+            Index = in_Index;
+        }
         public void Read(BinaryObjectReader reader)
         {
             uint nameOffset = reader.ReadUInt32();

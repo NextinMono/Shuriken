@@ -15,6 +15,8 @@ using System.Windows;
 using Shuriken.Misc;
 using System.Reflection;
 using Shuriken.Models.Animation;
+using SharpNeedle.Ninja.Csd;
+using SharpNeedle.Utilities;
 
 namespace Shuriken.ViewModels
 {
@@ -111,55 +113,61 @@ namespace Shuriken.ViewModels
         {
             Clear();
             ncpSubimages.Clear();
-
-            WorkFile = new FAPCFile();
-            WorkFile.Load(filename);
-
-            string root = Path.GetDirectoryName(Path.GetFullPath(filename));
-
-            List<XTexture> xTextures = WorkFile.Resources[1].Content.TextureList.Textures;
-            FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
-
-            TextureList texList = new TextureList("textures");
-            foreach (XTexture texture in xTextures)
+            if (System.IO.Path.GetExtension(filename).ToLower() == "swif")
             {
-                if (texture.Data != null)
-                    texList.Textures.Add(new Texture(texture.Name, texture.Data));
 
-                else
+            }
+            else
+            {
+                CsdProject csdFile = new CsdProject();
+                csdFile = ResourceUtility.Open<CsdProject>(@filename);
+                //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
+                //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
+                WorkFile = new FAPCFile();
+                WorkFile.Load(filename);
+
+                string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
+                
+                ITextureList xTextures = csdFile.Textures;
+                CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = csdFile.Project.Fonts;
+
+                TextureList texList = new TextureList("textures");
+                foreach (ITexture texture in xTextures)
                 {
-                    string texPath = Path.Combine(root, texture.Name);
+                    string texPath = System.IO.Path.Combine(root, texture.Name);
                     if (File.Exists(texPath))
                         texList.Textures.Add(new Texture(texPath));
                     else
                         MissingTextures.Add(texture.Name);
                 }
-            }
 
-            if (MissingTextures.Count > 0)
-                WarnMissingTextures();
+                if (MissingTextures.Count > 0)
+                    WarnMissingTextures();
 
-            GetSubImages(WorkFile.Resources[0].Content.CsdmProject.Root);
-            LoadSubimages(texList, ncpSubimages);
+                GetSubImages(WorkFile.Resources[0].Content.CsdmProject.Root);
+                LoadSubimages(texList, ncpSubimages);
 
-            List<FontID> fontIDSorted = xFontList.FontIDTable.OrderBy(o => o.Index).ToList();
-            for (int i = 0; i < xFontList.FontIDTable.Count; i++)
-            {
-                int id = Project.CreateFont(fontIDSorted[i].Name);
-                UIFont font = Project.TryGetFont(id);
-                foreach (var mapping in xFontList.Fonts[i].CharacterMappings)
+                List<FontID> fontID = new List<FontID>();
+
+               //Parse fonts from CsdProject
+                foreach (KeyValuePair<string, SharpNeedle.Ninja.Csd.Font> mFont in xFontList)
                 {
-                    var sprite = Utilities.FindSpriteIDFromNCPScene((int)mapping.SubImageIndex, ncpSubimages, texList.Textures);
-                    font.Mappings.Add(new Models.CharacterMapping(mapping.SourceCharacter, sprite));
+                    int id = Project.CreateFont(mFont.Key);
+                    UIFont font = Project.TryGetFont(id);
+                    foreach (var mCharacterMap in mFont.Value)
+                    {
+                        var sprite = Utilities.FindSpriteIDFromNCPScene((int)mCharacterMap.DestinationIndex, ncpSubimages, texList.Textures);
+                        font.Mappings.Add(new Models.CharacterMapping((char)mCharacterMap.SourceIndex, sprite));
+                    }
                 }
+
+                ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+
+                Project.TextureLists.Add(texList);
+
+                WorkFilePath = filename;
+                IsLoaded = !MissingTextures.Any();
             }
-
-            ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
-
-            Project.TextureLists.Add(texList);
-
-            WorkFilePath = filename;
-            IsLoaded = !MissingTextures.Any();
         }
 
         public void Save(string path)
@@ -172,7 +180,7 @@ namespace Shuriken.ViewModels
             FontList xFontList = WorkFile.Resources[0].Content.CsdmProject.Fonts;
 
             List<SubImage> subImageList = new();
-            List<Sprite> spriteList = new();
+            List<Shuriken.Models.Sprite> spriteList = new();
             BuildSubImageList(ref subImageList, ref spriteList);
 
             SaveTextures(xTextures);
@@ -192,7 +200,7 @@ namespace Shuriken.ViewModels
             WorkFile.Save(path);
         }
 
-        private void SaveNode(CSDNode xNode, UISceneGroup uiSceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Sprite> spriteList)
+        private void SaveNode(CSDNode xNode, UISceneGroup uiSceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
         {
             for (int s = 0; s < uiSceneGroup.Scenes.Count; ++s)
             {
@@ -215,7 +223,7 @@ namespace Shuriken.ViewModels
             xNode.NodeDictionaries = xNode.NodeDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
         }
 
-        private void BuildSubImageList(ref List<SubImage> subImages, ref List<Sprite> spriteList)
+        private void BuildSubImageList(ref List<SubImage> subImages, ref List<Shuriken.Models.Sprite> spriteList)
         {
             subImages = new();
             spriteList = new();
@@ -223,7 +231,7 @@ namespace Shuriken.ViewModels
             TextureList texList = Project.TextureLists[0];
             foreach (var entry in Project.Sprites)
             {
-                Sprite sprite = entry.Value;
+                Shuriken.Models.Sprite sprite = entry.Value;
                 int textureIndex = texList.Textures.IndexOf(sprite.Texture);
                 spriteList.Add(sprite);
 
@@ -247,7 +255,7 @@ namespace Shuriken.ViewModels
             }
         }
 
-        private void SaveFonts(FontList xFontList, List<Sprite> spriteList)
+        private void SaveFonts(FontList xFontList, List<Shuriken.Models.Sprite> spriteList)
         {
             xFontList.Fonts.Clear();
             xFontList.FontIDTable.Clear();
@@ -261,7 +269,7 @@ namespace Shuriken.ViewModels
                 fontID.Name = uiFont.Name;
                 xFontList.FontIDTable.Add(fontID);
 
-                Font font = new();
+                XNCPLib.XNCP.Font font = new();
                 foreach (var mapping in uiFont.Mappings)
                 {
                     // This seems to work fine, but causes different values to be saved in ui_gameplay.xncp. Duplicate subimage entry?
@@ -278,7 +286,7 @@ namespace Shuriken.ViewModels
             xFontList.FontIDTable = xFontList.FontIDTable.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
         }
 
-        private void SaveScenes(CSDNode xNode, UISceneGroup uiSGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Sprite> spriteList)
+        private void SaveScenes(CSDNode xNode, UISceneGroup uiSGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
         {
             xNode.Scenes.Clear();
             xNode.SceneIDTable.Clear();
@@ -287,7 +295,7 @@ namespace Shuriken.ViewModels
             for (int s = 0; s < uiSGroup.Scenes.Count; s++)
             {
                 UIScene uiScene = uiSGroup.Scenes[s];
-                Scene xScene = new();
+                XNCPLib.XNCP.Scene xScene = new();
 
                 // Save scene parameters
                 xScene.Version = uiScene.Field00;
@@ -463,11 +471,11 @@ namespace Shuriken.ViewModels
             }
         }
 
-        private void SaveCasts(List<UICast> uiCastList, CastGroup xCastGroup, List<Sprite> spriteList)
+        private void SaveCasts(List<UICast> uiCastList, CastGroup xCastGroup, List<Shuriken.Models.Sprite> spriteList)
         {
             foreach (UICast uiCast in uiCastList)
             {
-                Cast xCast = new();
+                XNCPLib.XNCP.Cast xCast = new();
 
                 xCast.Field00 = uiCast.Field00;
                 xCast.Field04 = (uint)uiCast.Type;
@@ -532,7 +540,7 @@ namespace Shuriken.ViewModels
                         continue;
                     }
 
-                    Sprite uiSprite = Project.TryGetSprite(uiCast.Sprites[index]);
+                    Shuriken.Models.Sprite uiSprite = Project.TryGetSprite(uiCast.Sprites[index]);
                     xCast.CastMaterialData.SubImageIndices[index] = spriteList.IndexOf(uiSprite);
                 }
 
