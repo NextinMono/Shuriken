@@ -97,22 +97,25 @@
                     <TreeView Grid.Row="1" Name="ScenesTreeView" TreeViewItem.Selected="ScenesTreeViewSelected" TreeView.SelectedItemChanged="SelectedItemChanged" ItemsSource="{Binding SelectedSceneGroup.Scenes}">
                         <TreeView.Resources>
                             <HierarchicalDataTemplate DataType="{x:Type models:UIScene}" ItemsSource="{Binding Groups}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" AllowDrop="True">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>
                                 <Run Text="&#xf61f; " FontFamily="{StaticResource FontAwesome}"/>
+                                <Run Text="{Binding extraTest}" Foreground="Orange" FontFamily="{StaticResource FontAwesome}"/>
                                 <Run Text="{Binding Name}"/>
                                     </TextBlock>
                                     <StackPanel.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="New Group" Command="{Binding CreateGroupCmd}" />
-                                            <MenuItem Header="Remove" Command="{Binding RemoveSceneCmd}" IsEnabled="False"/>
+                                            <MenuItem Header="Select as Origin" Click="SelectMergeSceneFirst" />
+                                            <MenuItem Header="Select as Target" Click="SelectMergeSceneSecond" />
+                                            <MenuItem Header="Merge Scenes" Click="MergeScene" />
+                                            <MenuItem Header="Remove" Click="DeleteScene"/>
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type models:UICastGroup}" ItemsSource="{Binding Casts}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" >
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>
                                 <Run Text="&#xf5fd; " FontFamily="{StaticResource FontAwesome}"/>
@@ -120,14 +123,14 @@
                                     </TextBlock>
                                     <StackPanel.ContextMenu>
                                         <ContextMenu>
-                                            <MenuItem Header="New Cast"/>
+                                            <MenuItem Header="New 1" Click="CopyIntoNewScene"/>
                                             <MenuItem Header="Remove"/>
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                             <HierarchicalDataTemplate DataType="{x:Type models:UICast}" ItemsSource="{Binding Children}">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" AllowDrop="True">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>
                                 <Run Text="&#xf111; " FontFamily="{StaticResource FontAwesome}"/>

@@ -219,6 +219,8 @@ namespace Shuriken.ViewModels
 
         public void Save(string path)
         {
+            try
+            {
             if (path == null) path = WorkFilePath;
             else WorkFilePath = path;
             bool saveOldSizes = false;
@@ -265,6 +267,12 @@ namespace Shuriken.ViewModels
             fapcFile.Resources[0].Content.CsdmProject.Root = rootNode;
 
             fapcFile.Save(path);
+
+            }
+            catch(Exception e)
+            {
+                MessageBox.Show($"There was an error while trying to save the file. {e.Message}", "Error", MessageBoxButton.OK);
+            }
         }
 
         private void SaveNode(CSDNode xNode, UISceneGroup uiSceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Sprite> spriteList)
@@ -402,6 +410,8 @@ namespace Shuriken.ViewModels
                         foreach (AnimationTrack track in list.Tracks)
                         {
                             List<Models.Animation.Keyframe> orderedList = track.Keyframes.OrderBy(o => o.Frame).ToList();
+                            if (orderedList.Count == 0)
+                                continue;
                             if (orderedList[orderedList.Count-1].Frame > longestTrackFrameCount)
                                 longestTrackFrameCount = orderedList[orderedList.Count - 1].Frame;
                         }

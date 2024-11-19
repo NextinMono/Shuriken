@@ -131,7 +131,7 @@
                             </StackPanel.Resources>
                             <TextBlock>
                                 <Run Text="Name: "/>
-                                <Run Text="{Binding SelectedTexture.Name, Mode=OneWay}"/>
+                                <TextBox Text="{Binding SelectedTexture.Name, UpdateSourceTrigger=PropertyChanged}"/>
                             </TextBlock>
                             <TextBlock>                              
                                 <Run Text="Width: "/>

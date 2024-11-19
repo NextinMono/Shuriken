@@ -37,10 +37,11 @@ namespace Shuriken.Models
         public float AspectRatio { get; set; }
         public float AnimationFramerate { get; set; }
         public bool Visible { get; set; }
-
+        public string ExtraName { get; set; }
         public ObservableCollection<Vector2> TextureSizes { get; set; }
         public ObservableCollection<UICastGroup> Groups { get; set; }
         public ObservableCollection<AnimationGroup> Animations { get; set; }
+        public Scene OriginalScene { get; set; }
         public UIScene(Scene scene, string sceneName, TextureList texList, uint index)
         {
             Name = sceneName;
@@ -68,6 +69,7 @@ namespace Shuriken.Models
                 TextureSizes.Add(new Vector2(texSize.X, texSize.Y));
             }
 
+            OriginalScene = scene;
             ProcessCasts(scene, texList);
             Visible = false;
         }
@@ -104,6 +106,10 @@ namespace Shuriken.Models
             foreach (var i in scene2.Groups) Groups.Add(i);
             foreach (var i in scene2.Animations) Animations.Add(i);
             foreach (var i in scene2.TextureSizes) TextureSizes.Add(i);
+        }
+        public void AddGroup()
+        {
+            Groups.Add(new UICastGroup());
         }
 
         private void ProcessCasts(Scene scene, TextureList texList)
@@ -145,8 +151,6 @@ namespace Shuriken.Models
                         {
                             try
                             {
-
-
                                 cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], scene.SubImages, texList.Textures);
                             }
                             catch { }

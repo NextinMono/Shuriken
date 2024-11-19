@@ -53,10 +53,14 @@ namespace Shuriken.ViewModels
             {
                 OpenFileDialog dlg = new OpenFileDialog();
                 dlg.Filter = "Direct Draw Surface Textures |*.dds";
+                dlg.Multiselect = true;
 
                 if (dlg.ShowDialog() == true)
                 {
-                    SelectedTexList.Textures.Add(new Texture(dlg.FileName));
+                    foreach (string file in dlg.FileNames)
+                    {
+                        SelectedTexList.Textures.Add(new Texture(file));
+                    }
                 }
             }
         }

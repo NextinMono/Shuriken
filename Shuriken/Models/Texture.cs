@@ -25,7 +25,7 @@ namespace Shuriken.Models
 {
     public class Texture
     {
-        public string Name { get; }
+        public string Name { get; set; }
         public string FullName { get; }
         public string FilePath { get; private set; }
         public int Width { get; private set; }

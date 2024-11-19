@@ -238,6 +238,7 @@ namespace Shuriken.ViewModels
         public ObservableCollection<UISceneGroup> SceneGroups => Project.SceneGroups;
         public ObservableCollection<UIScene> Scenes => SelectedSceneGroup?.Scenes;
 
+
         public ScenesViewModel()
         {
             DisplayName = "Scenes";
@@ -270,20 +271,7 @@ namespace Shuriken.ViewModels
       
         private void CloneSelectedScene()
         {
-
-            //snew.Groups = SelectedScene.Groups;
-            //snew.Field00 = SelectedScene.Field00;
-            //snew.Field0C = SelectedScene.Field0C;
-            //snew.Field10 = SelectedScene.Field10;
-            //snew.AnimationFramerate = SelectedScene.AnimationFramerate;
-            //snew.Animations = SelectedScene.Animations;
-            //snew.AspectRatio = SelectedScene.AspectRatio;
-            //snew.Name = SelectedScene.Name + "_Clone";
-            //snew.TextureSizes = SelectedScene.TextureSizes;
-            //snew.Visible = SelectedScene.Visible;
-            //snew.ZIndex = SelectedScene.ZIndex;
             Scenes.Add((UIScene)SelectedScene.Clone());
-            //SelectedScene.
         }
     }
 }

@@ -13,6 +13,7 @@ using OpenTK.Windowing.Common;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Wpf;
 using Vector2 = System.Numerics.Vector2;
+using Shuriken.Commands;
 
 namespace Shuriken.Views
 {
@@ -30,6 +31,7 @@ namespace Shuriken.Views
         Converters.ColorToBrushConverter colorConverter;
         Renderer renderer;
 
+        int sceneFirstMerge, sceneSecondMerge;
 
         public UIEditor()
         {
@@ -50,10 +52,89 @@ namespace Shuriken.Views
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.FramebufferSrgb);
 
+
             colorConverter = new Converters.ColorToBrushConverter();
             renderer = new Renderer(1280, 720);
         }
 
+
+        #region SceneCommands
+        private void AddGroupToScene(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+                vm.SelectedScene.Groups.Add(new UICastGroup());
+            }
+        }
+        private void DeleteScene(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+                if(vm.SelectedScene != null) 
+                vm.Scenes.Remove(vm.SelectedScene);
+            }
+        }
+        private void SelectMergeSceneFirst(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+                object uiobj = SelectedUIObject;
+
+                if (uiobj is UIScene)
+                {
+                    UIScene scene = (UIScene)uiobj;
+                    int index = Project.SceneGroups[0].Scenes.IndexOf(scene);
+                    sceneFirstMerge = index;
+                    Project.SceneGroups[0].Scenes[index].ExtraName = "1";
+                }
+            }
+        }
+        private void SelectMergeSceneSecond(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+                object uiobj = SelectedUIObject;
+
+                if (uiobj is UIScene)
+                {
+                    UIScene scene = (UIScene)uiobj;
+                    ((UIScene)uiobj).ExtraName = "2";
+                    sceneSecondMerge = Project.SceneGroups[0].Scenes.IndexOf(scene);
+                }
+            }
+        } 
+        private void MergeScene(object sender, RoutedEventArgs e)
+        {
+            if (sceneFirstMerge == -1 || sceneSecondMerge == -1)
+                return;
+            var efg = (ScenesViewModel)MainViewModel.Editors[0];
+            int one = Project.SceneGroups[0].Children.IndexOf(efg.SelectedSceneGroup);
+
+            Project.SceneGroups[0].Scenes[sceneFirstMerge].Merge(Project.SceneGroups[0].Scenes[sceneSecondMerge]);
+            Project.SceneGroups[0].Scenes[sceneFirstMerge].ExtraName = "";
+            Project.SceneGroups[0].Scenes[sceneSecondMerge].ExtraName = "";
+            Project.SceneGroups[0].Scenes.RemoveAt(sceneSecondMerge);
+        }
+        #endregion
+        #region GroupCommands
+        private void CopyIntoNewScene(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+                object uiobj = SelectedUIObject;
+                if(uiobj is UICastGroup)
+                {
+                    UICastGroup castGroup = (UICastGroup)uiobj;
+                    Project.SceneGroups[0].Scenes.Add(new UIScene("NewScene"));
+                    Project.SceneGroups[0].Scenes[^1].Groups.Add((UICastGroup)uiobj);
+                    foreach(var fe in vm.SelectedScene.Animations)
+                    {
+                        Project.SceneGroups[0].Scenes[^1].Animations.Add(fe);
+                    }
+                }
+            }
+        }
+        #endregion
         private void glControlRender(TimeSpan obj)
         {
             var sv = DataContext as ScenesViewModel;
@@ -306,7 +387,6 @@ namespace Shuriken.Views
                     UpdateCast(scene, child, childTransform, time);
             }
         }
-
         private void ScenesTreeViewSelected(object sender, RoutedEventArgs e)
         {
             TreeViewItem source = e.OriginalSource as TreeViewItem;

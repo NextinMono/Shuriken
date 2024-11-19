@@ -19,6 +19,8 @@ using XNCPLib;
 using System.IO;
 using Shuriken.Models;
 using System.Diagnostics;
+using XNCPLib.XNCP;
+using Shuriken.Misc;
 
 namespace Shuriken
 {
@@ -264,6 +266,71 @@ namespace Shuriken
             else
 
                 Project.SceneGroups.Remove(second);
+        }
+        private void Tools_TextureRemove(object sender, RoutedEventArgs e)
+        {
+            
+            List<bool> used = new List<bool>();
+            foreach(var tex in Project.TextureLists[0].Textures)
+            {
+                used.Add(false);
+            }
+            foreach(var group in Project.SceneGroups)
+            {
+                foreach(var scene in group.Scenes)
+                {
+                    foreach(var groupS in scene.Groups)
+                    {
+                        foreach(var node in groupS.Casts)
+                        {
+                            foreach(var tex in node.Sprites)
+                            {
+                                int i = Project.TextureLists[0].Textures.IndexOf(Utilities.GetTextureFromSpriteID(tex, scene.OriginalScene.SubImages, Project.TextureLists[0].Textures));
+                                if (i != -1)
+                                    used[i] = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Tools_TextureFind(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.InitialDirectory = @vm.WorkFilePath;
+            if (dialog.ShowDialog() == true)
+            {
+                List<string> textureSearch = new List<string>();
+                var directory = Directory.GetParent(dialog.FileName);
+                
+                    foreach(var tex in vm.MissingTextures)
+                    {
+                        textureSearch.Add(tex);
+                    }
+                
+                    
+                DirectoryInfo directoryInWhichToSearch = directory;
+                foreach(var name in textureSearch)
+                {
+                    string[] filesInDir = Directory.GetFiles(directory.FullName, name, SearchOption.AllDirectories);
+                    
+                    foreach (string file in filesInDir)
+                    {
+                        string dd = Directory.GetParent(vm.WorkFilePath).FullName;
+                        string path = Path.Combine(dd, Path.GetFileName(file));
+                        if (!File.Exists(path))
+                            File.Copy(file, path, false);
+                    }
+
+                }
+                //Reload file
+                if (vm.WorkFilePath != null)
+                    vm.Load(vm.WorkFilePath);
+
+
+
+            }            
         }
 
         private void Tools_SelectSecondFolderMerge(object sender, RoutedEventArgs e)

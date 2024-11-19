@@ -78,5 +78,32 @@ namespace Shuriken.Misc
 
             return -1;
         }
+        public static Texture GetTextureFromSpriteID(int spriteIndex, List<SubImage> spriteList, ObservableCollection<Texture> textures)
+        {
+            if (spriteIndex >= 0 && spriteIndex < spriteList.Count)
+            {
+                int textureIndex = (int)spriteList[spriteIndex].TextureIndex;
+                if (textureIndex >= 0 && textureIndex < textures.Count)
+                {
+                    var sprites = textures[textureIndex].Sprites;
+                    var target = spriteList[spriteIndex];
+                    Sprite targetToCompare = new Sprite(0, textures[textureIndex], target.TopLeft.Y, target.TopLeft.X,
+                        target.BottomRight.Y, target.BottomRight.X);
+                    for (int s = 0; s < sprites.Count; ++s)
+                    {
+                        var spr = Project.TryGetSprite(sprites[s]);
+
+                        if (spr.X == targetToCompare.X && spr.Y == targetToCompare.Y
+                            && spr.Width == targetToCompare.Width
+                            && spr.Height == targetToCompare.Height)
+                        {
+                            return textures[textureIndex];
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
     }
 }
