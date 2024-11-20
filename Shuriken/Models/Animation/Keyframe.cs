@@ -63,7 +63,17 @@ namespace Shuriken.Models.Animation
             Field14 = (int)k.Field14;
             Data8Value = new Vector3(data8Value.X, data8Value.Y, data8Value.Z);
         }
-
+        public Keyframe(SharpNeedle.Ninja.Csd.Motions.KeyFrame k, System.Numerics.Vector3 data8Value)
+        {
+            Frame = (int)k.Frame;
+            KValue = k.Value;
+            KValueColor = new Color(k.Value);
+            Type = (KeyframeType)k.Interpolation;
+            InTangent = k.InTangent;
+            OutTangent = k.OutTangent;
+            Field14 = (int)k.Field14;
+            Data8Value = new Vector3(data8Value.X, data8Value.Y, data8Value.Z);
+        }
         public Keyframe(Keyframe k)
         {
             Frame = k.Frame;

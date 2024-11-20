@@ -10,6 +10,8 @@ using Shuriken.ViewModels;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
+using SharpNeedle.Ninja.Csd;
+using Cast = XNCPLib.XNCP.Cast;
 
 namespace Shuriken.Models
 {
@@ -147,7 +149,58 @@ namespace Shuriken.Models
 
             Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, 32).ToList());
         }
+        public UICast(SharpNeedle.Ninja.Csd.Cast cast, string name, int index)
+        {
+            Name = name;
+            Field00 = cast.Field00;
+            Type = (DrawType)cast.Field04;
+            IsEnabled = cast.Enabled != false;
+            Visible = true;
+            ZIndex = index;
+            Children = new ObservableCollection<UICast>();
 
+            TopLeft = new Vector2(cast.TopLeft);
+            TopRight = new Vector2(cast.TopRight);
+            BottomLeft = new Vector2(cast.BottomLeft);
+            BottomRight = new Vector2(cast.BottomRight);
+
+            Field2C = cast.Field2C;
+            Field34 = cast.InheritanceFlags;
+            Flags = cast.Field38;
+            SubImageCount = (uint)cast.SpriteIndices.Length;
+
+            FontID = -1;
+            FontCharacters = cast.Text;
+
+            FontSpacingAdjustment = (float)cast.Field4C;
+            Width = cast.Width;
+            Height = cast.Height;
+
+            Field58 = cast.Field58;
+            Field5C = cast.Field5C;
+
+            Offset = new Vector2(cast.Origin);
+
+            Field68 = cast.Position.X;
+            Field6C = cast.Position.Y;
+            Field70 = cast.Field70;
+
+            HideFlag = (int)cast.Info.HideFlag;
+            Translation = new Vector2(cast.Info.Translation);
+            Rotation = cast.Info.Rotation;
+            Scale = new Vector3(cast.Info.Scale.X, cast.Info.Scale.Y, 1.0f);
+            DefaultSprite = cast.Info.SpriteIndex;
+            Color = new Color(cast.Info.Color.R, cast.Info.Color.G, cast.Info.Color.B, cast.Info.Color.A);
+            GradientTopLeft = new Color(cast.Info.GradientTopLeft.R, cast.Info.GradientTopLeft.G, cast.Info.GradientTopLeft.B, cast.Info.GradientTopLeft.A);
+            GradientBottomLeft = new Color(cast.Info.GradientBottomLeft.R, cast.Info.GradientBottomLeft.G, cast.Info.GradientBottomLeft.B, cast.Info.GradientBottomLeft.A);
+            GradientTopRight = new Color(cast.Info.GradientTopRight.R, cast.Info.GradientTopRight.G, cast.Info.GradientTopRight.B, cast.Info.GradientTopRight.A);
+            GradientBottomRight = new Color(cast.Info.GradientBottomRight.R, cast.Info.GradientBottomRight.G, cast.Info.GradientBottomRight.B, cast.Info.GradientBottomRight.A);
+            InfoField30 = cast.Info.Field30;
+            InfoField34 = cast.Info.Field34;
+            InfoField38 = cast.Info.Field38;
+
+            Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, cast.SpriteIndices.Length).ToList());
+        }
         public UICast()
         {
             Name = "Cast";

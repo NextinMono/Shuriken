@@ -49,22 +49,30 @@ namespace Shuriken.ViewModels
             ncpSubimages = new List<SubImage>();
         }
 
-        void GetSubImages(CSDNode node)
+        void GetSubImages(SharpNeedle.Ninja.Csd.SceneNode node)
         {
             foreach (var scene in node.Scenes)
             {
                 if (ncpSubimages.Count > 0)
                     return;
 
-                ncpSubimages = scene.SubImages;
+
+                foreach (var item in scene.Value.Sprites)
+                {
+                    var i = new SubImage();
+                    i.TextureIndex = (uint)item.TextureIndex;
+                    i.TopLeft = item.TopLeft;
+                    i.BottomRight = item.BottomRight;
+                    ncpSubimages.Add(i);
+                }
             }
 
-            foreach (var child in node.Children)
+            foreach (KeyValuePair<string, SceneNode> child in node.Children)
             {
                 if (ncpSubimages.Count > 0)
                     return;
 
-                GetSubImages(child);
+                GetSubImages(child.Value);
             }
         }
 
@@ -89,7 +97,25 @@ namespace Shuriken.ViewModels
             for (int n = 0; n < xNodeIDSorted.Count; ++n)
                 ProcessSceneGroups(xNode.Children[n], uiSceneGroup, texlist, xNodeIDSorted[n].Name);
         }
+        private void ProcessSceneGroups(SharpNeedle.Ninja.Csd.SceneNode xNode, UISceneGroup parent, TextureList texlist, string name)
+        {
+            UISceneGroup uiSceneGroup = new(name);
 
+            // process node scenes
+            foreach (var item in xNode.Scenes)
+            {
+                uiSceneGroup.Scenes.Add(new UIScene(item.Value, item.Key, texlist));
+
+            }
+
+            if (parent != null)
+                parent.Children.Add(uiSceneGroup);
+            else
+                Project.SceneGroups.Add(uiSceneGroup);
+
+            foreach (var item in xNode.Children)
+                ProcessSceneGroups(item.Value, uiSceneGroup, texlist, item.Key);
+        }
         private void LoadSubimages(TextureList texList, List<SubImage> subimages)
         {
             foreach (var image in subimages)
@@ -123,8 +149,8 @@ namespace Shuriken.ViewModels
                 csdFile = ResourceUtility.Open<CsdProject>(@filename);
                 //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
                 //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
-                WorkFile = new FAPCFile();
-                WorkFile.Load(filename);
+                //WorkFile = new FAPCFile();
+                //WorkFile.Load(filename);
 
                 string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
                 
@@ -144,7 +170,7 @@ namespace Shuriken.ViewModels
                 if (MissingTextures.Count > 0)
                     WarnMissingTextures();
 
-                GetSubImages(WorkFile.Resources[0].Content.CsdmProject.Root);
+                GetSubImages(csdFile.Project.Root);
                 LoadSubimages(texList, ncpSubimages);
 
                 List<FontID> fontID = new List<FontID>();
@@ -161,7 +187,8 @@ namespace Shuriken.ViewModels
                     }
                 }
 
-                ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+               // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+                ProcessSceneGroups(csdFile.Project.Root, null, texList, csdFile.Project.Name);
 
                 Project.TextureLists.Add(texList);
 
