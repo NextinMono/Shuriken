@@ -22,19 +22,16 @@ namespace Shuriken.Models
                     name = value;
             }
         }
-
-        public uint RootCastIndex { get; set; }
         public bool Visible { get; set; }
 
-        public ObservableCollection<UICast> Casts { get; set; }
-        public List<UICast> CastsOrderedByIndex { get; set; }
+        public ObservableCollection<ShurikenUIElement> Casts { get; set; }
 
-        public void AddCast(UICast cast)
+        public void AddCast(ShurikenUIElement cast)
         {
             Casts.Add(cast);
         }
 
-        public void RemoveCast(UICast cast)
+        public void RemoveCast(ShurikenUIElement cast)
         {
             Casts.Remove(cast);
         }
@@ -42,25 +39,23 @@ namespace Shuriken.Models
         public UICastGroup(CastGroup castGroup, string name = "Group")
         {
             Name = name;
-            RootCastIndex = castGroup.RootCastIndex;
             Visible = true;
-            Casts = new ObservableCollection<UICast>();
+            Casts = new ObservableCollection<ShurikenUIElement>();
         }
 
         public UICastGroup(string name = "Group")
         {
             Name = name;
             Visible = true;
-            Casts = new ObservableCollection<UICast>();
+            Casts = new ObservableCollection<ShurikenUIElement>();
         }
 
         public UICastGroup(UICastGroup g)
         {
             Name = g.name;
-            RootCastIndex = g.RootCastIndex;
             Visible = true;
 
-            Casts = new ObservableCollection<UICast>(g.Casts);
+            Casts = new ObservableCollection<ShurikenUIElement>(g.Casts);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

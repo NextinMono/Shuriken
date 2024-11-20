@@ -15,7 +15,7 @@ using Cast = XNCPLib.XNCP.Cast;
 
 namespace Shuriken.Models
 {
-    public class UICast : INotifyPropertyChanged, ICastContainer
+    public class ShurikenUIElement : INotifyPropertyChanged, ICastContainer
     {
         private string name;
         public string Name
@@ -85,27 +85,37 @@ namespace Shuriken.Models
         public int ZIndex { get; set; }
 
         public ObservableCollection<int> Sprites { get; set; }
-        public ObservableCollection<UICast> Children { get; set; }
+        public ObservableCollection<ShurikenUIElement> Children { get; set; }
+        public SharpNeedle.Ninja.Csd.Cast CastCsd;
+        //public SharpNeedle.Ninja.Csd CastSwif;
 
-        public void AddCast(UICast cast)
+        public List<ShurikenUIElement> GetAllChildren()
+        {
+            List<ShurikenUIElement> shurikenUIElements = new List<ShurikenUIElement>();
+            shurikenUIElements.Add(this);
+            foreach(var auto in Children)
+                shurikenUIElements.AddRange(auto.GetAllChildren());
+            return shurikenUIElements;
+        }
+        public void AddCast(ShurikenUIElement cast)
         {
             Children.Add(cast);
         }
 
-        public void RemoveCast(UICast cast)
+        public void RemoveCast(ShurikenUIElement cast)
         {
             Children.Remove(cast);
         }
 
-        public UICast(Cast cast, string name, int index)
+        public ShurikenUIElement(Cast cast, string name, int priority)
         {
             Name = name;
             Field00 = cast.Field00;
             Type = (DrawType)cast.Field04;
             IsEnabled = cast.IsEnabled != 0;
             Visible = true;
-            ZIndex = index;
-            Children = new ObservableCollection<UICast>();
+            ZIndex = priority;
+            Children = new ObservableCollection<ShurikenUIElement>();
 
             TopLeft = new Vector2(cast.TopLeft);
             TopRight = new Vector2(cast.TopRight);
@@ -149,15 +159,16 @@ namespace Shuriken.Models
 
             Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, 32).ToList());
         }
-        public UICast(SharpNeedle.Ninja.Csd.Cast cast, string name, int index)
+        public ShurikenUIElement(SharpNeedle.Ninja.Csd.Cast cast, string name, int index)
         {
+            CastCsd = cast;
             Name = name;
             Field00 = cast.Field00;
             Type = (DrawType)cast.Field04;
             IsEnabled = cast.Enabled != false;
             Visible = true;
             ZIndex = index;
-            Children = new ObservableCollection<UICast>();
+            Children = new ObservableCollection<ShurikenUIElement>();
 
             TopLeft = new Vector2(cast.TopLeft);
             TopRight = new Vector2(cast.TopRight);
@@ -165,7 +176,7 @@ namespace Shuriken.Models
             BottomRight = new Vector2(cast.BottomRight);
 
             Field2C = cast.Field2C;
-            Field34 = cast.InheritanceFlags;
+            Field34 = cast.InheritanceFlags.Value;
             Flags = cast.Field38;
             SubImageCount = (uint)cast.SpriteIndices.Length;
 
@@ -190,18 +201,18 @@ namespace Shuriken.Models
             Rotation = cast.Info.Rotation;
             Scale = new Vector3(cast.Info.Scale.X, cast.Info.Scale.Y, 1.0f);
             DefaultSprite = cast.Info.SpriteIndex;
-            Color = new Color(cast.Info.Color.R, cast.Info.Color.G, cast.Info.Color.B, cast.Info.Color.A);
-            GradientTopLeft = new Color(cast.Info.GradientTopLeft.R, cast.Info.GradientTopLeft.G, cast.Info.GradientTopLeft.B, cast.Info.GradientTopLeft.A);
-            GradientBottomLeft = new Color(cast.Info.GradientBottomLeft.R, cast.Info.GradientBottomLeft.G, cast.Info.GradientBottomLeft.B, cast.Info.GradientBottomLeft.A);
-            GradientTopRight = new Color(cast.Info.GradientTopRight.R, cast.Info.GradientTopRight.G, cast.Info.GradientTopRight.B, cast.Info.GradientTopRight.A);
-            GradientBottomRight = new Color(cast.Info.GradientBottomRight.R, cast.Info.GradientBottomRight.G, cast.Info.GradientBottomRight.B, cast.Info.GradientBottomRight.A);
+            Color = new Color(cast.Info.Color.A, cast.Info.Color.B, cast.Info.Color.G, cast.Info.Color.R);
+            GradientTopLeft = new Color(cast.Info.GradientTopLeft.A, cast.Info.GradientTopLeft.B, cast.Info.GradientTopLeft.G, cast.Info.GradientTopLeft.R);
+            GradientBottomLeft = new Color(cast.Info.GradientBottomLeft.A, cast.Info.GradientBottomLeft.B, cast.Info.GradientBottomLeft.G, cast.Info.GradientBottomLeft.R);
+            GradientTopRight = new Color(cast.Info.GradientTopRight.A, cast.Info.GradientTopRight.B, cast.Info.GradientTopRight.G, cast.Info.GradientTopRight.R);
+            GradientBottomRight = new Color(cast.Info.GradientBottomRight.A, cast.Info.GradientBottomRight.B, cast.Info.GradientBottomRight.G, cast.Info.GradientBottomRight.R);
             InfoField30 = cast.Info.Field30;
             InfoField34 = cast.Info.Field34;
             InfoField38 = cast.Info.Field38;
 
             Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, cast.SpriteIndices.Length).ToList());
         }
-        public UICast()
+        public ShurikenUIElement()
         {
             Name = "Cast";
             Field00 = 0;
@@ -209,7 +220,7 @@ namespace Shuriken.Models
             IsEnabled = true;
             Visible = true;
             ZIndex = 0;
-            Children = new ObservableCollection<UICast>();
+            Children = new ObservableCollection<ShurikenUIElement>();
 
             Field2C = 0;
             Field34 = 0;
@@ -255,7 +266,7 @@ namespace Shuriken.Models
             DefaultSprite = 0;
         }
 
-        public UICast(UICast c)
+        public ShurikenUIElement(ShurikenUIElement c)
         {
             Name = name;
             Field00 = c.Field00;
@@ -263,7 +274,7 @@ namespace Shuriken.Models
             IsEnabled = c.IsEnabled;
             Visible = true;
             ZIndex = ZIndex;
-            Children = new ObservableCollection<UICast>(c.Children);
+            Children = new ObservableCollection<ShurikenUIElement>(c.Children);
 
             TopLeft = new Vector2(c.TopLeft);
             TopRight = new Vector2(c.TopRight);

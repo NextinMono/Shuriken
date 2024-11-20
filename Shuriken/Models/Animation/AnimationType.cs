@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shuriken.Models.Animation
 {
+    [Flags]
     public enum AnimationType : uint
     {
         None        = 0,

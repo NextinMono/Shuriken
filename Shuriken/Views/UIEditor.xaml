@@ -109,7 +109,7 @@
                                     </StackPanel.ContextMenu>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
-                            <HierarchicalDataTemplate DataType="{x:Type models:UICast}" ItemsSource="{Binding Children}">
+                            <HierarchicalDataTemplate DataType="{x:Type models:ShurikenUIElement}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>

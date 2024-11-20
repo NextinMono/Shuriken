@@ -60,9 +60,9 @@ namespace Shuriken.ViewModels
 
         public void ChangeCastSprite(int index, int sprID)
         {
-            if (SelectedUIObject is UICast)
+            if (SelectedUIObject is ShurikenUIElement)
             {
-                var cast = (UICast)SelectedUIObject;
+                var cast = (ShurikenUIElement)SelectedUIObject;
                 cast.Sprites[index] = sprID;
             }
         }
@@ -120,13 +120,13 @@ namespace Shuriken.ViewModels
         public void AddCastToSelection()
         {
             if (SelectedUIObject is ICastContainer container)
-                container.AddCast(new UICast());
+                container.AddCast(new ShurikenUIElement());
         }
 
         public void RemoveSelectedCast()
         {
             if (ParentNode is ICastContainer container)
-                container.RemoveCast(SelectedUIObject as UICast);
+                container.RemoveCast(SelectedUIObject as ShurikenUIElement);
         }
 
         public void CreateSceneGroup()
@@ -166,7 +166,7 @@ namespace Shuriken.ViewModels
             CreateGroupCmd      = new RelayCommand(AddGroupToSelection, () => SelectedScene != null);
             RemoveGroupCmd      = new RelayCommand(RemoveSelectedGroup, () => SelectedUIObject is UICastGroup);
             CreateCastCmd       = new RelayCommand(AddCastToSelection, () => SelectedUIObject is ICastContainer);
-            RemoveCastCmd       = new RelayCommand(RemoveSelectedCast, () => SelectedUIObject is UICast);
+            RemoveCastCmd       = new RelayCommand(RemoveSelectedCast, () => SelectedUIObject is ShurikenUIElement);
             ChangeCastSpriteCmd = new RelayCommand<int>(SelectCastSprite, null);
         }
     }

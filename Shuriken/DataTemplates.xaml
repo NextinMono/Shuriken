@@ -10,7 +10,7 @@
     <DataTemplate DataType="{x:Type models:UICastGroup}">
         <controls:GroupControl/>
     </DataTemplate>
-    <DataTemplate DataType="{x:Type models:UICast}">
+    <DataTemplate DataType="{x:Type models:ShurikenUIElement}">
         <controls:LayerControl/>
     </DataTemplate>
 

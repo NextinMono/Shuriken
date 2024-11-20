@@ -112,18 +112,18 @@ namespace Shuriken.Views
             }
         }
 
-        private void UpdateCast(UIScene scene, UICast lyr, CastTransform transform, float time)
+        private void UpdateCast(UIScene scene, ShurikenUIElement in_UiElement, CastTransform transform, float time)
         {
-            bool hideFlag = lyr.HideFlag != 0;
-            var position = new Vec2(lyr.Translation.X, lyr.Translation.Y);
-            float rotation = lyr.Rotation;
-            var scale = new Vec2(lyr.Scale.X, lyr.Scale.Y);
-            float sprID = lyr.DefaultSprite;
-            var color = lyr.Color;
-            var gradientTopLeft = lyr.GradientTopLeft;
-            var gradientBottomLeft = lyr.GradientBottomLeft;
-            var gradientTopRight = lyr.GradientTopRight;
-            var gradientBottomRight = lyr.GradientBottomRight;
+            bool hideFlag = in_UiElement.HideFlag != 0;
+            var position = new Vec2(in_UiElement.Translation.X, in_UiElement.Translation.Y);
+            float rotation = in_UiElement.Rotation;
+            var scale = new Vec2(in_UiElement.Scale.X, in_UiElement.Scale.Y);
+            float sprID = in_UiElement.DefaultSprite;
+            var color = in_UiElement.Color;
+            var gradientTopLeft = in_UiElement.GradientTopLeft;
+            var gradientBottomLeft = in_UiElement.GradientBottomLeft;
+            var gradientTopRight = in_UiElement.GradientTopRight;
+            var gradientBottomRight = in_UiElement.GradientBottomRight;
 
             foreach (var animation in scene.Animations)
             {
@@ -133,7 +133,7 @@ namespace Shuriken.Views
                 for (int i = 0; i < 12; i++)
                 {
                     var type = (AnimationType)(1 << i);
-                    var track = animation.GetTrack(lyr, type);
+                    var track = animation.GetTrack(in_UiElement, type);
 
                     if (track == null)
                         continue;
@@ -207,56 +207,56 @@ namespace Shuriken.Views
             position.X = rotatedX / scene.AspectRatio;
             position.Y = rotatedY;
 
-            position += lyr.Offset;
+            position += in_UiElement.Offset;
 
             // Inherit position
-            if ((lyr.Field34 & 0x100) != 0)
+            if ((in_UiElement.Field34 & 0x100) != 0)
                 position.X += transform.Position.X;
             
-            if ((lyr.Field34 & 0x200) != 0)
+            if ((in_UiElement.Field34 & 0x200) != 0)
                 position.Y += transform.Position.Y;
 
             // Inherit rotation
-            if ((lyr.Field34 & 0x2) != 0)
+            if ((in_UiElement.Field34 & 0x2) != 0)
                 rotation += transform.Rotation;
 
             // Inherit scale
-            if ((lyr.Field34 & 0x400) != 0) 
+            if ((in_UiElement.Field34 & 0x400) != 0) 
                 scale.X *= transform.Scale.X;
-
-            if ((lyr.Field34 & 0x800) != 0) 
+            
+            if ((in_UiElement.Field34 & 0x800) != 0) 
                 scale.Y *= transform.Scale.Y;
 
             // Inherit color
-            if ((lyr.Field34 & 0x8) != 0)
+            if ((in_UiElement.Field34 & 0x8) != 0)
             {
                 Vector4 cF = Vector4.Multiply(color.ToFloats(), transform.Color.ToFloats());
                 color = new Color(cF.X, cF.Y, cF.Z, cF.W);
             }
 
-            if (lyr.Visible && lyr.IsEnabled)
+            if (in_UiElement.Visible && in_UiElement.IsEnabled)
             {
-                if (lyr.Type == DrawType.Sprite)
+                if (in_UiElement.Type == DrawType.Sprite)
                 {
-                    var spr = sprID >= 0 ? Project.TryGetSprite(lyr.Sprites[Math.Min(lyr.Sprites.Count - 1, (int)sprID)]) : null;
-                    var nextSpr = sprID >= 0 ? Project.TryGetSprite(lyr.Sprites[Math.Min(lyr.Sprites.Count - 1, (int)sprID + 1)]) : null;
+                    var spr = sprID >= 0 ? Project.TryGetSprite(in_UiElement.Sprites[Math.Min(in_UiElement.Sprites.Count - 1, (int)sprID)]) : null;
+                    var nextSpr = sprID >= 0 ? Project.TryGetSprite(in_UiElement.Sprites[Math.Min(in_UiElement.Sprites.Count - 1, (int)sprID + 1)]) : null;
 
                     spr ??= nextSpr;
                     nextSpr ??= spr;
 
                     renderer.DrawSprite(
-                        lyr.TopLeft, lyr.BottomLeft, lyr.TopRight, lyr.BottomRight,
+                        in_UiElement.TopLeft, in_UiElement.BottomLeft, in_UiElement.TopRight, in_UiElement.BottomRight,
                         position, Utilities.ToRadians(rotation), scale, scene.AspectRatio, spr, nextSpr, sprID % 1, color,
                         gradientTopLeft, gradientBottomLeft, gradientTopRight, gradientBottomRight,
-                        lyr.ZIndex, lyr.Flags);
+                        in_UiElement.ZIndex, in_UiElement.Flags);
                 }
-                else if (lyr.Type == DrawType.Font)
+                else if (in_UiElement.Type == DrawType.Font)
                 {
                     float xOffset = 0.0f;
 
-                    for (var i = 0; i < lyr.FontCharacters.Length; i++)
+                    for (var i = 0; i < in_UiElement.FontCharacters.Length; i++)
                     {
-                        var font = Project.TryGetFont(lyr.FontID);
+                        var font = Project.TryGetFont(in_UiElement.FontID);
                         if (font == null)
                             continue;
 
@@ -264,7 +264,7 @@ namespace Shuriken.Views
 
                         foreach (var mapping in font.Mappings)
                         {
-                            if (mapping.Character != lyr.FontCharacters[i]) 
+                            if (mapping.Character != in_UiElement.FontCharacters[i]) 
                                 continue;
                             
                             spr = Project.TryGetSprite(mapping.Sprite);
@@ -277,7 +277,7 @@ namespace Shuriken.Views
                         float width = spr.Dimensions.X / renderer.Width;
                         float height = spr.Dimensions.Y / renderer.Height;
 
-                        var begin = (Vector2)lyr.TopLeft;
+                        var begin = (Vector2)in_UiElement.TopLeft;
                         var end = begin + new Vector2(width, height);
 
                         renderer.DrawSprite(
@@ -287,16 +287,16 @@ namespace Shuriken.Views
                             new Vector2(end.X + xOffset, end.Y),
                             position, Utilities.ToRadians(rotation), scale, scene.AspectRatio, spr, spr, 0, color,
                             gradientTopLeft, gradientBottomLeft, gradientTopRight, gradientBottomRight,
-                            lyr.ZIndex, lyr.Flags
+                            in_UiElement.ZIndex, in_UiElement.Flags
                         );
 
-                        xOffset += width + lyr.FontSpacingAdjustment;
+                        xOffset += width + in_UiElement.FontSpacingAdjustment;
                     }
                 }
 
                 var childTransform = new CastTransform(position, rotation, scale, color);
 
-                foreach (var child in lyr.Children) 
+                foreach (var child in in_UiElement.Children) 
                     UpdateCast(scene, child, childTransform, time);
             }
         }

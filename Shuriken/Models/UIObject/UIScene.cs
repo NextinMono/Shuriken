@@ -4,13 +4,16 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using XNCPLib.XNCP;
+//using XNCPLib.XNCP;
 using System.ComponentModel;
 using Shuriken.Models.Animation;
 using Shuriken.Misc;
 using Shuriken.ViewModels;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using System.Diagnostics;
+using SharpNeedle.Ninja.Csd;
+using SharpNeedle.Ninja.Csd.Motions;
 
 namespace Shuriken.Models
 {
@@ -38,27 +41,27 @@ namespace Shuriken.Models
         public ObservableCollection<Vector2> TextureSizes { get; set; }
         public ObservableCollection<UICastGroup> Groups { get; set; }
         public ObservableCollection<AnimationGroup> Animations { get; set; }
-        public UIScene(Scene scene, string sceneName, TextureList texList)
-        {
-            Name = sceneName;
-            Field00 = scene.Version;
-            ZIndex = scene.ZIndex;
-            Field0C = scene.Field0C;
-            Field10 = scene.Field10;
-            AspectRatio = scene.AspectRatio;
-            AnimationFramerate = scene.AnimationFramerate;
-            TextureSizes = new ObservableCollection<Vector2>();
-            Animations = new ObservableCollection<AnimationGroup>();
-            Groups = new ObservableCollection<UICastGroup>();
-
-            foreach (var texSize in scene.Data1)
-            {
-                TextureSizes.Add(new Vector2(texSize.X, texSize.Y));
-            }
-
-            ProcessCasts(scene, texList);
-            Visible = false;
-        }
+        //public UIScene(Scene scene, string sceneName, TextureList texList)
+        //{
+        //    Name = sceneName;
+        //    Field00 = scene.Version;
+        //    ZIndex = scene.ZIndex;
+        //    Field0C = scene.Field0C;
+        //    Field10 = scene.Field10;
+        //    AspectRatio = scene.AspectRatio;
+        //    AnimationFramerate = scene.AnimationFramerate;
+        //    TextureSizes = new ObservableCollection<Vector2>();
+        //    Animations = new ObservableCollection<AnimationGroup>();
+        //    Groups = new ObservableCollection<UICastGroup>();
+        //
+        //    foreach (var texSize in scene.Data1)
+        //    {
+        //        TextureSizes.Add(new Vector2(texSize.X, texSize.Y));
+        //    }
+        //
+        //    //ProcessCasts(scene, texList);
+        //    Visible = false;
+        //}
         public UIScene(SharpNeedle.Ninja.Csd.Scene scene, string sceneName, TextureList texList)
         {
             Name = sceneName;
@@ -107,184 +110,101 @@ namespace Shuriken.Models
 
             Visible = false;
         }
-
-        private void ProcessCasts(Scene scene, TextureList texList)
+        #region Conversion Utilities
+        ShurikenUIElement ConvertSharpCast(SharpNeedle.Ninja.Csd.Cast in_Cast, SharpNeedle.Ninja.Csd.Scene in_Scene, TextureList in_TexList)
         {
-            // Create groups
-            for (int g = 0; g < scene.UICastGroups.Count; ++g)
+            ShurikenUIElement cast = new ShurikenUIElement(in_Cast, in_Cast.Name, in_Cast.Priority);
+
+            if (cast.Type == DrawType.Sprite)
             {
-                Groups.Add(new UICastGroup
+                int[] castSprites = in_Cast.SpriteIndices;
+                for (int index = 0; index < cast.Sprites.Count; ++index)
                 {
-                    Name = "Group_" + g,
-                    RootCastIndex = scene.UICastGroups[g].RootCastIndex
-                });
-            }
-
-            // Pre-process animations
-            List<XNCPLib.XNCP.Animation.AnimationDictionary> AnimIDSorted = scene.AnimationDictionaries.OrderBy(o => o.Index).ToList();
-            for (int a = 0; a < scene.AnimationFrameDataList.Count; a++)
-            {
-                Animations.Add(new AnimationGroup(AnimIDSorted[a].Name)
-                {
-                    Field00 = scene.AnimationFrameDataList[a].Field00,
-                    Duration = scene.AnimationFrameDataList[a].FrameCount
-                });
-            }
-
-            // process group layers
-            List<UICast> tempCasts = new List<UICast>();
-            for (int g = 0; g < Groups.Count; ++g)
-            {
-                for (int c = 0; c < scene.UICastGroups[g].Casts.Count; ++c)
-                {
-                    UICast cast = new UICast(scene.UICastGroups[g].Casts[c], GetCastName(g, c, scene.CastDictionaries), c);
-
-                    // sprite
-                    if (cast.Type == DrawType.Sprite)
-                    {
-                        int[] castSprites = scene.UICastGroups[g].Casts[c].CastMaterialData.SubImageIndices;
-                        for (int index = 0; index < cast.Sprites.Count; ++index)
-                        {
-                            cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], scene.SubImages, texList.Textures);
-                        }
-                    }
-                    else if (cast.Type == DrawType.Font)
-                    {
-                        foreach (var font in Project.Fonts)
-                        {
-                            if (font.Name == scene.UICastGroups[g].Casts[c].FontName)
-                                cast.FontID = font.ID;
-                        }
-                    }
-
-                    tempCasts.Add(cast);
+                    cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], in_Scene.Sprites, in_TexList.Textures);
                 }
-
-                for (int a = 0; a < scene.AnimationFrameDataList.Count; a++)
-                {
-                    XNCPLib.XNCP.Animation.AnimationKeyframeData keyframeData = scene.AnimationKeyframeDataList[a];
-                    for (int c = 0; c < keyframeData.GroupAnimationDataList[g].CastAnimationDataList.Count; ++c)
-                    {
-                        XNCPLib.XNCP.Animation.CastAnimationData castAnimData = keyframeData.GroupAnimationDataList[g].CastAnimationDataList[c];
-                        List<AnimationTrack> tracks = new List<AnimationTrack>((int)XNCPLib.Misc.Utilities.CountSetBits(castAnimData.Flags));
-
-                        int castAnimDataIndex = 0;
-                        for (int i = 0; i < 12; ++i)
-                        {
-                            // check each animation type if it exists in Flags
-                            if ((castAnimData.Flags & (1 << i)) != 0)
-                            {
-                                AnimationType type = (AnimationType)(1 << i);
-                                AnimationTrack anim = new AnimationTrack(type)
-                                {
-                                    Field00 = castAnimData.SubDataList[castAnimDataIndex].Field00,
-                                };
-
-                                int keyIndex = 0;
-                                foreach (var key in castAnimData.SubDataList[castAnimDataIndex].Keyframes)
-                                {
-                                    System.Numerics.Vector3 data8Value = 
-                                        scene.Version < 3 ? new() :
-                                        scene.AnimationData2List[a].GroupList.GroupList[g].AnimationData2List.ListData[c].Data.SubData[castAnimDataIndex].Data.Data[keyIndex].Value;
-                                    anim.Keyframes.Add(new Keyframe(key, data8Value));
-                                    keyIndex++;
-                                }
-
-                                tracks.Add(anim);
-                                ++castAnimDataIndex;
-                            }
-                        }
-
-                        if (tracks.Count > 0)
-                        {
-                            AnimationList layerAnimationList = new AnimationList(tempCasts[c], tracks);
-                            Animations[a].LayerAnimations.Add(layerAnimationList);
-                        }
-                    }
-                }
-
-                // build hierarchy tree
-                CreateHierarchyTree(g, scene.UICastGroups[g].CastHierarchyTree, tempCasts);
-
-                tempCasts.Clear();
             }
+            else if (cast.Type == DrawType.Font)
+            {
+                foreach (var font in Project.Fonts)
+                {
+                    if (font.Name == in_Cast.FontName)
+                        cast.FontID = font.ID;
+                }
+            }
+            return cast;
         }
+        ShurikenUIElement RecursiveConvertCast(SharpNeedle.Ninja.Csd.Cast in_ParentCast, SharpNeedle.Ninja.Csd.Scene in_Scene, TextureList in_TexList)
+        {
+            ShurikenUIElement cast = ConvertSharpCast(in_ParentCast,in_Scene,in_TexList);
+            foreach (var child in in_ParentCast.Children)
+            {
+                cast.Children.Add(RecursiveConvertCast(child, in_Scene, in_TexList));
+            }
+            return cast;
+        }
+        ShurikenUIElement FindElementFromCsdCast(ShurikenUIElement node, Cast searchValue)
+        {
+            if (node.CastCsd.Name == searchValue.Name && node.CastCsd.Position == searchValue.Position && node.CastCsd.Priority == searchValue.Priority)
+            {
+                return node;
+            }
+
+            foreach (var child in node.Children)
+            {
+                var element = FindElementFromCsdCast(child, searchValue);
+                if (element != null)
+                {
+                    return element;
+                }
+            }
+
+            return null;
+        }
+        #endregion
         private void ProcessCastsSharpNeedle(SharpNeedle.Ninja.Csd.Scene scene, TextureList texList)
         {
-            int indexF = 0;
-            // Create groups
+            // Process groups (convert them from SharpNeedle elements to Shuriken elements)
             for (int g = 0; g < scene.Families.Count; ++g)
             {
-                int fCopy = 0;
-                fCopy = indexF;
+                //Create new group
                 Groups.Add(new UICastGroup
                 {
-                    Name = "Group_" + g,
-                    RootCastIndex = (uint)fCopy
+                    Name = "Family_" + Groups.Count
                 });
-                indexF += scene.Families[g].Casts.Count;
-            }
 
-            // Pre-process animations
-            foreach (var item in scene.Motions)
-            {
-                foreach(var item2 in item.Value.FamilyMotions)
+                //Get root cast
+                Cast csdCast = scene.Families[g].Casts[0];
+
+                //Process casts and its children by converting all of them to Shuriken nodes
+                ShurikenUIElement castNew = ConvertSharpCast(csdCast, scene, texList);
+                foreach (Cast csdCastChild in csdCast.Children)
                 {
-                    foreach (SharpNeedle.Ninja.Csd.Motions.CastMotion item3 in item2.CastMotions)
-                    {
-                        foreach(var item4 in item3)
-                        {
-                            Animations.Add(new AnimationGroup(item.Key)
-                            {
-                                Field00 = item4.Field00,
-                                Duration = item4.Frames.Count
-                            });
-
-                        }
-                    }
-                }
-                
-            }
-
-            // process group layers
-            List<UICast> tempCasts = new List<UICast>();
-            for (int g = 0; g < Groups.Count; ++g)
-            {
-                for (int c = 0; c < scene.Families[g].Casts.Count; ++c)
-                {
-                    var m_CsdCast = scene.Families[g].Casts[c];
-                    UICast cast = new UICast(m_CsdCast, m_CsdCast.Name, c);
-
-                    // sprite
-                    if (cast.Type == DrawType.Sprite)
-                    {
-                        int[] castSprites = m_CsdCast.SpriteIndices;
-                        for (int index = 0; index < cast.Sprites.Count; ++index)
-                        {
-                            cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], scene.Sprites, texList.Textures);
-                        }
-                    }
-                    else if (cast.Type == DrawType.Font)
-                    {
-                        foreach (var font in Project.Fonts)
-                        {
-                            if (font.Name == scene.Families[g].Casts[c].FontName)
-                                cast.FontID = font.ID;
-                        }
-                    }
-
-                    tempCasts.Add(cast);
+                    castNew.Children.Add(RecursiveConvertCast(csdCastChild, scene, texList));
                 }
 
-                for (int a = 0; a < scene.Motions.Count; a++)
+                //This basically adds the root node
+                Groups[g].AddCast(castNew);
+            }
+            ///This... awful nested for loop is here to replicate the same functionality from XNCPLib
+            ///Fortunately and unfortunately I dont think SharpNeedle stores cast indices, and since
+            ///we're not using the sharpneedle types directly for drawing them onto the screen,
+            ///we just kinda have to do this to have animations
+            ///
+            ///Kill this with fire.
+            foreach (var sceneMotion in scene.Motions)
+            {
+                var keyframeData = sceneMotion.Value;
+                Animations.Add(new AnimationGroup(sceneMotion.Key));
+
+                foreach (var familyMotion in sceneMotion.Value.FamilyMotions)
                 {
-                    var keyframeData = scene.Motions[a];
-                    for (int c = 0; c < keyframeData.FamilyMotions[g].CastMotions.Count; ++c)
+                    foreach (var casMot in familyMotion.CastMotions)
                     {
-                        var castAnimData = keyframeData.FamilyMotions[g].CastMotions[c];
+                        CastMotion castAnimData = casMot;
                         List<AnimationTrack> tracks = new List<AnimationTrack>((int)XNCPLib.Misc.Utilities.CountSetBits(castAnimData.Flags));
 
                         int castAnimDataIndex = 0;
+                        //Loop through all possible animation types
                         for (int i = 0; i < 12; ++i)
                         {
                             // check each animation type if it exists in Flags
@@ -300,7 +220,7 @@ namespace Shuriken.Models
                                 foreach (SharpNeedle.Ninja.Csd.Motions.KeyFrame key in castAnimData[castAnimDataIndex].Frames)
                                 {
                                     System.Numerics.Vector3 data8Value;
-                                    if(scene.Version < 3)
+                                    if (scene.Version < 3)
                                     {
                                         data8Value = new();
                                     }
@@ -313,7 +233,7 @@ namespace Shuriken.Models
                                         else
                                             data8Value = new();
                                     }
-                                        
+
                                     anim.Keyframes.Add(new Keyframe(key, data8Value));
                                     keyIndex++;
                                 }
@@ -322,81 +242,27 @@ namespace Shuriken.Models
                                 ++castAnimDataIndex;
                             }
                         }
-
+                        //If there are tracks, add them to the scene
                         if (tracks.Count > 0)
                         {
-                            AnimationList layerAnimationList = new AnimationList(tempCasts[c], tracks);
-                            Animations[a].LayerAnimations.Add(layerAnimationList);
+                            ShurikenUIElement element = null;
+                            foreach (var g in Groups)
+                            {
+                                foreach (var t in g.Casts)
+                                {
+                                    element = FindElementFromCsdCast(t, casMot.Cast);
+                                    if (element != null)
+                                    {
+                                        break;
+                                    }
+                                }
+                                AnimationList layerAnimationList = new AnimationList(element, tracks);
+                                Animations[^1].LayerAnimations.Add(layerAnimationList);
+                            }
                         }
                     }
                 }
-
-                foreach(var cast in tempCasts)
-                {
-                    Groups[g].AddCast(cast);
-                }
-                // build hierarchy tree
-                //CreateHierarchyTree(g, scene.Families[g].CastHierarchyTree, tempCasts);
-
-                tempCasts.Clear();
             }
-        }
-
-        private void CreateHierarchyTree(int group, List<CastHierarchyTreeNode> tree, List<UICast> lyrs)
-        {
-            int next = (int)Groups[group].RootCastIndex;
-            while (next != -1)
-            {
-                Groups[group].Casts.Add(lyrs[next]);
-                BuildTree(next, tree, lyrs, null);
-
-                next = tree[next].NextIndex;
-            }
-
-            Groups[group].CastsOrderedByIndex = new List<UICast>(lyrs);
-        }
-
-        private void BuildTree(int c, List<CastHierarchyTreeNode> tree, List<UICast> lyrs, UICast parent)
-        {
-            int childIndex = tree[c].ChildIndex;
-            if (childIndex != -1)
-            {
-                UICast child = lyrs[childIndex];
-                lyrs[c].Children.Add(child);
-
-                BuildTree(childIndex, tree, lyrs, lyrs[c]);
-            }
-
-            if (parent != null)
-            {
-                int siblingIndex = tree[c].NextIndex;
-                if (siblingIndex != -1)
-                {
-                    UICast sibling = lyrs[siblingIndex];
-                    parent.Children.Add(sibling);
-
-                    BuildTree(siblingIndex, tree, lyrs, parent);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets the cast name from a cast dictionary provided its index and group index.
-        /// If the cast is not found, an empty string is returned.
-        /// </summary>
-        /// <param name="groupIndex">The index of the group in which the cast belongs</param>
-        /// <param name="castIndex">The index of the cast</param>
-        /// <param name="castDictionary">A dictionary containing cast names, group indices and cast indices.</param>
-        /// <returns></returns>
-        public string GetCastName(int groupIndex, int castIndex, List<CastDictionary> castDictionary)
-        {
-            foreach (var entry in castDictionary)
-            {
-                if (entry.GroupIndex == groupIndex && entry.CastIndex == castIndex)
-                    return entry.Name;
-            }
-
-            return String.Empty;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

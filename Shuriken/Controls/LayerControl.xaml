@@ -10,7 +10,7 @@
              xmlns:hc="https://handyorg.github.io/handycontrol"
              Name="LayerControlPanel"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=models:UICast}"
+             d:DataContext="{d:DesignInstance Type=models:ShurikenUIElement}"
              d:DesignWidth="300">
     <UserControl.Resources>
         <converters:EqualityToVisibilityConverter x:Key="Eq2Visibility"/>

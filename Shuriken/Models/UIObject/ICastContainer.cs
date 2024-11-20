@@ -8,7 +8,7 @@ namespace Shuriken.Models
 {
     public interface ICastContainer
     {
-        public void AddCast(UICast cast);
-        public void RemoveCast(UICast cast);
+        public void AddCast(ShurikenUIElement cast);
+        public void RemoveCast(ShurikenUIElement cast);
     }
 }
