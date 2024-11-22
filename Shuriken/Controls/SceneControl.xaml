@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Shuriken.Controls"
              xmlns:models="clr-namespace:Shuriken.Models"
              mc:Ignorable="d"
-             d:DataContext="{d:DesignInstance Type=models:UIScene}"
+             d:DataContext="{d:DesignInstance Type=models:ShurikenUIScene}"
              d:DesignHeight="800" d:DesignWidth="400">
     <UserControl.Resources>
         <Style TargetType="Label">

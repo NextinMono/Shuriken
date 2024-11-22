@@ -204,7 +204,7 @@ namespace Shuriken.Rendering
             Vector2 position, float rotation, Vector2 scale, float aspectRatio,
             Sprite sprite, Sprite nextSprite, float spriteFactor, Vector4 color, 
             Vector4 gradientTopLeft, Vector4 gradientBottomLeft, Vector4 gradientTopRight, Vector4 gradientBottomRight, 
-            int zIndex, uint flags)
+            int zIndex, ElementMaterialFlags flags)
         {
             var quad = new Quad();
             var aspect = new Vector2(aspectRatio, 1.0f);
@@ -235,8 +235,8 @@ namespace Shuriken.Rendering
                 begin = (1.0f - spriteFactor) * begin + spriteFactor * nextBegin;
                 end = (1.0f - spriteFactor) * end + spriteFactor * nextEnd;
 
-                if ((flags & 0x400) != 0) (begin.X, end.X) = (end.X, begin.X); // Mirror X
-                if ((flags & 0x800) != 0) (begin.Y, end.Y) = (end.Y, begin.Y); // Mirror Y
+                if ((flags & ElementMaterialFlags.MirrorX) != 0) (begin.X, end.X) = (end.X, begin.X); // Mirror X
+                if ((flags & ElementMaterialFlags.MirrorY) != 0) (begin.Y, end.Y) = (end.Y, begin.Y); // Mirror Y
 
                 quad.TopLeft.UV = begin;
                 quad.TopRight.UV = new Vector2(end.X, begin.Y);
@@ -250,8 +250,8 @@ namespace Shuriken.Rendering
             quad.BottomLeft.Color = color * gradientBottomLeft;
             quad.BottomRight.Color = color * gradientBottomRight;
             quad.ZIndex = zIndex;
-            quad.Additive = (flags & 0x1) != 0;
-            quad.LinearFiltering = (flags & 0x1000) != 0;
+            quad.Additive = (flags & ElementMaterialFlags.AdditiveBlending) != 0;
+            quad.LinearFiltering = (flags & ElementMaterialFlags.LinearFiltering) != 0;
 
             quads.Add(quad);
         }

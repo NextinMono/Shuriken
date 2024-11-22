@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shuriken.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,24 @@ namespace Shuriken.Controls
     /// </summary>
     public partial class LayerControl : UserControl
     {
+        private ShurikenUIElement CurrentUIElement { get { return (ShurikenUIElement)DataContext; } }
         public LayerControl()
         {
             InitializeComponent();
+        }
+
+        private void SetCastPivot_TL(object sender, RoutedEventArgs e)
+        {
+            CurrentUIElement.TopLeft.X = 0;
+            CurrentUIElement.TopLeft.Y = 0;
+            CurrentUIElement.TopRight.X = CurrentUIElement.Size.X / 1280.0f;
+            CurrentUIElement.TopRight.Y = 0;
+
+            CurrentUIElement.BottomLeft.X = 0;
+            CurrentUIElement.BottomLeft.Y = -(CurrentUIElement.Size.Y / 1280.0f);
+
+            CurrentUIElement.BottomRight.X = CurrentUIElement.Size.X / 1280.0f;
+            CurrentUIElement.BottomRight.Y = -(CurrentUIElement.Size.Y / 1280.0f);
         }
     }
 }

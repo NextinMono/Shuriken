@@ -9,7 +9,7 @@ namespace Shuriken.Models
 {
     public static class Project
     {
-        public static ObservableCollection<UISceneGroup> SceneGroups { get; set; } = new ObservableCollection<UISceneGroup>();
+        public static ObservableCollection<ShurikenUISceneGroup> SceneGroups { get; set; } = new ObservableCollection<ShurikenUISceneGroup>();
         public static ObservableCollection<TextureList> TextureLists { get; set; } = new ObservableCollection<TextureList>();
         public static ObservableCollection<UIFont> Fonts { get; set; } = new ObservableCollection<UIFont>();
         public static Dictionary<int, Sprite> Sprites { get; set; } = new Dictionary<int, Sprite>();

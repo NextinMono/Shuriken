@@ -4,7 +4,7 @@
                     xmlns:viewmodels="clr-namespace:Shuriken.ViewModels"
                     xmlns:views="clr-namespace:Shuriken.Views"
                     xmlns:controls="clr-namespace:Shuriken.Controls">
-    <DataTemplate DataType="{x:Type models:UIScene}">
+    <DataTemplate DataType="{x:Type models:ShurikenUIScene}">
         <controls:SceneControl/>
     </DataTemplate>
     <DataTemplate DataType="{x:Type models:UICastGroup}">

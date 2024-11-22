@@ -72,7 +72,7 @@ namespace Shuriken.Views
             GL.Finish();
         }
 
-        private void UpdateSceneGroups(IEnumerable<UISceneGroup> groups, IEnumerable<UIFont> fonts, float time)
+        private void UpdateSceneGroups(IEnumerable<ShurikenUISceneGroup> groups, IEnumerable<UIFont> fonts, float time)
         {
             foreach (var group in groups)
             {
@@ -81,14 +81,14 @@ namespace Shuriken.Views
 
                 UpdateSceneGroups(group.Children, fonts, time);
 
-                List<UIScene> sortedScenes = group.Scenes.ToList();
+                List<ShurikenUIScene> sortedScenes = group.Scenes.ToList();
                 sortedScenes.Sort();
 
                 UpdateScenes(group.Scenes, fonts, time);
             }
         }
 
-        private void UpdateScenes(IEnumerable<UIScene> scenes, IEnumerable<UIFont> fonts, float time)
+        private void UpdateScenes(IEnumerable<ShurikenUIScene> scenes, IEnumerable<UIFont> fonts, float time)
         {
             foreach (var scene in scenes)
             {
@@ -112,7 +112,7 @@ namespace Shuriken.Views
             }
         }
 
-        private void UpdateCast(UIScene scene, ShurikenUIElement in_UiElement, CastTransform transform, float time)
+        private void UpdateCast(ShurikenUIScene scene, ShurikenUIElement in_UiElement, CastTransform transform, float time)
         {
             bool hideFlag = in_UiElement.HideFlag != 0;
             var position = new Vec2(in_UiElement.Translation.X, in_UiElement.Translation.Y);
@@ -210,25 +210,25 @@ namespace Shuriken.Views
             position += in_UiElement.Offset;
 
             // Inherit position
-            if ((in_UiElement.Field34 & 0x100) != 0)
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritXPosition))
                 position.X += transform.Position.X;
-            
-            if ((in_UiElement.Field34 & 0x200) != 0)
+
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritYPosition))
                 position.Y += transform.Position.Y;
 
             // Inherit rotation
-            if ((in_UiElement.Field34 & 0x2) != 0)
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritRotation))
                 rotation += transform.Rotation;
 
             // Inherit scale
-            if ((in_UiElement.Field34 & 0x400) != 0) 
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritScaleX))
                 scale.X *= transform.Scale.X;
-            
-            if ((in_UiElement.Field34 & 0x800) != 0) 
+
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritScaleY))
                 scale.Y *= transform.Scale.Y;
 
             // Inherit color
-            if ((in_UiElement.Field34 & 0x8) != 0)
+            if (in_UiElement.InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritColor))
             {
                 Vector4 cF = Vector4.Multiply(color.ToFloats(), transform.Color.ToFloats());
                 color = new Color(cF.X, cF.Y, cF.Z, cF.W);
@@ -253,7 +253,8 @@ namespace Shuriken.Views
                 else if (in_UiElement.Type == DrawType.Font)
                 {
                     float xOffset = 0.0f;
-
+                    if (in_UiElement.FontCharacters == null)
+                        in_UiElement.FontCharacters = "";
                     for (var i = 0; i < in_UiElement.FontCharacters.Length; i++)
                     {
                         var font = Project.TryGetFont(in_UiElement.FontID);
@@ -306,13 +307,13 @@ namespace Shuriken.Views
             TreeViewItem source = e.OriginalSource as TreeViewItem;
             TreeViewItem item = source;
             
-            // Move up the tree view until we reach the TreeViewItem holding the UIScene
-            while (item != null && item.DataContext != null && item.DataContext is not UIScene)
+            // Move up the tree view until we reach the TreeViewItem holding the ShurikenUIScene
+            while (item != null && item.DataContext != null && item.DataContext is not ShurikenUIScene)
                 item = Utilities.GetParentTreeViewItem(item);
 
             if (DataContext is ScenesViewModel vm)
             {
-                vm.SelectedScene = item == null ? null : item.DataContext as UIScene;
+                vm.SelectedScene = item == null ? null : item.DataContext as ShurikenUIScene;
                 vm.SelectedUIObject = source.DataContext;
 
                 TreeViewItem parent = Utilities.GetParentTreeViewItem(source);
@@ -334,7 +335,15 @@ namespace Shuriken.Views
         {
             var item = e.OriginalSource as TreeViewItem;
             if (DataContext is ScenesViewModel vm)
-                vm.SelectedSceneGroup = item.DataContext as UISceneGroup;
+                vm.SelectedSceneGroup = item.DataContext as ShurikenUISceneGroup;
+        }
+
+        private void NewCastClickGroup(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is ScenesViewModel vm)
+            {
+               ((UICastGroup)vm.SelectedUIObject).Casts.Add(new ShurikenUIElement());
+            }
         }
     }
 }

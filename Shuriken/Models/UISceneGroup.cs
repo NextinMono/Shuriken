@@ -7,12 +7,12 @@ using System.Collections.ObjectModel;
 
 namespace Shuriken.Models
 {
-    public class UISceneGroup
+    public class ShurikenUISceneGroup
     {
         public string Name { get; set; }
         public bool Visible { get; set; }
-        public ObservableCollection<UIScene> Scenes { get; set; }
-        public ObservableCollection<UISceneGroup> Children { get; set; }
+        public ObservableCollection<ShurikenUIScene> Scenes { get; set; }
+        public ObservableCollection<ShurikenUISceneGroup> Children { get; set; }
 
         public void Clear()
         {
@@ -21,12 +21,12 @@ namespace Shuriken.Models
                 child.Clear();
         }
 
-        public UISceneGroup(string name)
+        public ShurikenUISceneGroup(string name)
         {
             Name = name;
             Visible = true;
-            Scenes = new ObservableCollection<UIScene>();
-            Children = new ObservableCollection<UISceneGroup>();
+            Scenes = new ObservableCollection<ShurikenUIScene>();
+            Children = new ObservableCollection<ShurikenUISceneGroup>();
         }
     }
 }

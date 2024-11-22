@@ -32,63 +32,101 @@
     </UserControl.Resources>
     <ScrollViewer>
         <StackPanel>
-            <Expander Header="Cast" IsExpanded="True">
-                <Border>
-                    <StackPanel>
-                        <Label>Name</Label>
-                        <TextBox Text="{Binding Name}"/>
+            <Border>
+                <StackPanel>
+                    <Label>Name</Label>
+                    <TextBox Text="{Binding Name}"/>
 
-                        <Label>Field00</Label>
-                        <TextBox Text="{Binding Field00}"/>
+                    <Label>Field00</Label>
+                    <TextBox Text="{Binding Field00}"/>
 
-                        <Label>Type</Label>
-                        <ComboBox ItemsSource="{Binding Type, Converter={StaticResource EnumConverter}, Mode=OneTime}"
+                    <Label>Type</Label>
+                    <ComboBox ItemsSource="{Binding Type, Converter={StaticResource EnumConverter}, Mode=OneTime}"
                               SelectedValue="{Binding Type}" SelectedValuePath="Value" DisplayMemberPath="Description"/>
 
-                        <CheckBox Content="Enabled" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Left" Margin="5 10"/>
+                    <GroupBox Grid.Row="1" Grid.Column="4" Header="Status">
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Content="Enabled" IsChecked="{Binding IsEnabled}" HorizontalAlignment="Left" Margin="5 10"/>
+                            <CheckBox Content="Hidden" IsChecked="{Binding HideFlag}" HorizontalAlignment="Right" Margin="5 10"/>
+                        </StackPanel>
+                    </GroupBox>
+                </StackPanel>
 
-                        <Label>Hide Flag</Label>
-                        <TextBox Text="{Binding HideFlag, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
-                </Border>
-            </Expander>
+
+            </Border>
             <Expander Header="Dimensions" IsExpanded="True">
                 <Border>
                     <StackPanel>
-                        <Label>Width</Label>
-                        <TextBox Text="{Binding Width, UpdateSourceTrigger=PropertyChanged}"/>
+                        <DockPanel>
+                            <Grid Height="46" Width="46" HorizontalAlignment="Left" Margin="5,8,5,0" VerticalAlignment="Top">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                        <Label>Height</Label>
-                        <TextBox Text="{Binding Height, UpdateSourceTrigger=PropertyChanged}"/>
+                                <!-- Add Radio Buttons -->
+                                <RadioButton Grid.Row="0" Grid.Column="0" Checked="SetCastPivot_TL"/>
+                                <RadioButton Grid.Row="0" Grid.Column="1"  />
+                                <RadioButton Grid.Row="0" Grid.Column="2"  />
 
-                        <Label>Top Left</Label>
-                        <local:Vector2Control Value="{Binding TopLeft}"/>
-                        <Label>Top Right</Label>
-                        <local:Vector2Control Value="{Binding TopRight}"/>
-                        <Label>Bottom Left</Label>
-                        <local:Vector2Control Value="{Binding BottomLeft}"/>
-                        <Label>Bottom Right</Label>
-                        <local:Vector2Control Value="{Binding BottomRight}"/>
+                                <RadioButton Grid.Row="1" Grid.Column="0"  />
+                                <RadioButton Grid.Row="1" Grid.Column="1"  />
+                                <RadioButton Grid.Row="1" Grid.Column="2"  />
+
+                                <RadioButton Grid.Row="2" Grid.Column="0" />
+                                <RadioButton Grid.Row="2" Grid.Column="1" />
+                                <RadioButton Grid.Row="2" Grid.Column="2" />
+
+                            </Grid>
+                            <GroupBox Grid.Row="1" Grid.Column="2" Header="Invert UV" RenderTransformOrigin="0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox Content="H" IsChecked="{Binding MirrorX}" HorizontalAlignment="Left" Margin="5 10"/>
+                                    <CheckBox Content="V" IsChecked="{Binding MirrorY}" HorizontalAlignment="Right" Margin="5 10"/>
+                                </StackPanel>
+                            </GroupBox>
+                        </DockPanel>
+
+                        <GroupBox Header="Size">
+		                    <local:Vector2Control Value="{Binding Size}"/>
+	                    </GroupBox>
+                        <Expander Header="UV Coordinates" IsExpanded="false">
+                            <StackPanel>
+                                <Label>Top Left</Label>
+                                <local:Vector2Control Value="{Binding TopLeft, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                <Label>Top Right</Label>
+                                <local:Vector2Control Value="{Binding TopRight}"/>
+                                <Label>Bottom Left</Label>
+                                <local:Vector2Control Value="{Binding BottomLeft}"/>
+                                <Label>Bottom Right</Label>
+                                <local:Vector2Control Value="{Binding BottomRight}"/>
+                            </StackPanel>
+                        </Expander>
                     </StackPanel>
                 </Border>
             </Expander>
             <Expander Header="Transform" IsExpanded="True">
                 <Border>
                     <StackPanel>
+
+	                    <Label>Rotation</Label>
+	                    <TextBox Text="{Binding Rotation, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Label>Origin</Label>
+	                    <local:Vector3Control Value="{Binding Offset}"/>
+                        
                         <Label>Translation</Label>
-                        <local:Vector2Control Value="{Binding Translation}"/>
+                        <local:Vector3Control Value="{Binding Translation}"/>
 
-                        <Label>Z-Translation</Label>
-                        <TextBox Text="{Binding ZTranslation, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <Label>Offset</Label>
-                        <local:Vector2Control Value="{Binding Offset}"/>
-
-                        <Label>Rotation</Label>
-                        <TextBox Text="{Binding Rotation, UpdateSourceTrigger=PropertyChanged}"/>
 
                         <Label>Scale</Label>
                         <local:Vector3Control Value="{Binding Scale}"/>
+
                     </StackPanel>
                 </Border>
             </Expander>
@@ -119,32 +157,40 @@
                         <ComboBox ItemsSource="{Binding Source={x:Static models:Project.Fonts}}"
                                   DisplayMemberPath="Name" SelectedValuePath="ID" SelectedValue="{Binding FontID}"/>
 
-                        <Label>Font Characters</Label>
+                        <Label>Text</Label>
                         <TextBox Text="{Binding FontCharacters, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <Label>Font Character Spacing</Label>
+                        <Label>Character Spacing</Label>
                         <TextBox Text="{Binding FontSpacingAdjustment, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </Border>
             </Expander>
+
+            <Expander Header="Inheritance Flags" IsExpanded="True">
+                <Border>
+                    <StackPanel>
+                        <CheckBox Content="Inherit Horizontal Position" IsChecked="{Binding InheritsXPosition}" HorizontalAlignment="Left" Margin="5 5"/>
+                        <CheckBox Content="Inherit Vertical Position" IsChecked="{Binding InheritsYPosition}" HorizontalAlignment="Left" Margin="5 5"/>
+                        <CheckBox Content="Inherit Rotation" IsChecked="{Binding InheritsRotation}" HorizontalAlignment="Left" Margin="5 5"/>
+                        <CheckBox Content="Inherit Color" IsChecked="{Binding InheritsColor}" HorizontalAlignment="Left" Margin="5 5"/>
+                        <CheckBox Content="Inherit Width" IsChecked="{Binding InheritsScaleX}" HorizontalAlignment="Left" Margin="5 5"/>
+                        <CheckBox Content="Inherit Height" IsChecked="{Binding InheritsScaleY}" HorizontalAlignment="Left" Margin="5 5"/>
+                    </StackPanel>
+                </Border>
+            </Expander>
+
             <Expander Header="Unknown" IsExpanded="True">
                 <Border>
                     <StackPanel>
                         <Label>Field2C</Label>
                         <TextBox Text="{Binding Field2C, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <Label>Inheritance</Label>
-                        <TextBox Text="{Binding Field34, UpdateSourceTrigger=PropertyChanged}"/>
-
-                        <Label>Flags</Label>
-                        <TextBox Text="{Binding Flags, UpdateSourceTrigger=PropertyChanged}"/>
-                        
-                        <Label>SubImageCount</Label>
-                        <TextBox Text="{Binding SubImageCount, UpdateSourceTrigger=PropertyChanged}"/>
+                        <!--<Label>SubImageCount</Label>
+                        <TextBox Text="{Binding SubImageCount, UpdateSourceTrigger=PropertyChanged}"/>-->
 
                         <Label>Field4C</Label>
                         <TextBox Text="{Binding Field4C, UpdateSourceTrigger=PropertyChanged}"/>
-                        
+
                         <Label>Field58</Label>
                         <TextBox Text="{Binding Field58, UpdateSourceTrigger=PropertyChanged}"/>
 
@@ -173,12 +219,23 @@
                     </StackPanel>
                 </Border>
             </Expander>
-            <Expander Header="Sprites" IsExpanded="True" Visibility="{Binding Type, Converter={StaticResource Eq2Visibility}, ConverterParameter={x:Static models:DrawType.Sprite}, Mode=OneWay}">
+            <Expander Header="Material" IsExpanded="True" Visibility="{Binding Type, Converter={StaticResource Eq2Visibility}, ConverterParameter={x:Static models:DrawType.Sprite}, Mode=OneWay}">
                 <Border>
                     <StackPanel>
-                        <Label>Default Sprite</Label>
+                        <GroupBox Header="Texture">
+                            <UniformGrid Columns="4">
+                                <Label>Filtering</Label>
+                                <ComboBox ItemsSource="{Binding Filtering, Converter={StaticResource EnumConverter}, Mode=OneTime}"
+			                              SelectedValue="{Binding Filtering}" SelectedValuePath="Value" DisplayMemberPath="Description" Margin="-10,0,5,0" />
+                                <Label>Blend</Label>
+                                <ComboBox ItemsSource="{Binding Additive, Converter={StaticResource EnumConverter}, Mode=OneTime}"
+			                              SelectedValue="{Binding Additive}" SelectedValuePath="Value" DisplayMemberPath="Description" Margin="-15,0,0,0"/>
+                            </UniformGrid>
+                        </GroupBox>
+                        <Label>Current Pattern</Label>
                         <TextBox Text="{Binding DefaultSprite, UpdateSourceTrigger=PropertyChanged}"/>
 
+                        <Label>Patterns</Label>
                         <ListView Name="SpriteList" ItemsSource="{Binding Sprites}" Height="100">
                             <ListView.ItemTemplate>
                                 <DataTemplate>

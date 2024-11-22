@@ -55,7 +55,7 @@
                     </TextBlock>
                     <TreeView Grid.Row="1" Name="SceneGroupsTreeView" TreeViewItem.Selected="NodesTreeViewSelectedItemChanged" ItemsSource="{Binding SceneGroups}">
                         <TreeView.Resources>
-                            <HierarchicalDataTemplate DataType="{x:Type models:UISceneGroup}" ItemsSource="{Binding Children}">
+                            <HierarchicalDataTemplate DataType="{x:Type models:ShurikenUISceneGroup}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock Text="{Binding Name}"/>
@@ -79,7 +79,7 @@
                     </TextBlock>
                     <TreeView Grid.Row="1" Name="ScenesTreeView" TreeViewItem.Selected="ScenesTreeViewSelected" TreeView.SelectedItemChanged="SelectedItemChanged" ItemsSource="{Binding SelectedSceneGroup.Scenes}">
                         <TreeView.Resources>
-                            <HierarchicalDataTemplate DataType="{x:Type models:UIScene}" ItemsSource="{Binding Groups}">
+                            <HierarchicalDataTemplate DataType="{x:Type models:ShurikenUIScene}" ItemsSource="{Binding Groups}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>
@@ -101,9 +101,9 @@
                                 <Run Text="&#xf5fd; " FontFamily="{StaticResource FontAwesome}"/>
                                 <Run Text="{Binding Name}"/>
                                     </TextBlock>
-                                    <StackPanel.ContextMenu>
+                                    <StackPanel.ContextMenu  >
                                         <ContextMenu>
-                                            <MenuItem Header="New Cast"/>
+                                            <MenuItem Header="New Cast" StaysOpenOnClick="true" Click="NewCastClickGroup"/>
                                             <MenuItem Header="Remove"/>
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>

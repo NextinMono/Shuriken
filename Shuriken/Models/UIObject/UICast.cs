@@ -12,14 +12,52 @@ using System.Runtime.CompilerServices;
 using System.Collections.ObjectModel;
 using SharpNeedle.Ninja.Csd;
 using Cast = XNCPLib.XNCP.Cast;
+using Shuriken.Misc.Extensions;
+using Shuriken.Views;
+
 
 namespace Shuriken.Models
 {
+    [Flags]
+    public enum ElementInheritanceFlags
+    {
+        None = 0,
+        InheritRotation = 0x2,
+        InheritColor = 0x8,
+        InheritXPosition = 0x100,
+        InheritYPosition = 0x200,
+        InheritScaleX = 0x400,
+        InheritScaleY = 0x800,
+    }
+    [Flags]
+    public enum ElementMaterialFlags
+    {
+        None = 0,
+        AdditiveBlending = 0x1,
+        MirrorX = 0x400,
+        MirrorY = 0x800,
+        LinearFiltering = 0x1000
+    }
+    public enum ElementMaterialFiltering
+    {
+        [Description("Nearest")]
+        NearestNeighbor = 0,
+        [Description("Linear")]
+        Linear = 1
+    }
+    public enum ElementMaterialBlend
+    {
+        [Description("Normal")]
+        Normal = 0,
+        [Description("Additive")]
+        Additive = 1
+    }
     public class ShurikenUIElement : INotifyPropertyChanged, ICastContainer
     {
+
         private string name;
         public string Name
-        { 
+        {
             get { return name; }
             set
             {
@@ -36,8 +74,9 @@ namespace Shuriken.Models
         public Vector2 TopRight { get; set; }
         public Vector2 BottomRight { get; set; }
 
-        public Vector2 Anchor 
-        { 
+        
+        public Vector2 Anchor
+        {
             get {
                 float right = Math.Abs(TopRight.X) - Math.Abs(TopLeft.X);
                 float top = Math.Abs(TopRight.Y) - Math.Abs(BottomRight.Y);
@@ -46,16 +85,15 @@ namespace Shuriken.Models
         }
 
         public uint Field2C { get; set; }
-        public uint Field34 { get; set; }
-        public uint Flags { get; set; }
+        public ElementInheritanceFlags InheritanceFlags { get; set; }
+        public ElementMaterialFlags Flags { get; set; }
         public uint SubImageCount { get; set; }
 
         public int FontID { get; set; }
         public string FontCharacters { get; set; }
 
         public float FontSpacingAdjustment { get; set; }
-        public uint Width { get; set; }
-        public uint Height { get; set; }
+        public Vector2 Size { get; set; }
         public uint Field58 { get; set; }
         public uint Field5C { get; set; }
 
@@ -65,13 +103,13 @@ namespace Shuriken.Models
         public uint Field70 { get; set; }
         public int HideFlag { get; set; }
 
-        public Vector2 Translation { get; set; }
+        public Vector3 Translation { get; set; }
         public float ZTranslation { get; set; }
         public float Rotation { get; set; }
         public Vector3 Scale { get; set; }
 
         public float DefaultSprite { get; set; }
-        public Color Color { get ; set; }
+        public Color Color { get; set; }
         public Color GradientTopLeft { get; set; }
         public Color GradientBottomLeft { get; set; }
         public Color GradientTopRight { get; set; }
@@ -89,6 +127,82 @@ namespace Shuriken.Models
         public SharpNeedle.Ninja.Csd.Cast CastCsd;
         //public SharpNeedle.Ninja.Csd CastSwif;
 
+        //These are for the UI to mess with
+        #region UI Funcs
+        public Vector2 UVTopLeft 
+        { 
+            get 
+            { return TopLeft * UIEditor.ViewResolution; } 
+            set 
+            { TopLeft = value / UIEditor.ViewResolution; }}
+        public Vector2 UVTopRight { get { return TopRight * UIEditor.ViewResolution; } set { TopRight = value / UIEditor.ViewResolution; }}
+        public Vector2 UVBottomLeft { get { return BottomLeft * UIEditor.ViewResolution; } set { BottomLeft = value / UIEditor.ViewResolution; }}
+        public Vector2 UVBottomRight { get { return BottomRight * UIEditor.ViewResolution; } set { BottomRight = value / UIEditor.ViewResolution; }}
+
+
+        public bool InheritsXPosition 
+        { 
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritXPosition); }
+            set { InheritanceFlags = InheritanceFlags.SetFlag<ElementInheritanceFlags>(ElementInheritanceFlags.InheritXPosition, value); }
+        }
+        public bool InheritsYPosition
+        {
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritYPosition); }
+            set { InheritanceFlags = InheritanceFlags.SetFlag(ElementInheritanceFlags.InheritYPosition, value); }
+        }
+        public bool InheritsRotation
+        {
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritRotation); }
+            set { InheritanceFlags = InheritanceFlags = InheritanceFlags.SetFlag(ElementInheritanceFlags.InheritRotation, value); }
+        }
+        public bool InheritsColor
+        {
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritColor); }
+            set { InheritanceFlags = InheritanceFlags.SetFlag(ElementInheritanceFlags.InheritColor, value); }
+        }
+        public bool InheritsScaleX
+        {
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritScaleX); }
+            set { InheritanceFlags = InheritanceFlags.SetFlag(ElementInheritanceFlags.InheritScaleX, value); }
+        }
+        public bool InheritsScaleY
+        {
+            get { return InheritanceFlags.HasFlag(ElementInheritanceFlags.InheritScaleY); }
+            set { InheritanceFlags = InheritanceFlags.SetFlag(ElementInheritanceFlags.InheritScaleY, value); }
+        }
+        public ElementMaterialBlend Additive
+        {
+            get
+            {
+                return (ElementMaterialBlend)(Flags.HasFlag(ElementMaterialFlags.AdditiveBlending) ? 1 : 0);
+            }
+            set
+            {
+                Flags = Flags.SetFlag(ElementMaterialFlags.AdditiveBlending, value == ElementMaterialBlend.Additive);
+            }
+        }
+        public ElementMaterialFiltering Filtering
+        {
+            get 
+            {
+                return (ElementMaterialFiltering)(Flags.HasFlag(ElementMaterialFlags.LinearFiltering) ? 1 : 0); 
+            }
+            set 
+            {
+                Flags = Flags.SetFlag(ElementMaterialFlags.LinearFiltering, value == ElementMaterialFiltering.Linear);
+            }
+        }
+        public bool MirrorX
+        {
+            get { return Flags.HasFlag(ElementMaterialFlags.MirrorX); }
+            set { if (value) Flags |= ElementMaterialFlags.MirrorX; else Flags &= ~ElementMaterialFlags.MirrorX; }
+        }
+        public bool MirrorY
+        {
+            get { return Flags.HasFlag(ElementMaterialFlags.MirrorY); }
+            set { if (value) Flags |= ElementMaterialFlags.MirrorY; else Flags &= ~ElementMaterialFlags.MirrorY; }
+        }
+        #endregion
         public List<ShurikenUIElement> GetAllChildren()
         {
             List<ShurikenUIElement> shurikenUIElements = new List<ShurikenUIElement>();
@@ -106,7 +220,6 @@ namespace Shuriken.Models
         {
             Children.Remove(cast);
         }
-
         public ShurikenUIElement(Cast cast, string name, int priority)
         {
             Name = name;
@@ -123,16 +236,15 @@ namespace Shuriken.Models
             BottomRight = new Vector2(cast.BottomRight);
 
             Field2C = cast.Field2C;
-            Field34 = cast.Field34;
-            Flags = cast.Field38;
+            InheritanceFlags = (ElementInheritanceFlags)cast.Field34;
+            Flags = (ElementMaterialFlags)cast.Field38;
             SubImageCount = cast.SubImageCount;
 
             FontID = -1;
             FontCharacters = cast.FontCharacters;
 
             FontSpacingAdjustment = cast.FontSpacingAdjustment;
-            Width = cast.Width;
-            Height = cast.Height;
+            Size = new Vector2(cast.Width, cast.Height);
 
             Field58 = cast.Field58;
             Field5C = cast.Field5C;
@@ -144,7 +256,7 @@ namespace Shuriken.Models
             Field70 = cast.Field70;
 
             HideFlag = cast.CastInfoData.HideFlag;
-            Translation = new Vector2(cast.CastInfoData.Translation);
+            Translation = new Vector3(cast.CastInfoData.Translation);
             Rotation = cast.CastInfoData.Rotation;
             Scale = new Vector3(cast.CastInfoData.Scale.X, cast.CastInfoData.Scale.Y, 1.0f);
             DefaultSprite = cast.CastInfoData.SubImage;
@@ -176,16 +288,15 @@ namespace Shuriken.Models
             BottomRight = new Vector2(cast.BottomRight);
 
             Field2C = cast.Field2C;
-            Field34 = cast.InheritanceFlags.Value;
-            Flags = cast.Field38;
+            InheritanceFlags = (ElementInheritanceFlags)cast.InheritanceFlags.Value;
+            Flags = (ElementMaterialFlags)cast.Field38;
             SubImageCount = (uint)cast.SpriteIndices.Length;
 
             FontID = -1;
             FontCharacters = cast.Text;
 
-            FontSpacingAdjustment = (float)cast.Field4C;
-            Width = cast.Width;
-            Height = cast.Height;
+            FontSpacingAdjustment = BitConverter.ToSingle(BitConverter.GetBytes(cast.Field4C));
+            Size = new Vector2(cast.Width, cast.Height);
 
             Field58 = cast.Field58;
             Field5C = cast.Field5C;
@@ -197,7 +308,7 @@ namespace Shuriken.Models
             Field70 = cast.Field70;
 
             HideFlag = (int)cast.Info.HideFlag;
-            Translation = new Vector2(cast.Info.Translation);
+            Translation = new Vector3(cast.Info.Translation);
             Rotation = cast.Info.Rotation;
             Scale = new Vector3(cast.Info.Scale.X, cast.Info.Scale.Y, 1.0f);
             DefaultSprite = cast.Info.SpriteIndex;
@@ -214,7 +325,7 @@ namespace Shuriken.Models
         }
         public ShurikenUIElement()
         {
-            Name = "Cast";
+            Name = "New_Cast";
             Field00 = 0;
             Type = DrawType.Sprite;
             IsEnabled = true;
@@ -223,7 +334,7 @@ namespace Shuriken.Models
             Children = new ObservableCollection<ShurikenUIElement>();
 
             Field2C = 0;
-            Field34 = 0;
+            InheritanceFlags = 0;
             Flags = 0;
             SubImageCount = 0;
 
@@ -231,8 +342,7 @@ namespace Shuriken.Models
             FontCharacters = "";
 
             FontSpacingAdjustment = 0;
-            Width = 64;
-            Height = 64;
+            Size = new Vector2(64, 64);
             Field58 = 0;
             Field5C = 0;
 
@@ -248,7 +358,7 @@ namespace Shuriken.Models
             Field70 = 0;
 
             HideFlag = 0;
-            Translation = new Vector2();
+            Translation = new Vector3();
             Rotation = 0;
             Scale = new Vector3(1.0f, 1.0f, 1.0f);
             DefaultSprite = 0;
@@ -282,7 +392,7 @@ namespace Shuriken.Models
             BottomRight = new Vector2(c.BottomRight);
 
             Field2C = c.Field2C;
-            Field34 = c.Field34;
+            InheritanceFlags = c.InheritanceFlags;
             Flags = c.Flags;
             SubImageCount = c.SubImageCount;
 
@@ -290,8 +400,8 @@ namespace Shuriken.Models
             FontCharacters = c.FontCharacters;
 
             FontSpacingAdjustment = c.FontSpacingAdjustment;
-            Width = c.Width;
-            Height = c.Height;
+
+            Size = c.Size;
             Field58 = c.Field58;
             Field5C = c.Field5C;
 
@@ -302,7 +412,7 @@ namespace Shuriken.Models
             Field70 = c.Field70;
 
             HideFlag = c.HideFlag;
-            Translation = new Vector2(c.Translation);
+            Translation = new Vector3(c.Translation);
             Rotation = c.Rotation;
             Scale = new Vector3(c.Scale);
             DefaultSprite = c.DefaultSprite;

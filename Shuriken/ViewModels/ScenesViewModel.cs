@@ -98,7 +98,7 @@ namespace Shuriken.ViewModels
 
         public void CreateScene()
         {
-            Scenes.Add(new UIScene("scene"));
+            Scenes.Add(new ShurikenUIScene("scene"));
         }
 
         public void RemoveSelectedScene()
@@ -139,12 +139,12 @@ namespace Shuriken.ViewModels
             throw new NotImplementedException();
         }
 
-        public UISceneGroup SelectedSceneGroup { get; set; }
-        public UIScene SelectedScene { get; set; }
+        public ShurikenUISceneGroup SelectedSceneGroup { get; set; }
+        public ShurikenUIScene SelectedScene { get; set; }
         public object ParentNode { get; set; }
         public object SelectedUIObject { get; set; }
-        public ObservableCollection<UISceneGroup> SceneGroups => Project.SceneGroups;
-        public ObservableCollection<UIScene> Scenes => SelectedSceneGroup?.Scenes;
+        public ObservableCollection<ShurikenUISceneGroup> SceneGroups => Project.SceneGroups;
+        public ObservableCollection<ShurikenUIScene> Scenes => SelectedSceneGroup?.Scenes;
 
         public ScenesViewModel()
         {

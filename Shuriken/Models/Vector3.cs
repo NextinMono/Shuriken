@@ -25,14 +25,24 @@ namespace Shuriken.Models
             Y = v.Y;
             Z = v.Z;
         }
-
+        public Vector3(Vector2 v)
+        {
+            X = v.X;
+            Y = v.Y;
+            Z = 0;
+        }
         public Vector3(System.Numerics.Vector3 v)
         {
             X = v.X;
             Y = v.Y;
             Z = v.Z;
         }
-
+        public Vector3(System.Numerics.Vector2 v)
+        {
+            X = v.X;
+            Y = v.Y;
+            Z = 0;
+        }
         public System.Numerics.Vector3 ToSystemNumerics()
         {
             return new System.Numerics.Vector3(X, Y, Z);

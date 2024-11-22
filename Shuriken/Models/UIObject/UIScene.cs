@@ -17,7 +17,7 @@ using SharpNeedle.Ninja.Csd.Motions;
 
 namespace Shuriken.Models
 {
-    public class UIScene : INotifyPropertyChanged, IComparable<UIScene>
+    public class ShurikenUIScene : INotifyPropertyChanged, IComparable<ShurikenUIScene>
     {
         private string name;
         public string Name
@@ -41,7 +41,7 @@ namespace Shuriken.Models
         public ObservableCollection<Vector2> TextureSizes { get; set; }
         public ObservableCollection<UICastGroup> Groups { get; set; }
         public ObservableCollection<AnimationGroup> Animations { get; set; }
-        //public UIScene(Scene scene, string sceneName, TextureList texList)
+        //public ShurikenUIScene(Scene scene, string sceneName, TextureList texList)
         //{
         //    Name = sceneName;
         //    Field00 = scene.Version;
@@ -62,7 +62,7 @@ namespace Shuriken.Models
         //    //ProcessCasts(scene, texList);
         //    Visible = false;
         //}
-        public UIScene(SharpNeedle.Ninja.Csd.Scene scene, string sceneName, TextureList texList)
+        public ShurikenUIScene(SharpNeedle.Ninja.Csd.Scene scene, string sceneName, TextureList texList)
         {
             Name = sceneName;
             Field00 = (uint)scene.Version;
@@ -83,7 +83,7 @@ namespace Shuriken.Models
             ProcessCastsSharpNeedle(scene, texList);
             Visible = false;
         }
-        public UIScene(string sceneName)
+        public ShurikenUIScene(string sceneName)
         {
             Name = sceneName;
             ZIndex = 0;
@@ -96,7 +96,7 @@ namespace Shuriken.Models
             Visible = false;
         }
 
-        public UIScene(UIScene s)
+        public ShurikenUIScene(ShurikenUIScene s)
         {
             Name = s.Name;
             ZIndex = s.ZIndex;
@@ -271,7 +271,7 @@ namespace Shuriken.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public int CompareTo(UIScene other)
+        public int CompareTo(ShurikenUIScene other)
         {
             return (int)(ZIndex - other.ZIndex);
         }

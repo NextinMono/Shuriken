@@ -77,24 +77,24 @@ namespace Shuriken.ViewModels
         }
 
        
-        private void ProcessSceneGroups(SharpNeedle.Ninja.Csd.SceneNode xNode, UISceneGroup parent, TextureList texlist, string name)
+        private void ProcessSceneGroups(SharpNeedle.Ninja.Csd.SceneNode xNode, ShurikenUISceneGroup parent, TextureList texlist, string name)
         {
-            UISceneGroup uiSceneGroup = new(name);
+            ShurikenUISceneGroup ShurikenUISceneGroup = new(name);
 
             // process node scenes
             foreach (var item in xNode.Scenes)
             {
-                uiSceneGroup.Scenes.Add(new UIScene(item.Value, item.Key, texlist));
+                ShurikenUISceneGroup.Scenes.Add(new ShurikenUIScene(item.Value, item.Key, texlist));
 
             }
 
             if (parent != null)
-                parent.Children.Add(uiSceneGroup);
+                parent.Children.Add(ShurikenUISceneGroup);
             else
-                Project.SceneGroups.Add(uiSceneGroup);
+                Project.SceneGroups.Add(ShurikenUISceneGroup);
 
             foreach (var item in xNode.Children)
-                ProcessSceneGroups(item.Value, uiSceneGroup, texlist, item.Key);
+                ProcessSceneGroups(item.Value, ShurikenUISceneGroup, texlist, item.Key);
         }
         private void LoadSubimages(TextureList texList, List<SubImage> subimages)
         {
@@ -117,64 +117,84 @@ namespace Shuriken.ViewModels
         /// <param name="filename">The path of the file to load</param>
         public void Load(string filename)
         {
-            Clear();
-            ncpSubimages.Clear();
-            if (System.IO.Path.GetExtension(filename).ToLower() == "swif")
+            try
             {
-
-            }
-            else
-            {
-                CsdProject csdFile = new CsdProject();
-                csdFile = ResourceUtility.Open<CsdProject>(@filename);
-                //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
-                //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
-                //WorkFile = new FAPCFile();
-                //WorkFile.Load(filename);
-
-                string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
-                
-                ITextureList xTextures = csdFile.Textures;
-                CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = csdFile.Project.Fonts;
-
-                TextureList texList = new TextureList("textures");
-                foreach (ITexture texture in xTextures)
+                Clear();
+                ncpSubimages.Clear();
+                if (System.IO.Path.GetExtension(filename).ToLower() == "swif")
                 {
-                    string texPath = System.IO.Path.Combine(root, texture.Name);
-                    if (File.Exists(texPath))
-                        texList.Textures.Add(new Texture(texPath));
-                    else
-                        MissingTextures.Add(texture.Name);
+
                 }
-
-                if (MissingTextures.Count > 0)
-                    WarnMissingTextures();
-
-                GetSubImages(csdFile.Project.Root);
-                LoadSubimages(texList, ncpSubimages);
-
-                List<FontID> fontID = new List<FontID>();
-
-               //Parse fonts from CsdProject
-                foreach (KeyValuePair<string, SharpNeedle.Ninja.Csd.Font> mFont in xFontList)
+                else
                 {
-                    int id = Project.CreateFont(mFont.Key);
-                    UIFont font = Project.TryGetFont(id);
-                    foreach (var mCharacterMap in mFont.Value)
+                    CsdProject csdFile = new CsdProject();
+
+                    csdFile = ResourceUtility.Open<CsdProject>(@filename);
+                    //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
+                    //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
+                    //WorkFile = new FAPCFile();
+                    //WorkFile.Load(filename);
+
+                    string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
+
+                    ITextureList xTextures = csdFile.Textures;
+                    CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = csdFile.Project.Fonts;
+
+                    TextureList texList = new TextureList("textures");
+                    if (xTextures != null)
                     {
-                        var sprite = Utilities.FindSpriteIDFromNCPScene((int)mCharacterMap.DestinationIndex, ncpSubimages, texList.Textures);
-                        font.Mappings.Add(new Models.CharacterMapping((char)mCharacterMap.SourceIndex, sprite));
+                        foreach (ITexture texture in xTextures)
+                        {
+                            string texPath = System.IO.Path.Combine(@root, texture.Name);
+                            if (File.Exists(texPath))
+                                texList.Textures.Add(new Texture(texPath));
+                            else
+                                MissingTextures.Add(texture.Name);
+                        }
                     }
+                    else
+                    {
+                        MessageBox.Show("The loaded UI file has an invalid texture list, textures will not load.", "", MessageBoxButton.OK);
+                    }
+
+                    if (MissingTextures.Count > 0)
+                        WarnMissingTextures();
+
+                    GetSubImages(csdFile.Project.Root);
+                    LoadSubimages(texList, ncpSubimages);
+
+                    List<FontID> fontID = new List<FontID>();
+
+                    if(xFontList != null)
+                    {
+                        //Parse fonts from CsdProject
+                        foreach (KeyValuePair<string, SharpNeedle.Ninja.Csd.Font> mFont in xFontList)
+                        {
+                            int id = Project.CreateFont(mFont.Key);
+                            UIFont font = Project.TryGetFont(id);
+                            foreach (var mCharacterMap in mFont.Value)
+                            {
+                                var sprite = Utilities.FindSpriteIDFromNCPScene((int)mCharacterMap.DestinationIndex, ncpSubimages, texList.Textures);
+                                font.Mappings.Add(new Models.CharacterMapping((char)mCharacterMap.SourceIndex, sprite));
+                            }
+                        }
+                    }
+                    
+
+                    // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+                    ProcessSceneGroups(csdFile.Project.Root, null, texList, csdFile.Project.Name);
+
+                    Project.TextureLists.Add(texList);
+
+                    WorkFilePath = filename;
+                    IsLoaded = !MissingTextures.Any();
                 }
-
-               // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
-                ProcessSceneGroups(csdFile.Project.Root, null, texList, csdFile.Project.Name);
-
-                Project.TextureLists.Add(texList);
-
-                WorkFilePath = filename;
-                IsLoaded = !MissingTextures.Any();
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"There was an error whilst opening the file:\n{ex.Message}\n{ex.StackTrace}", "", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            
         }
 
         public void Save(string path)
@@ -207,22 +227,22 @@ namespace Shuriken.ViewModels
             WorkFile.Save(path);
         }
 
-        private void SaveNode(CSDNode xNode, UISceneGroup uiSceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
+        private void SaveNode(CSDNode xNode, ShurikenUISceneGroup ShurikenUISceneGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
         {
-            for (int s = 0; s < uiSceneGroup.Scenes.Count; ++s)
+            for (int s = 0; s < ShurikenUISceneGroup.Scenes.Count; ++s)
             {
-                SaveScenes(xNode, uiSceneGroup, subImageList, Data1, spriteList);
+                SaveScenes(xNode, ShurikenUISceneGroup, subImageList, Data1, spriteList);
             }
 
-            for (int i = 0; i < uiSceneGroup.Children.Count; ++i)
+            for (int i = 0; i < ShurikenUISceneGroup.Children.Count; ++i)
             {
                 NodeDictionary dictionary = new();
-                dictionary.Name = uiSceneGroup.Children[i].Name;
+                dictionary.Name = ShurikenUISceneGroup.Children[i].Name;
                 dictionary.Index = (uint)i;
                 xNode.NodeDictionaries.Add(dictionary);
 
                 CSDNode newNode = new();
-                SaveNode(newNode, uiSceneGroup.Children[i], subImageList, Data1, spriteList);
+                SaveNode(newNode, ShurikenUISceneGroup.Children[i], subImageList, Data1, spriteList);
                 xNode.Children.Add(newNode);
             }
 
@@ -293,7 +313,7 @@ namespace Shuriken.ViewModels
             xFontList.FontIDTable = xFontList.FontIDTable.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
         }
 
-        private void SaveScenes(CSDNode xNode, UISceneGroup uiSGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
+        private void SaveScenes(CSDNode xNode, ShurikenUISceneGroup uiSGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
         {
            //xNode.Scenes.Clear();
            //xNode.SceneIDTable.Clear();
@@ -301,21 +321,21 @@ namespace Shuriken.ViewModels
            //// Save individual scenes
            //for (int s = 0; s < uiSGroup.Scenes.Count; s++)
            //{
-           //    UIScene uiScene = uiSGroup.Scenes[s];
+           //    ShurikenUIScene ShurikenUIScene = uiSGroup.Scenes[s];
            //    XNCPLib.XNCP.Scene xScene = new();
            //
            //    // Save scene parameters
-           //    xScene.Version = uiScene.Field00;
-           //    xScene.ZIndex = uiScene.ZIndex;
-           //    xScene.AnimationFramerate = uiScene.AnimationFramerate;
-           //    xScene.Field0C = uiScene.Field0C;
-           //    xScene.Field10 = uiScene.Field10;
-           //    xScene.AspectRatio = uiScene.AspectRatio;
+           //    xScene.Version = ShurikenUIScene.Field00;
+           //    xScene.ZIndex = ShurikenUIScene.ZIndex;
+           //    xScene.AnimationFramerate = ShurikenUIScene.AnimationFramerate;
+           //    xScene.Field0C = ShurikenUIScene.Field0C;
+           //    xScene.Field10 = ShurikenUIScene.Field10;
+           //    xScene.AspectRatio = ShurikenUIScene.AspectRatio;
            //    xScene.Data1 = Data1;
            //    xScene.SubImages = subImageList;
            //
            //    // Initial AnimationKeyframeData so we can add groups and cast data in it
-           //    foreach (AnimationGroup animGroup in uiScene.Animations)
+           //    foreach (AnimationGroup animGroup in ShurikenUIScene.Animations)
            //    {
            //        AnimationKeyframeData keyframeData = new();
            //        xScene.AnimationKeyframeDataList.Add(keyframeData);
@@ -342,10 +362,10 @@ namespace Shuriken.ViewModels
            //    // Sort animation names
            //    xScene.AnimationDictionaries = xScene.AnimationDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
            //
-           //    for (int g = 0; g < uiScene.Groups.Count; g++)
+           //    for (int g = 0; g < ShurikenUIScene.Groups.Count; g++)
            //    {
            //        CastGroup xCastGroup = new();
-           //        UICastGroup uiCastGroup = uiScene.Groups[g];
+           //        UICastGroup uiCastGroup = ShurikenUIScene.Groups[g];
            //
            //        xCastGroup.RootCastIndex = uiCastGroup.RootCastIndex;
            //        SaveCasts(uiCastGroup.CastsOrderedByIndex, xCastGroup, spriteList);
@@ -373,7 +393,7 @@ namespace Shuriken.ViewModels
            //        for (int a = 0; a < xScene.AnimationKeyframeDataList.Count; a++)
            //        {
            //            AnimationKeyframeData animationKeyframeData = xScene.AnimationKeyframeDataList[a];
-           //            AnimationGroup animation = uiScene.Animations[a];
+           //            AnimationGroup animation = ShurikenUIScene.Animations[a];
            //
            //            GroupAnimationData2 groupAnimationData2 = new();
            //            groupAnimationData2.AnimationData2List = new();
@@ -441,7 +461,7 @@ namespace Shuriken.ViewModels
            //
            //    // Add scene name to dictionary, NOTE: this need to sorted after
            //    SceneID xSceneID = new();
-           //    xSceneID.Name = uiScene.Name;
+           //    xSceneID.Name = ShurikenUIScene.Name;
            //    xSceneID.Index = (uint)s;
            //    xNode.SceneIDTable.Add(xSceneID);
            //    xNode.Scenes.Add(xScene);
@@ -494,8 +514,8 @@ namespace Shuriken.ViewModels
                 xCast.BottomRight = new Vector2(uiCast.BottomRight);
 
                 xCast.Field2C = uiCast.Field2C;
-                xCast.Field34 = uiCast.Field34;
-                xCast.Field38 = uiCast.Flags;
+                xCast.Field34 = (uint)uiCast.InheritanceFlags;
+                xCast.Field38 = (uint)uiCast.Flags;
                 xCast.SubImageCount = uiCast.SubImageCount;
 
                 xCast.FontCharacters = uiCast.FontCharacters;
@@ -509,8 +529,8 @@ namespace Shuriken.ViewModels
                 }
                 xCast.FontSpacingAdjustment = uiCast.FontSpacingAdjustment;
 
-                xCast.Width = uiCast.Width;
-                xCast.Height = uiCast.Height;
+                xCast.Width = (uint)uiCast.Size.X;
+                xCast.Height = (uint)uiCast.Size.Y;
                 xCast.Field58 = uiCast.Field58;
                 xCast.Field5C = uiCast.Field5C;
 
