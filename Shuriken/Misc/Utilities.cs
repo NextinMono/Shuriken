@@ -14,6 +14,11 @@ namespace Shuriken.Misc
 {
     public static class Utilities
     {
+
+        public static Shuriken.Models.Color ReverseColor(SharpNeedle.Color<byte> color)
+        {
+            return new Shuriken.Models.Color(color.A, color.B, color.G, color.R);
+        }
         public static float ToRadians(float degrees)
         {
             return degrees * MathF.PI / 180.0f;

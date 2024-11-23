@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpNeedle", "SharpNeedle\
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "SharpNeedle.Shared", "SharpNeedle.Shared\SharpNeedle.Shared.shproj", "{925BC477-9B22-47FB-B0B1-95EA381B3B9E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GvrTool", "GvrTool\GvrTool.csproj", "{6712CBD2-BD19-4841-9A44-356F0562D2D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{C505B203-77E4-411E-AC76-D9750FC3FB3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C505B203-77E4-411E-AC76-D9750FC3FB3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C505B203-77E4-411E-AC76-D9750FC3FB3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6712CBD2-BD19-4841-9A44-356F0562D2D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6712CBD2-BD19-4841-9A44-356F0562D2D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6712CBD2-BD19-4841-9A44-356F0562D2D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6712CBD2-BD19-4841-9A44-356F0562D2D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

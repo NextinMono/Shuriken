@@ -17,6 +17,7 @@ using System.Reflection;
 using Shuriken.Models.Animation;
 using SharpNeedle.Ninja.Csd;
 using SharpNeedle.Utilities;
+using GvrTool.Gvr;
 
 namespace Shuriken.ViewModels
 {
@@ -31,6 +32,7 @@ namespace Shuriken.ViewModels
 
         // File Info
         public FAPCFile WorkFile { get; set; }
+        public CsdProject WorkProjectCsd;
         public string WorkFilePath { get; set; }
         public bool IsLoaded { get; set; }
         public MainViewModel()
@@ -117,37 +119,107 @@ namespace Shuriken.ViewModels
         /// <param name="filename">The path of the file to load</param>
         public void Load(string filename)
         {
-            try
-            {
+            string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
+            //try
+            //{
                 Clear();
                 ncpSubimages.Clear();
-                if (System.IO.Path.GetExtension(filename).ToLower() == "swif")
+                if (System.IO.Path.GetExtension(filename).ToLower().Contains("swif"))
                 {
+                    List<TextureList> texList = new List<TextureList>();
+                    SharpNeedle.SurfRide.Draw.SrdProject srdProject = new SharpNeedle.SurfRide.Draw.SrdProject();
+                    srdProject = ResourceUtility.Open<SharpNeedle.SurfRide.Draw.SrdProject>(@filename);
+                    var swScenes = srdProject.Project.Scenes;
+                    var swTextureLists = srdProject.Project.TextureLists;
+                    var swFontLists = srdProject.Project.Fonts;
+                    Clear();
 
+                    foreach (var textureList in swTextureLists)
+                    {
+                        var texList2 = new TextureList(textureList.Name);
+                        foreach (SharpNeedle.SurfRide.Draw.Texture texture in textureList)
+                        {
+                            string texPath = Path.Combine(root, texture.Name + ".dds");
+                            if (File.Exists(texPath))
+                            {
+                                Texture tex = new Texture(texPath);
+                                foreach (SharpNeedle.SurfRide.Draw.Crop subimage in texture)
+                                {
+                                    int id = Project.CreateSprite(tex, subimage.Top, subimage.Left,
+                                        subimage.Bottom, subimage.Right);
+                                    tex.Sprites.Add(id);
+                                }
+
+                                texList2.Textures.Add(tex);
+                            }
+                            else
+                            {
+                                MissingTextures.Add(texture.Name);
+                            }
+                        }
+
+                        Project.TextureLists.Add(texList2);
+                    }
+
+                    foreach (var fontList in swFontLists)
+                    {
+                        // Implement Texture List Index and Texture Index too here.
+                        UIFont font = new UIFont(fontList.Name, -1);
+                        for (int index = 0; index < fontList.Count; ++index)
+                        {
+                            var texList3 = Project.TextureLists.ElementAt(fontList[index].TextureListIndex);
+                            Texture texture = texList3.Textures.ElementAt(fontList[index].TextureListIndex);
+                            var sprite = texture.Sprites.ElementAt(fontList[index].TextureIndex);
+                            font.Mappings.Add(new Models.CharacterMapping(Convert.ToChar(fontList[index].Code), sprite));
+                        }
+
+                        Project.Fonts.Add(font);
+                    }
+
+                    ShurikenUISceneGroup sceneGroup = new ShurikenUISceneGroup("Test");
+                    foreach (var scene in swScenes)
+                    {
+                        sceneGroup.Scenes.Add(new ShurikenUIScene(srdProject.Project, scene, scene.Name, Project.TextureLists, Project.Fonts));
+                    }
+                    Project.SceneGroups.Add(sceneGroup);
+
+                    if (MissingTextures.Count > 0)
+                        WarnMissingTextures();
                 }
                 else
                 {
-                    CsdProject csdFile = new CsdProject();
+                    WorkProjectCsd = new CsdProject();
 
-                    csdFile = ResourceUtility.Open<CsdProject>(@filename);
+                    WorkProjectCsd = ResourceUtility.Open<CsdProject>(@filename);
                     //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
                     //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
                     //WorkFile = new FAPCFile();
                     //WorkFile.Load(filename);
 
-                    string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
 
-                    ITextureList xTextures = csdFile.Textures;
-                    CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = csdFile.Project.Fonts;
+                    ITextureList xTextures = WorkProjectCsd.Textures;
+                    CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = WorkProjectCsd.Project.Fonts;
 
                     TextureList texList = new TextureList("textures");
                     if (xTextures != null)
                     {
+                        bool tempChangeExtension = false;
+                    string t = Path.GetExtension(xTextures[0].Name).ToLower();
+                        if ( t!= ".dds")
+                        {
+                            //MessageBox.Show("This tool is not capable of loading non-dds images yet, convert them to dds manually to make them show up in the tool.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            tempChangeExtension = true;
+                        }    
                         foreach (ITexture texture in xTextures)
                         {
                             string texPath = System.IO.Path.Combine(@root, texture.Name);
+                            //if (tempChangeExtension)
+                            //{
+                            //    texPath = Path.ChangeExtension(texPath, "dds");
+                            //}
+
                             if (File.Exists(texPath))
-                                texList.Textures.Add(new Texture(texPath));
+                                texList.Textures.Add(new Texture(texPath, tempChangeExtension));
                             else
                                 MissingTextures.Add(texture.Name);
                         }
@@ -160,7 +232,7 @@ namespace Shuriken.ViewModels
                     if (MissingTextures.Count > 0)
                         WarnMissingTextures();
 
-                    GetSubImages(csdFile.Project.Root);
+                    GetSubImages(WorkProjectCsd.Project.Root);
                     LoadSubimages(texList, ncpSubimages);
 
                     List<FontID> fontID = new List<FontID>();
@@ -182,18 +254,18 @@ namespace Shuriken.ViewModels
                     
 
                     // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
-                    ProcessSceneGroups(csdFile.Project.Root, null, texList, csdFile.Project.Name);
+                    ProcessSceneGroups(WorkProjectCsd.Project.Root, null, texList, WorkProjectCsd.Project.Name);
 
                     Project.TextureLists.Add(texList);
 
                     WorkFilePath = filename;
                     IsLoaded = !MissingTextures.Any();
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"There was an error whilst opening the file:\n{ex.Message}\n{ex.StackTrace}", "", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            //}
+           //catch (Exception ex)
+           //{
+           //    MessageBox.Show($"There was an error whilst opening the file:\n{ex.Message}\n{ex.StackTrace}", "", MessageBoxButton.OK, MessageBoxImage.Error);
+           //}
             
         }
 

@@ -10,6 +10,12 @@ using Shuriken.Converters;
 using Shuriken.Rendering;
 using DirectXTexNet;
 using System.ComponentModel;
+using GvrTool.Gvr;
+using System.Collections;
+using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Drawing.Imaging;
+using System.Windows.Media;
 
 namespace Shuriken.Models
 {
@@ -41,6 +47,62 @@ namespace Shuriken.Models
 
             img.Dispose();
         }
+        /// <summary>
+        /// Used for GVR textures for GNCPs, converts GVR's to BitmapSource and output a pixel array for the GL WPF Control
+        /// </summary>
+        /// <param name="in_Gvr">GVR Texture</param>
+        /// <param name="out_Pixels">Pixel array output for GL</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">Thrown if the GVR pixel array is null</exception>
+        public static BitmapSource LoadTga(GVR in_Gvr, ref byte[] out_Pixels)
+        {
+            if (in_Gvr.Pixels == null) throw new ArgumentNullException("GVR Image might be invalid, pixel array is null.");
+            var pixelFormat = PixelFormats.Bgr32; //temporary!!!!!!
+
+            int bytesPerPixel = pixelFormat.BitsPerPixel / 8;
+            int stride = in_Gvr.Width * bytesPerPixel;
+
+            var bitmap = new WriteableBitmap(
+                in_Gvr.Width, in_Gvr.Height,
+                96, 96,
+                pixelFormat,
+                null
+            );
+
+            bitmap.WritePixels(
+                new Int32Rect(0, 0, in_Gvr.Width, in_Gvr.Height),
+                in_Gvr.Pixels,
+                stride,
+                0
+            );
+            //Flip vertically
+            var tb = new TransformedBitmap();
+            var bi = bitmap.Clone();
+            tb.BeginInit();
+            tb.Source = bi;
+            var transform = new ScaleTransform(1, -1, 0, 0);
+            tb.Transform = transform;
+            tb.EndInit();
+
+            out_Pixels = new byte[stride * tb.PixelHeight];
+
+            tb.CopyPixels(out_Pixels, stride, 0);
+
+            return bitmap;
+        }
+        private unsafe void CreateTextureGvr(GVR gvr)
+        {
+            Width = gvr.Width;
+            Height = gvr.Height;
+
+            byte[] forGlTex = null;
+            var bmp = (BitmapSource)LoadTga(gvr, ref forGlTex);
+           
+
+            fixed (byte* pBytes = forGlTex)
+                GlTex = new GLTexture((IntPtr)pBytes, Width, Height);
+            ImageSource = bmp;
+        }
 
         private unsafe void CreateTexture(byte[] bytes)
         {
@@ -50,7 +112,7 @@ namespace Shuriken.Models
 
         private void CreateTexture(string filename)
         {
-            CreateTexture(TexHelper.Instance.LoadFromDDSFile(filename, DDS_FLAGS.NONE));
+           CreateTexture(TexHelper.Instance.LoadFromDDSFile(filename, DDS_FLAGS.NONE));
         }
 
         private void CreateBitmap(ScratchImage img)
@@ -62,11 +124,18 @@ namespace Shuriken.Models
             bmp.Dispose();
         }
 
-        public Texture(string filename) : this()
+        public Texture(string filename, bool gvrTex = false) : this()
         {
             FullName = filename;
             Name = Path.GetFileNameWithoutExtension(filename);
-            CreateTexture(filename);
+            if (gvrTex)
+            {
+                GVR gVR = new GVR();
+                gVR.LoadFromGvrFile(filename);
+                CreateTextureGvr(gVR);
+            }
+            else
+                CreateTexture(filename);
         }
 
         public Texture(string name, byte[] bytes) : this()

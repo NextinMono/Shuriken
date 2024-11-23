@@ -243,12 +243,24 @@ namespace Shuriken.Views
 
                     spr ??= nextSpr;
                     nextSpr ??= spr;
-
-                    renderer.DrawSprite(
-                        in_UiElement.TopLeft, in_UiElement.BottomLeft, in_UiElement.TopRight, in_UiElement.BottomRight,
-                        position, Utilities.ToRadians(rotation), scale, scene.AspectRatio, spr, nextSpr, sprID % 1, color,
-                        gradientTopLeft, gradientBottomLeft, gradientTopRight, gradientBottomRight,
-                        in_UiElement.ZIndex, in_UiElement.Flags);
+                    if(in_UiElement.RendererType == ElementType.Csd)
+                    {
+                        renderer.DrawSprite(
+                            in_UiElement.TopLeft, in_UiElement.BottomLeft, in_UiElement.TopRight, in_UiElement.BottomRight,
+                            position, Utilities.ToRadians(rotation), scale, scene.AspectRatio, spr, nextSpr, sprID % 1, color,
+                            gradientTopLeft, gradientBottomLeft, gradientTopRight, gradientBottomRight,
+                            in_UiElement.ZIndex, in_UiElement.Flags);
+                    }
+                    else
+                    {
+                       // renderer.DrawSprite(position, rotation, new Vec3(lyr.Width, lyr.Height, 1.0f) * scale, spr,
+                       //lyr.Flags, color.ToFloats(), gradients[0].ToFloats(), gradients[2].ToFloats(), gradients[3].ToFloats(), gradients[1].ToFloats(), lyr.ZIndex);
+                        //renderer.DrawSprite(
+                        //    in_UiElement.TopLeft, in_UiElement.BottomLeft, in_UiElement.TopRight, in_UiElement.BottomRight,
+                        //    position, Utilities.ToRadians(rotation), scale, scene.AspectRatio, spr, nextSpr, sprID % 1, color,
+                        //    gradientTopLeft, gradientBottomLeft, gradientTopRight, gradientBottomRight,
+                        //    in_UiElement.ZIndex, in_UiElement.Flags);
+                    }   
                 }
                 else if (in_UiElement.Type == DrawType.Font)
                 {

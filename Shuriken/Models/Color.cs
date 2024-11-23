@@ -67,7 +67,13 @@ namespace Shuriken.Models
             B = c.B;
             A = c.A;
         }
-
+        public Color(SharpNeedle.Color<byte> color)
+        {
+            R = color.R;
+            G = color.G;
+            B = color.B;
+            A = color.A;
+        }
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Vector4 ToFloats()

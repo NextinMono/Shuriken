@@ -160,7 +160,7 @@
                         <Label>Text</Label>
                         <TextBox Text="{Binding FontCharacters, UpdateSourceTrigger=PropertyChanged}"/>
 
-                        <Label>Character Spacing</Label>
+                        <Label>Kerning</Label>
                         <TextBox Text="{Binding FontSpacingAdjustment, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </Border>

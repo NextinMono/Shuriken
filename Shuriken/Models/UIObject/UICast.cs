@@ -14,6 +14,7 @@ using SharpNeedle.Ninja.Csd;
 using Cast = XNCPLib.XNCP.Cast;
 using Shuriken.Misc.Extensions;
 using Shuriken.Views;
+using SharpNeedle.SurfRide.Draw;
 
 
 namespace Shuriken.Models
@@ -52,9 +53,14 @@ namespace Shuriken.Models
         [Description("Additive")]
         Additive = 1
     }
+    public enum ElementType
+    {
+        Csd,
+        Swif
+    }
     public class ShurikenUIElement : INotifyPropertyChanged, ICastContainer
     {
-
+        public ElementType RendererType;
         private string name;
         public string Name
         {
@@ -77,11 +83,7 @@ namespace Shuriken.Models
         
         public Vector2 Anchor
         {
-            get {
-                float right = Math.Abs(TopRight.X) - Math.Abs(TopLeft.X);
-                float top = Math.Abs(TopRight.Y) - Math.Abs(BottomRight.Y);
-                return new Vector2(right, top);
-            }
+            get; set;
         }
 
         public uint Field2C { get; set; }
@@ -273,6 +275,7 @@ namespace Shuriken.Models
         }
         public ShurikenUIElement(SharpNeedle.Ninja.Csd.Cast cast, string name, int index)
         {
+            RendererType = ElementType.Csd;
             CastCsd = cast;
             Name = name;
             Field00 = cast.Field00;
@@ -320,8 +323,158 @@ namespace Shuriken.Models
             InfoField30 = cast.Info.Field30;
             InfoField34 = cast.Info.Field34;
             InfoField38 = cast.Info.Field38;
+            
+            float right = Math.Abs(TopRight.X) - Math.Abs(TopLeft.X);
+            float top = Math.Abs(TopRight.Y) - Math.Abs(BottomRight.Y);
+            Anchor = new Vector2(right, top);            
 
             Sprites = new ObservableCollection<int>(Enumerable.Repeat(-1, cast.SpriteIndices.Length).ToList());
+        }
+        public enum ESwifFlags : uint
+        {
+            eFlags_Transparent = 1,
+            eFlags_InvertColors = 2,
+            eFlags_Unk3 = 4,
+            eFlags_FlipHorizontally = 0x10,
+            eFlags_FlipVertically = 0x20,
+            eFlags_RotateLeft = 0x40,
+            eFlags_FlipHorizontallyAndVertically = 0x80,
+            eFlags_UseFont = 0x100,
+            eFlags_AntiAliasing = 0x2000,
+            eFlags_AnchorBottomRight = 0x40000,
+            eFlags_AnchorBottom = 0x80000,
+            eFlags_AnchorBottomLeft = 0x100000,
+            eFlags_AnchorRight = 0x180000,
+            eFlags_AnchorCenter = 0x200000,
+            eFlags_AnchorLeft = 0x280000,
+            eFlags_AnchorTopRight = 0x300000,
+            eFlags_AnchorTop = 0x380000,
+            eFlags_AnchorTopLeft = 0x400000,
+        }
+        public ShurikenUIElement(CastNode castnode, SharpNeedle.SurfRide.Draw.Cell3D cell, System.Numerics.Vector2 framesize, string name, int index)
+        {
+            RendererType = ElementType.Swif;
+            Name = name;
+            IsEnabled = true;
+            Visible = true;
+            ZIndex = index;
+            Children = new ObservableCollection<ShurikenUIElement>();
+
+            Offset = new Vector2();
+
+            Translation = new Vector3(cell.Position.X / framesize.X, -(cell.Position.Y / framesize.Y), cell.Position.Z);
+
+            Rotation = (cell.RotationZ & 0xFFFF) * 360.0f / ushort.MaxValue;
+            Scale = new Vector3(cell.Scale.X, cell.Scale.Y, cell.Scale.Z);
+            Color = new Color(Misc.Utilities.ReverseColor(cell.MaterialColor));
+            GradientTopLeft = new Color(255, 255, 255, 255);
+            GradientBottomLeft = new Color(255, 255, 255, 255);
+            GradientTopRight = new Color(255, 255, 255, 255);
+            GradientBottomRight = new Color(255, 255, 255, 255);
+            if ((castnode.Flags & 0xF) == 1)
+            {
+                if ((castnode.Flags & (uint)ESwifFlags.eFlags_UseFont) != 0)
+                {
+                    Type = DrawType.Font;
+                }
+                else
+                {
+                    Type = DrawType.Sprite;
+                }
+
+                var imageData = (ImageCastData)castnode.Data;
+                    Vector2 anchorPoint = new Vector2();
+                anchorPoint.X = ((imageData.PivotPoint.X != 0) ? imageData.PivotPoint.X : imageData.Size.X) / framesize.X;
+                anchorPoint.Y = (imageData.PivotPoint.Y != 0 ? imageData.PivotPoint.Y : imageData.Size.Y) / framesize.Y;
+                switch (imageData.Flags & (CastAttribute)0xFF0000)
+                {
+                    case CastAttribute.PivotPositionBottomRight:
+                        Anchor = new Vector2(anchorPoint.X, -anchorPoint.Y);
+                        break;
+                    case CastAttribute.PivotPositionBottomCenter:
+                        Anchor = new Vector2(0, -anchorPoint.Y);
+                        break;
+                    case CastAttribute.PivotPositionBottomLeft:
+                        Anchor = new Vector2(-anchorPoint.X, -anchorPoint.Y);
+                        break;
+                    case CastAttribute.PivotPositionMiddleRight:
+                        Anchor = new Vector2(anchorPoint.X, 0);
+                        break;
+                    case CastAttribute.PivotPositionMiddleCenter:
+                        Anchor = new Vector2(0, 0);
+                        break;
+                    case CastAttribute.PivotPositionMiddleLeft:
+                        Anchor = new Vector2(-anchorPoint.X, 0);
+                        break;
+                    case CastAttribute.PivotPositionTopRight:
+                        Anchor = new Vector2(anchorPoint.X, anchorPoint.Y);
+                        break;
+                    case CastAttribute.PivotPositionTopCenter:
+                        Anchor = new Vector2(0, anchorPoint.Y);
+                        break;
+                    case CastAttribute.PivotPositionTopLeft:
+                        Anchor = new Vector2(-anchorPoint.X, anchorPoint.Y);
+                        break;
+                    default:
+                        break;
+                }
+                if ((imageData.Flags & CastAttribute.PivotPositionMiddleRight) == CastAttribute.PivotPositionMiddleRight)
+                {
+                    Anchor = new Vector2(anchorPoint.X, 0);
+                }
+                else if ((imageData.Flags & CastAttribute.PivotPositionMiddleLeft) == CastAttribute.PivotPositionMiddleLeft)
+                {
+                    Anchor = new Vector2(-anchorPoint.X, 0);
+                }
+                else if ((imageData.Flags & CastAttribute.PivotPositionTopRight) == CastAttribute.PivotPositionTopRight)
+                {
+                    Anchor = new Vector2(anchorPoint.X, anchorPoint.Y);
+                }
+                else if ((imageData.Flags & CastAttribute.PivotPositionTopLeft) == CastAttribute.PivotPositionTopLeft)
+                {
+                    Anchor = new Vector2(-anchorPoint.X, anchorPoint.Y);
+                }
+
+                //Flags = (uint)cast.Flags;
+
+                UIFont font = null;
+                if(imageData.FontData != null)
+                {
+                    FontCharacters = imageData.FontData.Characters;
+                    FontSpacingAdjustment = (uint)Math.Abs(imageData.FontData.SpaceCorrection);
+                }
+
+                Size = new Vector2(imageData.Size);
+
+                if ((imageData.Flags & CastAttribute.RotateLeft) == CastAttribute.RotateLeft)
+                {
+                    Size = new Vector2(imageData.Size.Y, imageData.Size.X);
+                    Rotation += 90;
+                }
+
+                if ((imageData.Flags & CastAttribute.FlipHorizontal) == CastAttribute.FlipHorizontal)
+                {
+                    Scale.X = -Scale.X;
+                }
+                else if ((imageData.Flags & CastAttribute.FlipVertical) == CastAttribute.FlipVertical)
+                {
+                    Scale.Y = -Scale.Y;
+                }
+                else if ((imageData.Flags & CastAttribute.FlipHorizontalAndVertical) == CastAttribute.FlipHorizontalAndVertical)
+                {
+                    Scale.X = -Scale.X;
+                    Scale.Y = -Scale.Y;
+                }
+
+                GradientTopLeft = new Color(Misc.Utilities.ReverseColor(imageData.VertexColorTopLeft));
+                GradientBottomLeft = new Color(Misc.Utilities.ReverseColor(imageData.VertexColorBottomLeft));
+                GradientTopRight = new Color(Misc.Utilities.ReverseColor(imageData.VertexColorTopRight));
+                GradientBottomRight = new Color(Misc.Utilities.ReverseColor(imageData.VertexColorBottomRight));
+            }
+
+            Sprites = new ObservableCollection<int>();
+            for (int i = 0; i < 64; ++i)
+                Sprites.Add(-1);
         }
         public ShurikenUIElement()
         {

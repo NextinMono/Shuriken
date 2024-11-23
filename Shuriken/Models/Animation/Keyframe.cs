@@ -67,7 +67,7 @@ namespace Shuriken.Models.Animation
         {
             Frame = (int)k.Frame;
             KValue = k.Value;
-            KValueColor = new Color(k.Value);
+            KValueColor = new Color(k.Value.Float);
             Type = (KeyframeType)k.Interpolation;
             InTangent = k.InTangent;
             OutTangent = k.OutTangent;

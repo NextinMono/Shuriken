@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GvrTool\GvrTool.csproj" />
     <ProjectReference Include="..\SharpNeedle\SharpNeedle.csproj" />
     <ProjectReference Include="..\XNCPLib\XNCPLib.csproj" />
   </ItemGroup>

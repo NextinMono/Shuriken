@@ -14,6 +14,8 @@ using System.Windows;
 using System.Diagnostics;
 using SharpNeedle.Ninja.Csd;
 using SharpNeedle.Ninja.Csd.Motions;
+using SharpNeedle.SurfRide.Draw;
+using XNCPLib.XNCP;
 
 namespace Shuriken.Models
 {
@@ -83,6 +85,146 @@ namespace Shuriken.Models
             ProcessCastsSharpNeedle(scene, texList);
             Visible = false;
         }
+        public ShurikenUIScene(SharpNeedle.SurfRide.Draw.ProjectChunk project, SharpNeedle.SurfRide.Draw.Scene scene, string sceneName, IEnumerable<TextureList> texLists, IEnumerable<UIFont> fonts)
+        {
+            Name = sceneName;
+            AspectRatio = scene.Resolution.X / scene.Resolution.Y;
+            AnimationFramerate = project.FrameRate;
+            TextureSizes = new ObservableCollection<Vector2>();
+            Groups = new ObservableCollection<UICastGroup>();
+
+            ProcessSWCasts(scene, texLists, fonts);
+            Visible = false;
+        }
+        private void ProcessSWCasts(SharpNeedle.SurfRide.Draw.Scene scene, IEnumerable<TextureList> texLists, IEnumerable<UIFont> fonts)
+        {
+            // Create groups
+            for (int g = 0; g < scene.Layers.Count; ++g)
+            {
+                Groups.Add(new UICastGroup
+                {
+                    Name = scene.Layers[g].Name,
+                });
+
+                // process group layers
+                var tempCasts = new List<ShurikenUIElement>();
+
+                var castIndexMap = new Dictionary<int, int>();
+                for (int c = 0; c < scene.Layers[g].Cells.Count; ++c)
+                {
+                    var cast = new ShurikenUIElement(scene.Layers[g].Nodes[c], (Cell3D)scene.Layers[g].Cells[c],
+                        scene.Resolution, scene.Layers[g].Nodes[c].Name, c);
+
+                    castIndexMap.Add(scene.Layers[g].Nodes[c].ID, c);
+
+                    if (cast.Type == DrawType.Sprite)
+                    {
+                        var cropRefs = ((ImageCastData)scene.Layers[g].Nodes[c].Data).Surface.CropRefs;
+                        for (int index = 0; index < cropRefs.Count; ++index)
+                        {
+                            var texList = texLists.ElementAt(cropRefs[index].TextureListIndex);
+                            var texture = texList.Textures.ElementAt(cropRefs[index].TextureListIndex);
+                            cast.Sprites[index] = texture.Sprites.ElementAt(cropRefs[index].TextureIndex);
+                        }
+                    }
+                    else if (cast.Type == DrawType.Font)
+                    {
+                        var fontdata = (ImageCastData)scene.Layers[g].Nodes[c].Data;
+                        cast.FontID = (int)fontdata.FontData.FontListIndex;
+                    }
+
+                    Groups[g].Casts.Add(cast);
+                }
+            }
+            int animations = 0;
+            Animations = new ObservableCollection<AnimationGroup>();
+            //foreach (var animation in scene.Layers[g].Animations)
+            //{
+            //    Groups[g].Add(new(animation.Name)
+            //    {
+            //        Duration = animation.FrameCount
+            //    });
+            //
+            //    foreach (var link in animation.AnimationLinks)
+            //    {
+            //        var tracks = new List<AnimationTrack>();
+            //        foreach (var track in link.Tracks)
+            //        {
+            //            var type = AnimationType.None;
+            //            switch (track.AnimationType)
+            //            {
+            //                case 0:
+            //                    type = AnimationType.XPosition;
+            //                    break;
+            //                case 1:
+            //                    type = AnimationType.YPosition;
+            //                    break;
+            //                case 2:
+            //                    type = AnimationType.ZPosition;
+            //                    break;
+            //                case 6:
+            //                    type = AnimationType.XScale;
+            //                    break;
+            //                case 7:
+            //                    type = AnimationType.YScale;
+            //                    break;
+            //                case 8:
+            //                    type = AnimationType.ZScale;
+            //                    break;
+            //                case 17:
+            //                    type = AnimationType.SubImage;
+            //                    break;
+            //                case 21:
+            //                    type = AnimationType.ColorRed;
+            //                    break;
+            //                case 22:
+            //                    type = AnimationType.ColorGreen;
+            //                    break;
+            //                case 23:
+            //                    type = AnimationType.ColorBlue;
+            //                    break;
+            //                case 24:
+            //                    type = AnimationType.ColorAlpha;
+            //                    break;
+            //                default:
+            //                    break;
+            //            }
+            //
+            //            var anim = new AnimationTrack(type, track.Flags);
+            //            foreach (var key in track.Keys)
+            //            {
+            //                var keyframe = new Keyframe(key);
+            //                switch (type)
+            //                {
+            //                    case AnimationType.XPosition:
+            //                        keyframe.KValue /= scene.FrameSize.X;
+            //                        break;
+            //                    case AnimationType.YPosition:
+            //                        keyframe.KValue /= -scene.FrameSize.Y;
+            //                        break;
+            //                    default:
+            //                        break;
+            //                }
+            //
+            //                anim.Keyframes.Add(keyframe);
+            //
+            //            }
+            //
+            //            tracks.Add(anim);
+            //        }
+            //
+            //        var layerAnimationList = new AnimationList(tempCasts[castIndexMap[link.CastID]], tracks);
+            //        Groups[g].Animations[animations].LayerAnimations.Add(layerAnimationList);
+            //    }
+            //
+            //    animations++;
+            //}
+
+            //// build hierarchy tree
+            //CreateHierarchyTree(g, scene.Layers[g].CastNodes, tempCasts);
+
+
+        }
         public ShurikenUIScene(string sceneName)
         {
             Name = sceneName;
@@ -120,7 +262,7 @@ namespace Shuriken.Models
                 int[] castSprites = in_Cast.SpriteIndices;
                 for (int index = 0; index < cast.Sprites.Count; ++index)
                 {
-                    cast.Sprites[index] = Utilities.FindSpriteIDFromNCPScene(castSprites[index], in_Scene.Sprites, in_TexList.Textures);
+                    cast.Sprites[index] = Misc.Utilities.FindSpriteIDFromNCPScene(castSprites[index], in_Scene.Sprites, in_TexList.Textures);
                 }
             }
             else if (cast.Type == DrawType.Font)
@@ -142,7 +284,7 @@ namespace Shuriken.Models
             }
             return cast;
         }
-        ShurikenUIElement FindElementFromCsdCast(ShurikenUIElement node, Cast searchValue)
+        ShurikenUIElement FindElementFromCsdCast(ShurikenUIElement node, SharpNeedle.Ninja.Csd.Cast searchValue)
         {
             if (node.CastCsd.Name == searchValue.Name && node.CastCsd.Position == searchValue.Position && node.CastCsd.Priority == searchValue.Priority)
             {
@@ -173,11 +315,11 @@ namespace Shuriken.Models
                 });
 
                 //Get root cast
-                Cast csdCast = scene.Families[g].Casts[0];
+                SharpNeedle.Ninja.Csd.Cast csdCast = scene.Families[g].Casts[0];
 
                 //Process casts and its children by converting all of them to Shuriken nodes
                 ShurikenUIElement castNew = ConvertSharpCast(csdCast, scene, texList);
-                foreach (Cast csdCastChild in csdCast.Children)
+                foreach (SharpNeedle.Ninja.Csd.Cast csdCastChild in csdCast.Children)
                 {
                     castNew.Children.Add(RecursiveConvertCast(csdCastChild, scene, texList));
                 }
