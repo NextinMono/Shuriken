@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,27 @@ namespace Shuriken.Misc
 {
     public static class Utilities
     {
+        //For GVR, taken from GVRTool, which in turn takes it from Puyotools
+        public static ushort SwapU16(ushort value)
+        {
+            return (ushort)((value << 8) | (value >> 8));
+        }
 
+        public static uint SwapU32(uint value)
+        {
+            return (value << 24) | ((value & 0x0000FF00) << 8) | ((value & 0x00FF0000) >> 8) | (value >> 24);
+        }
+        public static uint ReadUInt32Endian(this BinaryReader br, bool bigEndian)
+        {
+            if (bigEndian) return SwapU32(br.ReadUInt32());
+            else return br.ReadUInt32();
+        }
+        public static ushort ReadUInt16Endian(this BinaryReader br, bool bigEndian)
+        {
+            if (bigEndian) return SwapU16(br.ReadUInt16());
+            else return br.ReadUInt16();
+        }
+        //
         public static Shuriken.Models.Color ReverseColor(SharpNeedle.Color<byte> color)
         {
             return new Shuriken.Models.Color(color.A, color.B, color.G, color.R);

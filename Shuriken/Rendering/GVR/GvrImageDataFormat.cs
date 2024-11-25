@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace GvrTool.Gvr.ImageDataFormats
+namespace Shuriken.Rendering.Gvr
 {
-    internal abstract class GvrImageDataFormat : ImageDataFormat
+    internal abstract class GvrImageDataFormat : ImageDataFormatBase
     {
         public GvrImageDataFormat(ushort width, ushort height) : base(width, height)
         {
@@ -14,15 +14,15 @@ namespace GvrTool.Gvr.ImageDataFormats
             switch (format)
             {
                 case GvrDataFormat.Index4:
-                    return new I4_GvrImageDataFormat(width, height);
+                    return new GvrImageDataFormatIndex4(width, height);
                 case GvrDataFormat.Index8:
-                    return new I8_GvrImageDataFormat(width, height);
+                    return new GvrImageDataFormatIndex8(width, height);
                 case GvrDataFormat.Rgb5a3:
-                    return new RGB5A3_GvrImageDataFormat(width, height);
+                    return new GvrImageDataFormatRGB5A3(width, height);
                 case GvrDataFormat.Argb8888:
-                    return new ARGB8888_GvrImageDataFormat(width, height);
+                    return new GvrImageDataFormatARGB8888(width, height);
                 case GvrDataFormat.Dxt1:
-                    return new Dxt1_GvrImageDataFormat(width, height);
+                    return new GvrImageDataFormatDxt1(width, height);
                 default:
                     throw new NotImplementedException($"Unsupported GVR image data format: {format}.");
             }

@@ -7,4 +7,5 @@
         <Setter Property="BorderBrush" Value="Transparent"/>
         <Setter Property="Padding" Value="5"/>
     </Style>
+
 </ResourceDictionary>

@@ -1,7 +1,8 @@
 ﻿using System;
 
-namespace GvrTool.Gvr.PaletteDataFormats
+namespace Shuriken.Rendering.Gvr
 {
+    //Modified from GVRTool
     abstract class GvrPaletteDataFormat : PaletteDataFormat
     {
         public GvrPaletteDataFormat(ushort paletteEntryCount) : base(paletteEntryCount)
@@ -14,9 +15,9 @@ namespace GvrTool.Gvr.PaletteDataFormats
             switch (format)
             {
                 case GvrPixelFormat.Rgb5a3:
-                    return new RGB5A3_GvrPaletteDataFormat(paletteEntryCount);
+                    return new GvrPaletteA8R8G8B8(paletteEntryCount);
                 case GvrPixelFormat.Rgb565:
-                    return new RGB565_GvrPaletteDataFormat(paletteEntryCount);
+                    return new GvrPaletteR8G8B8(paletteEntryCount);
                 default:
                     throw new NotImplementedException($"Unsupported GVR palette data format: {format}.");
             }

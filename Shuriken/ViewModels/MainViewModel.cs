@@ -17,7 +17,7 @@ using System.Reflection;
 using Shuriken.Models.Animation;
 using SharpNeedle.Ninja.Csd;
 using SharpNeedle.Utilities;
-using GvrTool.Gvr;
+using Amicitia.IO.Binary;
 
 namespace Shuriken.ViewModels
 {
@@ -78,7 +78,7 @@ namespace Shuriken.ViewModels
             }
         }
 
-       
+
         private void ProcessSceneGroups(SharpNeedle.Ninja.Csd.SceneNode xNode, ShurikenUISceneGroup parent, TextureList texlist, string name)
         {
             ShurikenUISceneGroup ShurikenUISceneGroup = new(name);
@@ -120,153 +120,172 @@ namespace Shuriken.ViewModels
         public void Load(string filename)
         {
             string root = System.IO.Path.GetDirectoryName(System.IO.Path.GetFullPath(filename));
+            
+            Clear();
+            ncpSubimages.Clear();
+            //Catch errors if the program is built in release mode (since losing progress is awful)
+#if !DEBUG
             //try
             //{
+#endif
+            string extension = System.IO.Path.GetExtension(filename).ToLower();
+            if (extension ==".swif")
+            {
+                List<TextureList> texList = new List<TextureList>();
+                SharpNeedle.SurfRide.Draw.SrdProject srdProject = new SharpNeedle.SurfRide.Draw.SrdProject();
+                srdProject = ResourceUtility.Open<SharpNeedle.SurfRide.Draw.SrdProject>(@filename);
+                var swScenes = srdProject.Project.Scenes;
+                var swTextureLists = srdProject.Project.TextureLists;
+                var swFontLists = srdProject.Project.Fonts;
                 Clear();
-                ncpSubimages.Clear();
-                if (System.IO.Path.GetExtension(filename).ToLower().Contains("swif"))
+
+                foreach (var textureList in swTextureLists)
                 {
-                    List<TextureList> texList = new List<TextureList>();
-                    SharpNeedle.SurfRide.Draw.SrdProject srdProject = new SharpNeedle.SurfRide.Draw.SrdProject();
-                    srdProject = ResourceUtility.Open<SharpNeedle.SurfRide.Draw.SrdProject>(@filename);
-                    var swScenes = srdProject.Project.Scenes;
-                    var swTextureLists = srdProject.Project.TextureLists;
-                    var swFontLists = srdProject.Project.Fonts;
-                    Clear();
-
-                    foreach (var textureList in swTextureLists)
+                    var texList2 = new TextureList(textureList.Name);
+                    foreach (SharpNeedle.SurfRide.Draw.Texture texture in textureList)
                     {
-                        var texList2 = new TextureList(textureList.Name);
-                        foreach (SharpNeedle.SurfRide.Draw.Texture texture in textureList)
+                        string texPath = Path.Combine(root, texture.Name + ".dds");
+                        if (File.Exists(texPath))
                         {
-                            string texPath = Path.Combine(root, texture.Name + ".dds");
-                            if (File.Exists(texPath))
+                            Texture tex = new Texture(texPath);
+                            foreach (SharpNeedle.SurfRide.Draw.Crop subimage in texture)
                             {
-                                Texture tex = new Texture(texPath);
-                                foreach (SharpNeedle.SurfRide.Draw.Crop subimage in texture)
-                                {
-                                    int id = Project.CreateSprite(tex, subimage.Top, subimage.Left,
-                                        subimage.Bottom, subimage.Right);
-                                    tex.Sprites.Add(id);
-                                }
+                                int id = Project.CreateSprite(tex, subimage.Top, subimage.Left,
+                                    subimage.Bottom, subimage.Right);
+                                tex.Sprites.Add(id);
+                            }
 
-                                texList2.Textures.Add(tex);
-                            }
-                            else
-                            {
-                                MissingTextures.Add(texture.Name);
-                            }
+                            texList2.Textures.Add(tex);
                         }
-
-                        Project.TextureLists.Add(texList2);
-                    }
-
-                    foreach (var fontList in swFontLists)
-                    {
-                        // Implement Texture List Index and Texture Index too here.
-                        UIFont font = new UIFont(fontList.Name, -1);
-                        for (int index = 0; index < fontList.Count; ++index)
+                        else
                         {
-                            var texList3 = Project.TextureLists.ElementAt(fontList[index].TextureListIndex);
-                            Texture texture = texList3.Textures.ElementAt(fontList[index].TextureListIndex);
-                            var sprite = texture.Sprites.ElementAt(fontList[index].TextureIndex);
-                            font.Mappings.Add(new Models.CharacterMapping(Convert.ToChar(fontList[index].Code), sprite));
+                            MissingTextures.Add(texture.Name);
                         }
-
-                        Project.Fonts.Add(font);
                     }
 
-                    ShurikenUISceneGroup sceneGroup = new ShurikenUISceneGroup("Test");
-                    foreach (var scene in swScenes)
+                    Project.TextureLists.Add(texList2);
+                }
+
+                foreach (var fontList in swFontLists)
+                {
+                    // Implement Texture List Index and Texture Index too here.
+                    UIFont font = new UIFont(fontList.Name, -1);
+                    for (int index = 0; index < fontList.Count; ++index)
                     {
-                        sceneGroup.Scenes.Add(new ShurikenUIScene(srdProject.Project, scene, scene.Name, Project.TextureLists, Project.Fonts));
+                        var texList3 = Project.TextureLists.ElementAt(fontList[index].TextureListIndex);
+                        Texture texture = texList3.Textures.ElementAt(fontList[index].TextureListIndex);
+                        var sprite = texture.Sprites.ElementAt(fontList[index].TextureIndex);
+                        font.Mappings.Add(new Models.CharacterMapping(Convert.ToChar(fontList[index].Code), sprite));
                     }
-                    Project.SceneGroups.Add(sceneGroup);
 
-                    if (MissingTextures.Count > 0)
-                        WarnMissingTextures();
+                    Project.Fonts.Add(font);
+                }
+
+                ShurikenUISceneGroup sceneGroup = new ShurikenUISceneGroup("Test");
+                foreach (var scene in swScenes)
+                {
+                    sceneGroup.Scenes.Add(new ShurikenUIScene(srdProject.Project, scene, scene.Name, Project.TextureLists, Project.Fonts));
+                }
+                Project.SceneGroups.Add(sceneGroup);
+
+                if (MissingTextures.Count > 0)
+                    WarnMissingTextures();
+            }
+            else
+            {
+                WorkProjectCsd = new CsdProject();
+
+                using var infoReader = new BinaryObjectReader(@filename, Endianness.Big, Encoding.ASCII);
+                uint fpacSignature = infoReader.ReadNative<uint>();
+                //If the file is actually just the InfoChunk (ends in IF), warn the user and avoid loading the file
+                if (((fpacSignature >> 16) & 0xFFFF) == 0x4649)
+                {                    
+                    MessageBox.Show("This UI file does not contain a texture list.\nMerge the file with its texture list before opening it in this program.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;                    
+                }
+                else
+                    WorkProjectCsd = ResourceUtility.Open<CsdProject>(@filename);
+
+
+                ITextureList xTextures = WorkProjectCsd.Textures;
+                CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = WorkProjectCsd.Project.Fonts;
+
+                TextureList texList = new TextureList("textures");
+                if (xTextures != null)
+                {
+                    bool tempChangeExtension = false;
+                    string t = Path.GetExtension(xTextures[0].Name).ToLower();
+                    if (t != ".dds")
+                    {
+                        //MessageBox.Show("This tool is not capable of loading non-dds images yet, convert them to dds manually to make them show up in the tool.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        tempChangeExtension = true;
+                    }
+                    foreach (ITexture texture in xTextures)
+                    {
+                        string texPath = System.IO.Path.Combine(@root, texture.Name);
+                        //if (tempChangeExtension)
+                        //{
+                        //    texPath = Path.ChangeExtension(texPath, "dds");
+                        //}
+
+                        if (File.Exists(texPath))
+                            texList.Textures.Add(new Texture(texPath, tempChangeExtension));
+                        else
+                            MissingTextures.Add(texture.Name);
+                    }
                 }
                 else
                 {
-                    WorkProjectCsd = new CsdProject();
-
-                    WorkProjectCsd = ResourceUtility.Open<CsdProject>(@filename);
-                    //using var reader = new BinaryReader(@filename, Endianness.Big, Encoding.ASCII);
-                    //var info = reader.ReadObject<SharpNeedle.Ninja.InfoChunk>();
-                    //WorkFile = new FAPCFile();
-                    //WorkFile.Load(filename);
-
-
-                    ITextureList xTextures = WorkProjectCsd.Textures;
-                    CsdDictionary<SharpNeedle.Ninja.Csd.Font> xFontList = WorkProjectCsd.Project.Fonts;
-
-                    TextureList texList = new TextureList("textures");
-                    if (xTextures != null)
+                    //GNCP/SNCP requires TXDs
+                    if(extension == ".gncp" || extension == ".sncp")
                     {
-                        bool tempChangeExtension = false;
-                    string t = Path.GetExtension(xTextures[0].Name).ToLower();
-                        if ( t!= ".dds")
-                        {
-                            //MessageBox.Show("This tool is not capable of loading non-dds images yet, convert them to dds manually to make them show up in the tool.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            tempChangeExtension = true;
-                        }    
-                        foreach (ITexture texture in xTextures)
-                        {
-                            string texPath = System.IO.Path.Combine(@root, texture.Name);
-                            //if (tempChangeExtension)
-                            //{
-                            //    texPath = Path.ChangeExtension(texPath, "dds");
-                            //}
-
-                            if (File.Exists(texPath))
-                                texList.Textures.Add(new Texture(texPath, tempChangeExtension));
-                            else
-                                MissingTextures.Add(texture.Name);
-                        }
+                        GSncpImportWindow windowImport = new GSncpImportWindow();
+                        windowImport.ShowDialog();
                     }
                     else
+                        MessageBox.Show("The loaded UI file has an invalid texture list, textures will not load.", "", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+
+                if (MissingTextures.Count > 0)
+                    WarnMissingTextures();
+
+                GetSubImages(WorkProjectCsd.Project.Root);
+                LoadSubimages(texList, ncpSubimages);
+
+                List<FontID> fontID = new List<FontID>();
+
+                if (xFontList != null)
+                {
+                    //Parse fonts from CsdProject
+                    foreach (KeyValuePair<string, SharpNeedle.Ninja.Csd.Font> mFont in xFontList)
                     {
-                        MessageBox.Show("The loaded UI file has an invalid texture list, textures will not load.", "", MessageBoxButton.OK);
-                    }
-
-                    if (MissingTextures.Count > 0)
-                        WarnMissingTextures();
-
-                    GetSubImages(WorkProjectCsd.Project.Root);
-                    LoadSubimages(texList, ncpSubimages);
-
-                    List<FontID> fontID = new List<FontID>();
-
-                    if(xFontList != null)
-                    {
-                        //Parse fonts from CsdProject
-                        foreach (KeyValuePair<string, SharpNeedle.Ninja.Csd.Font> mFont in xFontList)
+                        int id = Project.CreateFont(mFont.Key);
+                        UIFont font = Project.TryGetFont(id);
+                        foreach (var mCharacterMap in mFont.Value)
                         {
-                            int id = Project.CreateFont(mFont.Key);
-                            UIFont font = Project.TryGetFont(id);
-                            foreach (var mCharacterMap in mFont.Value)
-                            {
-                                var sprite = Utilities.FindSpriteIDFromNCPScene((int)mCharacterMap.DestinationIndex, ncpSubimages, texList.Textures);
-                                font.Mappings.Add(new Models.CharacterMapping((char)mCharacterMap.SourceIndex, sprite));
-                            }
+                            var sprite = Utilities.FindSpriteIDFromNCPScene((int)mCharacterMap.DestinationIndex, ncpSubimages, texList.Textures);
+                            font.Mappings.Add(new Models.CharacterMapping((char)mCharacterMap.SourceIndex, sprite));
                         }
                     }
-                    
-
-                    // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
-                    ProcessSceneGroups(WorkProjectCsd.Project.Root, null, texList, WorkProjectCsd.Project.Name);
-
-                    Project.TextureLists.Add(texList);
-
-                    WorkFilePath = filename;
-                    IsLoaded = !MissingTextures.Any();
                 }
+
+
+                // ProcessSceneGroups(WorkFile.Resources[0].Content.CsdmProject.Root, null, texList, WorkFile.Resources[0].Content.CsdmProject.ProjectName);
+                ProcessSceneGroups(WorkProjectCsd.Project.Root, null, texList, WorkProjectCsd.Project.Name);
+
+                Project.TextureLists.Add(texList);
+
+                WorkFilePath = filename;
+                IsLoaded = !MissingTextures.Any();
+            }
+            #if !DEBUG
             //}
-           //catch (Exception ex)
-           //{
-           //    MessageBox.Show($"There was an error whilst opening the file:\n{ex.Message}\n{ex.StackTrace}", "", MessageBoxButton.OK, MessageBoxImage.Error);
-           //}
-            
+            //catch (Exception ex)
+            //{
+            //    MessageBox.Show($"The UI file is either unsupported or corrupt.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            //}
+            #endif
+
         }
 
         public void Save(string path)
@@ -387,160 +406,160 @@ namespace Shuriken.ViewModels
 
         private void SaveScenes(CSDNode xNode, ShurikenUISceneGroup uiSGroup, List<SubImage> subImageList, List<System.Numerics.Vector2> Data1, List<Shuriken.Models.Sprite> spriteList)
         {
-           //xNode.Scenes.Clear();
-           //xNode.SceneIDTable.Clear();
-           //
-           //// Save individual scenes
-           //for (int s = 0; s < uiSGroup.Scenes.Count; s++)
-           //{
-           //    ShurikenUIScene ShurikenUIScene = uiSGroup.Scenes[s];
-           //    XNCPLib.XNCP.Scene xScene = new();
-           //
-           //    // Save scene parameters
-           //    xScene.Version = ShurikenUIScene.Field00;
-           //    xScene.ZIndex = ShurikenUIScene.ZIndex;
-           //    xScene.AnimationFramerate = ShurikenUIScene.AnimationFramerate;
-           //    xScene.Field0C = ShurikenUIScene.Field0C;
-           //    xScene.Field10 = ShurikenUIScene.Field10;
-           //    xScene.AspectRatio = ShurikenUIScene.AspectRatio;
-           //    xScene.Data1 = Data1;
-           //    xScene.SubImages = subImageList;
-           //
-           //    // Initial AnimationKeyframeData so we can add groups and cast data in it
-           //    foreach (AnimationGroup animGroup in ShurikenUIScene.Animations)
-           //    {
-           //        AnimationKeyframeData keyframeData = new();
-           //        xScene.AnimationKeyframeDataList.Add(keyframeData);
-           //
-           //        AnimationData2 animationData2 = new();
-           //        animationData2.GroupList = new();
-           //        animationData2.GroupList.GroupList = new();
-           //        animationData2.GroupList.Field00 = 0; // TODO:
-           //        xScene.AnimationData2List.Add(animationData2);
-           //
-           //        // Add animation names, NOTE: need to be sorted after
-           //        AnimationDictionary animationDictionary = new();
-           //        animationDictionary.Index = (uint)xScene.AnimationDictionaries.Count;
-           //        animationDictionary.Name = animGroup.Name;
-           //        xScene.AnimationDictionaries.Add(animationDictionary);
-           //
-           //        // AnimationFrameDataList
-           //        AnimationFrameData animationFrameData = new();
-           //        animationFrameData.Field00 = animGroup.Field00;
-           //        animationFrameData.FrameCount = animGroup.Duration;
-           //        xScene.AnimationFrameDataList.Add(animationFrameData);
-           //    }
-           //
-           //    // Sort animation names
-           //    xScene.AnimationDictionaries = xScene.AnimationDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
-           //
-           //    for (int g = 0; g < ShurikenUIScene.Groups.Count; g++)
-           //    {
-           //        CastGroup xCastGroup = new();
-           //        UICastGroup uiCastGroup = ShurikenUIScene.Groups[g];
-           //
-           //        xCastGroup.RootCastIndex = uiCastGroup.RootCastIndex;
-           //        SaveCasts(uiCastGroup.CastsOrderedByIndex, xCastGroup, spriteList);
-           //
-           //        // Save the hierarchy tree for the current group
-           //        xCastGroup.CastHierarchyTree = new();
-           //        xCastGroup.CastHierarchyTree.AddRange
-           //        (
-           //            Enumerable.Repeat(new CastHierarchyTreeNode(-1, -1), uiCastGroup.CastsOrderedByIndex.Count)
-           //        );
-           //        SaveHierarchyTree(uiCastGroup.Casts, uiCastGroup.CastsOrderedByIndex, xCastGroup.CastHierarchyTree);
-           //
-           //        // Add cast name to dictionary, NOTE: this need to be sorted after
-           //        for (int c = 0; c < uiCastGroup.CastsOrderedByIndex.Count; c++)
-           //        {
-           //            CastDictionary castDictionary = new();
-           //            castDictionary.Name = uiCastGroup.CastsOrderedByIndex[c].Name;
-           //            castDictionary.GroupIndex = (uint)g;
-           //            castDictionary.CastIndex = (uint)c;
-           //            xScene.CastDictionaries.Add(castDictionary);
-           //        }
-           //        xScene.UICastGroups.Add(xCastGroup);
-           //
-           //        // Take this oppotunatity to fill group cast keyframe data
-           //        for (int a = 0; a < xScene.AnimationKeyframeDataList.Count; a++)
-           //        {
-           //            AnimationKeyframeData animationKeyframeData = xScene.AnimationKeyframeDataList[a];
-           //            AnimationGroup animation = ShurikenUIScene.Animations[a];
-           //
-           //            GroupAnimationData2 groupAnimationData2 = new();
-           //            groupAnimationData2.AnimationData2List = new();
-           //            groupAnimationData2.AnimationData2List.ListData = new();
-           //
-           //            GroupAnimationData groupAnimationData = new();
-           //            for (int c = 0; c < uiCastGroup.CastsOrderedByIndex.Count; c++)
-           //            {
-           //                CastAnimationData2 castAnimationData2 = new();
-           //                castAnimationData2.Data = new();
-           //                CastAnimationData castAnimationData = new();
-           //
-           //                ShurikenUIElement uiCast = uiCastGroup.CastsOrderedByIndex[c];
-           //                for (int t = 0; t < 12; t++)
-           //                {
-           //                    AnimationType type = (AnimationType)(1u << t);
-           //                    AnimationTrack animationTrack = animation.GetTrack(uiCast, type);
-           //                    if (animationTrack == null) continue;
-           //                    castAnimationData.Flags |= (uint)type;
-           //
-           //                    // Initialize if we haven't
-           //                    if (castAnimationData2.Data.SubData == null)
-           //                    {
-           //                        castAnimationData2.Data.SubData = new();
-           //                    }
-           //
-           //                    Data6 data6 = new();
-           //                    data6.Data = new();
-           //                    data6.Data.Data = new();
-           //
-           //                    CastAnimationSubData castAnimationSubData = new();
-           //                    castAnimationSubData.Field00 = animationTrack.Field00;
-           //                    foreach (Models.Animation.Keyframe keyframe in animationTrack.Keyframes)
-           //                    {
-           //                        XNCPLib.XNCP.Animation.Keyframe xKeyframe = new();
-           //                        xKeyframe.Frame = keyframe.HasNoFrame ? 0xFFFFFFFF : (uint)keyframe.Frame;
-           //                        xKeyframe.Value = keyframe.KValue;
-           //                        xKeyframe.Type = keyframe.Type;
-           //                        xKeyframe.InTangent = keyframe.InTangent;
-           //                        xKeyframe.OutTangent = keyframe.OutTangent;
-           //                        xKeyframe.Field14 = (uint)keyframe.Field14;
-           //                        castAnimationSubData.Keyframes.Add(xKeyframe);
-           //
-           //                        Data8 data8 = new();
-           //                        data8.Value = new System.Numerics.Vector3(keyframe.Data8Value.X, keyframe.Data8Value.Y, keyframe.Data8Value.Z);
-           //                        data6.Data.Data.Add(data8);
-           //                    }
-           //
-           //                    castAnimationData2.Data.SubData.Add(data6);
-           //                    castAnimationData.SubDataList.Add(castAnimationSubData);
-           //                }
-           //
-           //                groupAnimationData2.AnimationData2List.ListData.Add(castAnimationData2);
-           //                groupAnimationData.CastAnimationDataList.Add(castAnimationData);
-           //            }
-           //
-           //            AnimationData2 animationData2 = xScene.AnimationData2List[a];
-           //            animationData2.GroupList.GroupList.Add(groupAnimationData2);
-           //            animationKeyframeData.GroupAnimationDataList.Add(groupAnimationData);
-           //        }
-           //    }
-           //
-           //    // Sort cast names
-           //    xScene.CastDictionaries = xScene.CastDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
-           //
-           //    // Add scene name to dictionary, NOTE: this need to sorted after
-           //    SceneID xSceneID = new();
-           //    xSceneID.Name = ShurikenUIScene.Name;
-           //    xSceneID.Index = (uint)s;
-           //    xNode.SceneIDTable.Add(xSceneID);
-           //    xNode.Scenes.Add(xScene);
-           //}
-           //
-           //// Sort scene names
-           //xNode.SceneIDTable = xNode.SceneIDTable.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
+            //xNode.Scenes.Clear();
+            //xNode.SceneIDTable.Clear();
+            //
+            //// Save individual scenes
+            //for (int s = 0; s < uiSGroup.Scenes.Count; s++)
+            //{
+            //    ShurikenUIScene ShurikenUIScene = uiSGroup.Scenes[s];
+            //    XNCPLib.XNCP.Scene xScene = new();
+            //
+            //    // Save scene parameters
+            //    xScene.Version = ShurikenUIScene.Field00;
+            //    xScene.ZIndex = ShurikenUIScene.ZIndex;
+            //    xScene.AnimationFramerate = ShurikenUIScene.AnimationFramerate;
+            //    xScene.Field0C = ShurikenUIScene.Field0C;
+            //    xScene.Field10 = ShurikenUIScene.Field10;
+            //    xScene.AspectRatio = ShurikenUIScene.AspectRatio;
+            //    xScene.Data1 = Data1;
+            //    xScene.SubImages = subImageList;
+            //
+            //    // Initial AnimationKeyframeData so we can add groups and cast data in it
+            //    foreach (AnimationGroup animGroup in ShurikenUIScene.Animations)
+            //    {
+            //        AnimationKeyframeData keyframeData = new();
+            //        xScene.AnimationKeyframeDataList.Add(keyframeData);
+            //
+            //        AnimationData2 animationData2 = new();
+            //        animationData2.GroupList = new();
+            //        animationData2.GroupList.GroupList = new();
+            //        animationData2.GroupList.Field00 = 0; // TODO:
+            //        xScene.AnimationData2List.Add(animationData2);
+            //
+            //        // Add animation names, NOTE: need to be sorted after
+            //        AnimationDictionary animationDictionary = new();
+            //        animationDictionary.Index = (uint)xScene.AnimationDictionaries.Count;
+            //        animationDictionary.Name = animGroup.Name;
+            //        xScene.AnimationDictionaries.Add(animationDictionary);
+            //
+            //        // AnimationFrameDataList
+            //        AnimationFrameData animationFrameData = new();
+            //        animationFrameData.Field00 = animGroup.Field00;
+            //        animationFrameData.FrameCount = animGroup.Duration;
+            //        xScene.AnimationFrameDataList.Add(animationFrameData);
+            //    }
+            //
+            //    // Sort animation names
+            //    xScene.AnimationDictionaries = xScene.AnimationDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
+            //
+            //    for (int g = 0; g < ShurikenUIScene.Groups.Count; g++)
+            //    {
+            //        CastGroup xCastGroup = new();
+            //        UICastGroup uiCastGroup = ShurikenUIScene.Groups[g];
+            //
+            //        xCastGroup.RootCastIndex = uiCastGroup.RootCastIndex;
+            //        SaveCasts(uiCastGroup.CastsOrderedByIndex, xCastGroup, spriteList);
+            //
+            //        // Save the hierarchy tree for the current group
+            //        xCastGroup.CastHierarchyTree = new();
+            //        xCastGroup.CastHierarchyTree.AddRange
+            //        (
+            //            Enumerable.Repeat(new CastHierarchyTreeNode(-1, -1), uiCastGroup.CastsOrderedByIndex.Count)
+            //        );
+            //        SaveHierarchyTree(uiCastGroup.Casts, uiCastGroup.CastsOrderedByIndex, xCastGroup.CastHierarchyTree);
+            //
+            //        // Add cast name to dictionary, NOTE: this need to be sorted after
+            //        for (int c = 0; c < uiCastGroup.CastsOrderedByIndex.Count; c++)
+            //        {
+            //            CastDictionary castDictionary = new();
+            //            castDictionary.Name = uiCastGroup.CastsOrderedByIndex[c].Name;
+            //            castDictionary.GroupIndex = (uint)g;
+            //            castDictionary.CastIndex = (uint)c;
+            //            xScene.CastDictionaries.Add(castDictionary);
+            //        }
+            //        xScene.UICastGroups.Add(xCastGroup);
+            //
+            //        // Take this oppotunatity to fill group cast keyframe data
+            //        for (int a = 0; a < xScene.AnimationKeyframeDataList.Count; a++)
+            //        {
+            //            AnimationKeyframeData animationKeyframeData = xScene.AnimationKeyframeDataList[a];
+            //            AnimationGroup animation = ShurikenUIScene.Animations[a];
+            //
+            //            GroupAnimationData2 groupAnimationData2 = new();
+            //            groupAnimationData2.AnimationData2List = new();
+            //            groupAnimationData2.AnimationData2List.ListData = new();
+            //
+            //            GroupAnimationData groupAnimationData = new();
+            //            for (int c = 0; c < uiCastGroup.CastsOrderedByIndex.Count; c++)
+            //            {
+            //                CastAnimationData2 castAnimationData2 = new();
+            //                castAnimationData2.Data = new();
+            //                CastAnimationData castAnimationData = new();
+            //
+            //                ShurikenUIElement uiCast = uiCastGroup.CastsOrderedByIndex[c];
+            //                for (int t = 0; t < 12; t++)
+            //                {
+            //                    AnimationType type = (AnimationType)(1u << t);
+            //                    AnimationTrack animationTrack = animation.GetTrack(uiCast, type);
+            //                    if (animationTrack == null) continue;
+            //                    castAnimationData.Flags |= (uint)type;
+            //
+            //                    // Initialize if we haven't
+            //                    if (castAnimationData2.Data.SubData == null)
+            //                    {
+            //                        castAnimationData2.Data.SubData = new();
+            //                    }
+            //
+            //                    Data6 data6 = new();
+            //                    data6.Data = new();
+            //                    data6.Data.Data = new();
+            //
+            //                    CastAnimationSubData castAnimationSubData = new();
+            //                    castAnimationSubData.Field00 = animationTrack.Field00;
+            //                    foreach (Models.Animation.Keyframe keyframe in animationTrack.Keyframes)
+            //                    {
+            //                        XNCPLib.XNCP.Animation.Keyframe xKeyframe = new();
+            //                        xKeyframe.Frame = keyframe.HasNoFrame ? 0xFFFFFFFF : (uint)keyframe.Frame;
+            //                        xKeyframe.Value = keyframe.KValue;
+            //                        xKeyframe.Type = keyframe.Type;
+            //                        xKeyframe.InTangent = keyframe.InTangent;
+            //                        xKeyframe.OutTangent = keyframe.OutTangent;
+            //                        xKeyframe.Field14 = (uint)keyframe.Field14;
+            //                        castAnimationSubData.Keyframes.Add(xKeyframe);
+            //
+            //                        Data8 data8 = new();
+            //                        data8.Value = new System.Numerics.Vector3(keyframe.Data8Value.X, keyframe.Data8Value.Y, keyframe.Data8Value.Z);
+            //                        data6.Data.Data.Add(data8);
+            //                    }
+            //
+            //                    castAnimationData2.Data.SubData.Add(data6);
+            //                    castAnimationData.SubDataList.Add(castAnimationSubData);
+            //                }
+            //
+            //                groupAnimationData2.AnimationData2List.ListData.Add(castAnimationData2);
+            //                groupAnimationData.CastAnimationDataList.Add(castAnimationData);
+            //            }
+            //
+            //            AnimationData2 animationData2 = xScene.AnimationData2List[a];
+            //            animationData2.GroupList.GroupList.Add(groupAnimationData2);
+            //            animationKeyframeData.GroupAnimationDataList.Add(groupAnimationData);
+            //        }
+            //    }
+            //
+            //    // Sort cast names
+            //    xScene.CastDictionaries = xScene.CastDictionaries.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
+            //
+            //    // Add scene name to dictionary, NOTE: this need to sorted after
+            //    SceneID xSceneID = new();
+            //    xSceneID.Name = ShurikenUIScene.Name;
+            //    xSceneID.Index = (uint)s;
+            //    xNode.SceneIDTable.Add(xSceneID);
+            //    xNode.Scenes.Add(xScene);
+            //}
+            //
+            //// Sort scene names
+            //xNode.SceneIDTable = xNode.SceneIDTable.OrderBy(o => o.Name, StringComparer.Ordinal).ToList();
         }
 
         private void SaveHierarchyTree(ObservableCollection<ShurikenUIElement> children, List<ShurikenUIElement> uiCastList, List<CastHierarchyTreeNode> tree)
@@ -607,7 +626,7 @@ namespace Shuriken.ViewModels
                 xCast.Field5C = uiCast.Field5C;
 
                 xCast.Offset = new Vector2(uiCast.Offset);
-                
+
                 xCast.Field68 = uiCast.Field68;
                 xCast.Field6C = uiCast.Field6C;
                 xCast.Field70 = uiCast.Field70;

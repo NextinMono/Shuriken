@@ -1,15 +1,15 @@
-﻿using TGASharpLib;
+﻿using Shuriken.Rendering.Gvr;
+using TGASharpLib;
 
-namespace GvrTool.Gvr.PaletteDataFormats
+namespace Shuriken.Rendering.Gvr
 {
-    class RGB565_GvrPaletteDataFormat : GvrPaletteDataFormat
+    class GvrPaletteR8G8B8 : GvrPaletteDataFormat
     {
         public override uint DecodedDataLength => (uint)(PaletteEntryCount * 3);
         public override uint EncodedDataLength => (uint)(PaletteEntryCount * 2);
 
-        public override TgaColorMapEntrySize TgaColorMapEntrySize => TgaColorMapEntrySize.R8G8B8;
 
-        public RGB565_GvrPaletteDataFormat(ushort paletteEntryCount) : base(paletteEntryCount)
+        public GvrPaletteR8G8B8(ushort paletteEntryCount) : base(paletteEntryCount)
         {
 
         }

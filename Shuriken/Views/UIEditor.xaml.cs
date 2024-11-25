@@ -29,6 +29,7 @@ namespace Shuriken.Views
         Converters.ColorToBrushConverter colorConverter;
         Renderer renderer;
 
+        
         public UIEditor()
         {
             InitializeComponent();
@@ -66,7 +67,6 @@ namespace Shuriken.Views
             sv.SizeY = ViewResolution.Y;
             sv.Tick(deltaTime);
             renderer.SetShader(renderer.shaderDictionary["basic"]);
-
             UpdateSceneGroups(Project.SceneGroups, Project.Fonts, sv.Time);
 
             GL.Finish();

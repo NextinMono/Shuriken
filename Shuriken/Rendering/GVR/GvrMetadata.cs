@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Text.Json;
 
-namespace GvrTool.Gvr
+//Taken from GVRTool, which in turn takes it from Puyotools
+namespace Shuriken.Rendering.Gvr
 {
     class GVRMetadata
     {
@@ -23,19 +24,5 @@ namespace GvrTool.Gvr
 
         const uint METADATA_VERSION = 2;
 
-        public static void SaveMetadataToJson(GVRMetadata metadata, string jsonFilePath)
-        {
-            metadata.MetadataVersion = METADATA_VERSION;
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            string jsonString = JsonSerializer.Serialize(metadata, options);
-            File.WriteAllText(jsonFilePath, jsonString);
-        }
-
-        public static GVRMetadata LoadMetadataFromJson(string jsonFilePath)
-        {
-            string jsonString = File.ReadAllText(jsonFilePath);
-            return JsonSerializer.Deserialize<GVRMetadata>(jsonString);
-        }
     }
 }

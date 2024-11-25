@@ -1,19 +1,16 @@
-﻿using TGASharpLib;
-
-namespace GvrTool.Gvr.ImageDataFormats
+﻿
+namespace Shuriken.Rendering.Gvr
 {
-    class I4_GvrImageDataFormat : GvrImageDataFormat
+    class GvrImageDataFormatIndex4 : GvrImageDataFormat
     {
         public override uint BitsPerPixel => 4;
 
         public override uint DecodedDataLength => (uint)(Width * Height);
         public override uint EncodedDataLength => (uint)((Width * Height) >> 1);
 
-        public override TgaPixelDepth TgaPixelDepth => TgaPixelDepth.Bpp8;
-        public override TgaImageType TgaImageType => TgaImageType.Uncompressed_ColorMapped;
         public override byte TgaAlphaChannelBits => 0;
 
-        public I4_GvrImageDataFormat(ushort width, ushort height) : base(width, height)
+        public GvrImageDataFormatIndex4(ushort width, ushort height) : base(width, height)
         {
 
         }

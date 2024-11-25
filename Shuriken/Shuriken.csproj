@@ -16,6 +16,11 @@
 
   <ItemGroup>
     <None Remove="Fonts\fa-solid-900.ttf" />
+    <None Remove="Icons\folder.ico" />
+    <None Remove="Icons\fontcast.ico" />
+    <None Remove="Icons\imagecast.ico" />
+    <None Remove="Icons\nodraw.ico" />
+    <None Remove="Icons\Untitled-1-02.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,7 +31,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GvrTool\GvrTool.csproj" />
     <ProjectReference Include="..\SharpNeedle\SharpNeedle.csproj" />
     <ProjectReference Include="..\XNCPLib\XNCPLib.csproj" />
   </ItemGroup>
@@ -35,6 +39,14 @@
     <Resource Include="Fonts\fa-solid-900.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <Resource Include="Icons\folder.ico" />
+    <Resource Include="Icons\fontcast.ico" />
+    <Resource Include="Icons\imagecast.ico" />
+    <Resource Include="Icons\nodraw.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

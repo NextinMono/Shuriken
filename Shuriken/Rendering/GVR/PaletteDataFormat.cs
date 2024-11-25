@@ -1,27 +1,13 @@
 ﻿using System.IO;
-using TGASharpLib;
 
-namespace GvrTool
+namespace Shuriken.Rendering.Gvr
 {
-    abstract class ImageDataFormat
+    abstract class PaletteDataFormat
     {
-        public ushort Width { get; set; }
-        public ushort Height { get; set; }
-
-        public abstract uint BitsPerPixel { get; }
+        public ushort PaletteEntryCount { get; set; }
 
         public abstract uint DecodedDataLength { get; }
         public abstract uint EncodedDataLength { get; }
-
-        public abstract TgaPixelDepth TgaPixelDepth { get; }
-        public abstract TgaImageType TgaImageType { get; }
-        public abstract byte TgaAlphaChannelBits { get; }
-
-        public ImageDataFormat(ushort width, ushort height)
-        {
-            Width = width;
-            Height = height;
-        }
 
         public byte[] Decode(Stream inputStream)
         {
@@ -41,5 +27,10 @@ namespace GvrTool
 
         public abstract byte[] Decode(byte[] input);
         public abstract byte[] Encode(byte[] input);
+
+        public PaletteDataFormat(ushort paletteEntryCount)
+        {
+            PaletteEntryCount = paletteEntryCount;
+        }
     }
 }

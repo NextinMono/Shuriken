@@ -1,19 +1,17 @@
 ﻿using TGASharpLib;
 
-namespace GvrTool.Gvr.ImageDataFormats
+namespace Shuriken.Rendering.Gvr
 {
-    class RGB5A3_GvrImageDataFormat : GvrImageDataFormat
+    class GvrImageDataFormatRGB5A3 : GvrImageDataFormat
     {
         public override uint BitsPerPixel => 16;
 
         public override uint DecodedDataLength => (uint)((Width * Height) << 2);
         public override uint EncodedDataLength => (uint)((Width * Height) << 1);
 
-        public override TgaPixelDepth TgaPixelDepth => TgaPixelDepth.Bpp32;
-        public override TgaImageType TgaImageType => TgaImageType.Uncompressed_TrueColor;
         public override byte TgaAlphaChannelBits => 8;
 
-        public RGB5A3_GvrImageDataFormat(ushort width, ushort height) : base(width, height)
+        public GvrImageDataFormatRGB5A3(ushort width, ushort height) : base(width, height)
         {
 
         }

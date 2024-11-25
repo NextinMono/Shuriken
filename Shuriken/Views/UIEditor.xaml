@@ -7,12 +7,17 @@
              xmlns:local="clr-namespace:Shuriken.Views"
              xmlns:controls="clr-namespace:Shuriken.Controls"
              xmlns:models="clr-namespace:Shuriken.Models"
-             xmlns:animation="clr-namespace:Shuriken.Models.Animation"
+             xmlns:animation="clr-namespace:Shuriken.Models.Animation"             
+             xmlns:converters="clr-namespace:Shuriken.Converters"
              xmlns:gl="clr-namespace:OpenTK.Wpf;assembly=GLWpfControl"
              xmlns:viewmodels="clr-namespace:Shuriken.ViewModels"
              d:DataContext="{d:DesignInstance Type=viewmodels:ScenesViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="1200">
+
+	<UserControl.Resources>
+        <converters:DrawTypeToCastIcon x:Key="DrawTypeToCastIcon"/>
+	</UserControl.Resources>
     <Grid>
         <!--Main layout [other controls - properties panel]-->
         <Grid.ColumnDefinitions>
@@ -58,7 +63,11 @@
                             <HierarchicalDataTemplate DataType="{x:Type models:ShurikenUISceneGroup}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
-                                    <TextBlock Text="{Binding Name}"/>
+
+                                    <TextBlock>                                        
+	                                    <Run Text="&#xf07b; " FontFamily="{StaticResource FontAwesome}"/>
+	                                    <Run Text="{Binding Name}"/>
+                                    </TextBlock>
                                 </StackPanel>
                             </HierarchicalDataTemplate>
                         </TreeView.Resources>
@@ -98,7 +107,7 @@
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
                                     <TextBlock>
-                                <Run Text="&#xf5fd; " FontFamily="{StaticResource FontAwesome}"/>
+                                <Run Text="&#xf07b; " FontFamily="{StaticResource FontAwesome}"/>
                                 <Run Text="{Binding Name}"/>
                                     </TextBlock>
                                     <StackPanel.ContextMenu  >
@@ -112,8 +121,10 @@
                             <HierarchicalDataTemplate DataType="{x:Type models:ShurikenUIElement}" ItemsSource="{Binding Children}">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox IsChecked="{Binding Visible}" Margin="0 0 5 0"/>
-                                    <TextBlock>
-                                <Run Text="&#xf111; " FontFamily="{StaticResource FontAwesome}"/>
+
+                                    <TextBlock>                                
+	                                    <Run Text="{Binding Type, Converter={StaticResource DrawTypeToCastIcon}}" FontFamily="{StaticResource FontAwesome}"/>
+                                <!--<Run Text=" "/>-->
                                 <Run Text="{Binding Name}"/>
                                     </TextBlock>
                                     <StackPanel.ContextMenu>
@@ -166,8 +177,12 @@
                         <Border.Effect>
                             <DropShadowEffect BlurRadius="12" ShadowDepth="3" Direction="-45" Color="#333" Opacity="0.5"/>
                         </Border.Effect>
-                        <gl:GLWpfControl Width="{Binding SizeX}" Height="{Binding SizeY}" Name="glControl" Render="glControlRender"  RenderTransformOrigin="0.5, 0.5">
-                        </gl:GLWpfControl>
+                        <Grid>                            
+	                        <gl:GLWpfControl Width="{Binding SizeX}" Height="{Binding SizeY}" Name="glControl" Render="glControlRender"  RenderTransformOrigin="0.5, 0.5">
+                            </gl:GLWpfControl>
+                            <!--<Label x:Name="NoFileLoadedText" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" Visibility="{Binding IsNoFileLoaded}" >Load a file from the File menu to start editing.</Label>-->
+                        </Grid>
+                        
                     </Border>
                 </ScrollViewer>
                 

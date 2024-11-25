@@ -42,7 +42,13 @@ namespace Shuriken.ViewModels
         public RelayCommand<int> ChangeCastSpriteCmd { get; }
         public RelayCommand CreateCastCmd { get; }
         public RelayCommand RemoveCastCmd { get; }
-
+        public System.Windows.Visibility IsNoFileLoaded
+        {
+            get
+            {
+                return Project.SceneGroups.Count == 0 ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            }
+        }
         public void SelectCastSprite(object index)
         {
             SpritePickerWindow dialog = new SpritePickerWindow(Project.TextureLists);
