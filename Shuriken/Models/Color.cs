@@ -100,5 +100,9 @@ namespace Shuriken.Models
         {
             return v.ToFloats();
         }
+        public static implicit operator SharpNeedle.Color<byte>(Color v)
+        {
+            return new(v.R,v.G,v.B,v.A);
+        }
     }
 }

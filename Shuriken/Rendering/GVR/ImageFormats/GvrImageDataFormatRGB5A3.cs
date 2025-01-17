@@ -1,6 +1,4 @@
-﻿using TGASharpLib;
-
-namespace Shuriken.Rendering.Gvr
+﻿namespace Shuriken.Rendering.Gvr
 {
     class GvrImageDataFormatRGB5A3 : GvrImageDataFormat
     {

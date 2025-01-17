@@ -1,3 +1,4 @@
+
 namespace SharpNeedle.Ninja.Csd;
 
 [StructLayout(LayoutKind.Sequential)]
@@ -16,4 +17,9 @@ public struct CastInfo
     public uint Field30;
     public uint Field34;
     public uint Field38;
+
+    public static implicit operator CastInfo(CastInfo v)
+    {
+        throw new NotImplementedException();
+    }
 }

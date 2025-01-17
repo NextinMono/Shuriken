@@ -1,5 +1,4 @@
 ﻿using Shuriken.Rendering.Gvr;
-using TGASharpLib;
 
 namespace Shuriken.Rendering.Gvr
 {
